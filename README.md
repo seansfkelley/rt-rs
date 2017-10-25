@@ -2,6 +2,8 @@
 
 Raytracer written in Rust.
 
+Debug running:
+
 ```
-cargo run
+RUST_BACKTRACE=1 RUST_LOG=rt=info cargo run
 ```
