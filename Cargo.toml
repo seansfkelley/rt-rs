@@ -1,0 +1,6 @@
+[package]
+name = "rt-rs"
+version = "0.1.0"
+authors = ["Sean Kelley <seansfkelley@gmail.com>"]
+
+[dependencies]
