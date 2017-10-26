@@ -18,7 +18,7 @@ use std::path::Path;
 fn main() {
     env_logger::init().unwrap();
 
-    let camera_position = Vec3::new(0f64, 0f64, 10f64);
+    let camera_position = Vec3::new(0f64, 0f64, 20f64);
     let camera_up = Vec3::new(0f64, 1f64, 0f64).as_unit_vector();
     let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_unit_vector();
     let camera_right = camera_direction.cross(camera_up).as_unit_vector();
@@ -39,7 +39,8 @@ fn main() {
 
 
     let sphere = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, Color::new(1f64, 0f64, 0f64));
-    let scene = Scene::new(vec![&sphere]);
+    let light = objects::Light::new(Vec3::new(3f64, 6f64, 5f64), Color::new(1f64, 1f64, 1f64));
+    let scene = Scene::new(vec![&sphere], vec![&light]);
     let background_color = Color::new(0f64, 0f64, 0f64);
 
     let mut img = RgbImage::new(width, height);

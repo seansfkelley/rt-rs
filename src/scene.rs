@@ -2,11 +2,12 @@ use objects;
 
 pub struct Scene<'a> {
     objects: Vec<&'a objects::Intersectable>,
+    lights: Vec<&'a objects::Light>,
 }
 
 impl<'a> Scene<'a> {
-    pub fn new(objects: Vec<&objects::Intersectable>) -> Scene {
-        Scene { objects }
+    pub fn new(objects: Vec<&'a objects::Intersectable>, lights: Vec<&'a objects::Light>) -> Scene<'a> {
+        Scene { objects, lights }
     }
 
     pub fn cast_ray(&'a self, ray: objects::Ray) -> Option<objects::Intersection> {
