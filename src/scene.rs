@@ -10,7 +10,7 @@ impl<'a> Scene<'a> {
         Scene { objects, lights }
     }
 
-    pub fn cast_ray(&'a self, ray: objects::Ray) -> Option<objects::Intersection> {
+    pub fn cast_ray(&self, ray: objects::Ray) -> Option<objects::Intersection> {
         let mut closest: Option<objects::Intersection> = Option::None;
 
         for o in &self.objects {
