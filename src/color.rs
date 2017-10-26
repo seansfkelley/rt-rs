@@ -8,17 +8,25 @@ pub struct Color {
 }
 
 impl Color {
-  pub fn new(r: f64, g: f64, b: f64) -> Color {
-      Color { r, g, b }
-  }
+    pub fn new(r: f64, g: f64, b: f64) -> Color {
+        Color { r, g, b }
+    }
 
-  pub fn as_bytes(&self) -> [u8; 3] {
-    [
-      (self.r * 255f64) as u8,
-      (self.g * 255f64) as u8,
-      (self.b * 255f64) as u8,
-    ]
-  }
+    pub fn as_bytes(&self) -> [u8; 3] {
+        [
+            (self.r * 255f64) as u8,
+            (self.g * 255f64) as u8,
+            (self.b * 255f64) as u8,
+        ]
+    }
+
+    pub fn clamp(&self) -> Color {
+        Color {
+            r: self.r.max(0f64).min(1f64),
+            g: self.g.max(0f64).min(1f64),
+            b: self.b.max(0f64).min(1f64),
+        }
+    }
 }
 
 impl Add for Color {

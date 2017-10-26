@@ -29,6 +29,7 @@ impl Light {
 #[derive(Debug, Clone, Copy)]
 pub struct Intersection {
     pub distance: f64,
+    pub location: Vec3,
     pub normal: Vec3,
     pub material: Material,
 }
@@ -68,10 +69,11 @@ impl Intersectable for Sphere {
                 let t0 = t_center - t_distance;
                 let t1 = t_center + t_distance;
                 let t = if t0 <= 0f64 { t0 } else { t1 };
-
+                let location = (ray.direction * t + ray.origin);
                 Some(Intersection {
                     distance: t,
-                    normal: ((ray.direction * t + ray.origin) - self.center).as_unit_vector(),
+                    location,
+                    normal: (location - self.center).as_unit_vector(),
                     material: self.material
                 })
             }
