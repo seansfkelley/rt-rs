@@ -38,12 +38,12 @@ pub struct Intersection<'a> {
     pub location: Vec3,
     pub normal: Vec3,
     pub uv: (f64, f64),
-    pub object: &'a SceneObject<'a>,
+    pub object: &'a (SceneObject + 'a),
 }
 
-pub trait SceneObject<'a> {
-    fn intersect(&'a self, ray: &Ray) -> Option<Intersection<'a>>;
-    fn material(&self) -> &'a Material;
+pub trait SceneObject {
+    fn intersect(&self, ray: &Ray) -> Option<Intersection>;
+    fn material(&self) -> &Material;
 }
 
 #[derive(Debug)]
@@ -59,10 +59,10 @@ impl<'a> Sphere<'a> {
     }
 }
 
-impl<'a> SceneObject<'a> for Sphere<'a> {
+impl<'a> SceneObject for Sphere<'a> {
     // TODO: Verify this implementation against pbrt.
     // TODO: Should transform ray into world space first so the rest of the math is easy.
-    fn intersect(&'a self, ray: &Ray) -> Option<Intersection<'a>> {
+    fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         let l = self.center - ray.origin;
         let t_center = l.dot(ray.direction);
         if t_center <= 0f64 {
@@ -100,5 +100,5 @@ impl<'a> SceneObject<'a> for Sphere<'a> {
         }
     }
 
-    fn material(&self) -> &'a Material { self.material }
+    fn material(&self) -> &Material { self.material }
 }

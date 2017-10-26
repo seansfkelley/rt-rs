@@ -1,20 +1,20 @@
 use objects::*;
 use color::Color;
 
-pub struct Scene<'a> {
-    objects: Vec<Box<SceneObject<'a>>>,
+pub struct Scene {
+    objects: Vec<Box<SceneObject>>,
     lights: Vec<Box<Light>>,
     background_color: Color,
     depth_limit: u32,
 }
 
-impl<'a> Scene<'a> {
+impl Scene {
     pub fn new(
-        objects: Vec<Box<SceneObject<'a>>>,
+        objects: Vec<Box<SceneObject>>,
         lights: Vec<Box<Light>>,
         background_color: Color,
         depth_limit: u32
-    ) -> Scene<'a> {
+    ) -> Scene {
         Scene { objects, lights, background_color, depth_limit }
     }
 
@@ -53,10 +53,10 @@ impl<'a> Scene<'a> {
         }
     }
 
-    fn cast_ray(&self, ray: Ray) -> Option<Intersection<'a>> {
-        let mut closest: Option<Intersection<'a>> = Option::None;
+    fn cast_ray(&self, ray: Ray) -> Option<Intersection> {
+        let mut closest: Option<Intersection> = Option::None;
 
-        for o in self.objects {
+        for o in &self.objects {
             match o.intersect(&ray) {
                 Some(intersection) => {
                     if closest.is_some() {
