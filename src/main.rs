@@ -5,8 +5,10 @@ extern crate image;
 
 mod vector;
 mod objects;
+mod color;
 
-use vector::{ Vec3, Color };
+use color::Color;
+use vector::Vec3;
 use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
@@ -33,7 +35,7 @@ fn main() {
     let grid_center = camera_position + camera_direction * pixel_grid_distance;
     let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
-    let sphere = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, Color::new(255f64, 0f64, 0f64));
+    let sphere = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, Color::new(1f64, 0f64, 0f64));
     let scene: Vec<&objects::Intersectable> = vec![
         &sphere
     ];
@@ -72,7 +74,7 @@ fn main() {
                 None => { background_color }
             };
 
-            img.put_pixel(x, y, Rgb::from_channels(color.x as u8, color.y as u8, color.y as u8, 0));
+            img.put_pixel(x, y, *Rgb::from_slice(&color.as_bytes()));
         }
     }
 

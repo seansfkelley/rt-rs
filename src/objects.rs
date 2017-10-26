@@ -1,6 +1,6 @@
-use vector::{ Vec3, Color };
+use vector::Vec3;
+use color::Color;
 
-// TODO: Actual material.
 type Material = Color;
 
 #[derive(Debug, Clone, Copy)]
