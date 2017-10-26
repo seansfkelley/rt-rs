@@ -36,11 +36,15 @@ fn main() {
     let grid_center = camera_position + camera_direction * pixel_grid_distance;
     let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
-    let red_plastic = plastic::create(Color::new(0f64, 0.7f64, 0.7f64));
-    let sphere1 = objects::Sphere::new(Vec3::new(-4f64, -4f64, 0f64), 5f64, red_plastic);
-    let sphere2 = objects::Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, red_plastic);
+    let cyan = plastic::create(Color::new(0f64, 0.7f64, 0.7f64));
+    let yellow = plastic::create(Color::new(0.7f64, 0.7f64, 0f64));
+
+    let sphere1 = objects::Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, cyan);
+    let sphere2 = objects::Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, yellow);
+
     let light1 = objects::Light::new(Vec3::new(5f64, 5f64, 10f64), Color::new(0.4f64, 0.4f64, 0.4f64));
-    let light2 = objects::Light::new(Vec3::new(-10f64, -10f64, 7f64), Color::new(0.4f64, 0.4f64, 0.4f64));
+    let light2 = objects::Light::new(Vec3::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64));
+
     let scene = Scene::new(vec![&sphere1, &sphere2], vec![&light1, &light2], Color::new(0f64, 0f64, 0f64), 3);
 
     let mut rng = rand::thread_rng();

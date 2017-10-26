@@ -19,7 +19,7 @@ pub mod plastic {
             diffuse: color,
             specular: color * 0.5,
             specular_exponent: 5f64,
-            reflectivity: 0.3,
+            reflectivity: 0.1,
         }
     }
 }
