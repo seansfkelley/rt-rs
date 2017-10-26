@@ -40,8 +40,7 @@ fn main() {
 
     let sphere = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, Color::new(1f64, 0f64, 0f64));
     let light = objects::Light::new(Vec3::new(3f64, 6f64, 5f64), Color::new(1f64, 1f64, 1f64));
-    let scene = Scene::new(vec![&sphere], vec![&light]);
-    let background_color = Color::new(0f64, 0f64, 0f64);
+    let scene = Scene::new(vec![&sphere], vec![&light], Color::new(0f64, 0f64, 0f64));
 
     let mut img = RgbImage::new(width, height);
 
