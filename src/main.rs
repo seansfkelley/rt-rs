@@ -1,25 +1,20 @@
 #[macro_use]
 extern crate log;
 extern crate env_logger;
+extern crate image;
 
 mod vector;
 
 use vector::Vec3;
+use image::{RgbImage, Rgb, Pixel};
+use std::fs::File;
+use std::path::Path;
 
 fn main() {
     env_logger::init().unwrap();
 
-    debug!("debug");
-    info!("info");
-    warn!("warn");
-
-    println!("Hello, world!");
-
-    let normal = Vec3::new(1f64, 3f64, 5f64);
-    let ray = Vec3::new(10f64, 8f64, 9f64);
-    let thing = normal.cross(ray);
-    println!("normal: {:?}, ray: {:?}, result: {:?}", normal, ray, thing);
-    println!("add: {:?}", normal + ray);
-    let test = normal;
-    let test2 = ray;
+    let mut img = RgbImage::new(512, 512);
+    img.put_pixel(20, 20, Rgb::from_channels(255, 0, 0, 0));
+    let ref mut fout = File::create(&Path::new("out.png")).unwrap();
+    let _ = image::ImageRgb8(img).save(fout, image::PNG);
 }
