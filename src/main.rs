@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate log;
-extern crate env_logger;
 extern crate image;
 
 mod vector;
@@ -15,11 +12,9 @@ use scene::Scene;
 use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
-use material::{Material, plastic};
+use material::plastic;
 
 fn main() {
-    env_logger::init().unwrap();
-
     let camera_position = Vec3::new(0f64, 0f64, 25f64);
     let camera_up = Vec3::new(0f64, 1f64, 0f64).as_unit_vector();
     let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_unit_vector();
