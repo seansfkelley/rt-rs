@@ -4,13 +4,17 @@ use material::Material;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
-    origin: Vec3,
-    direction: Vec3,
+    pub origin: Vec3,
+    pub direction: Vec3,
 }
 
 impl Ray {
     pub fn new(origin: Vec3, direction: Vec3) -> Ray {
         Ray { origin, direction }
+    }
+
+    pub fn at(&self, distance: f64) -> Vec3 {
+        self.origin + self.direction * distance
     }
 }
 
@@ -69,7 +73,7 @@ impl Intersectable for Sphere {
                 let t0 = t_center - t_distance;
                 let t1 = t_center + t_distance;
                 let t = if t0 <= 0f64 { t0 } else { t1 };
-                let location = (ray.direction * t + ray.origin);
+                let location = ray.at(t);
                 Some(Intersection {
                     distance: t,
                     location,

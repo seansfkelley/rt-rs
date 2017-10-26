@@ -6,6 +6,7 @@ pub struct Material {
     pub diffuse: Color,
     pub specular: Color,
     pub specular_exponent: f64,
+    pub reflectivity: f64,
 }
 
 pub mod plastic {
@@ -18,6 +19,7 @@ pub mod plastic {
             diffuse: color,
             specular: color * 0.5,
             specular_exponent: 5f64,
+            reflectivity: 0.3,
         }
     }
 }

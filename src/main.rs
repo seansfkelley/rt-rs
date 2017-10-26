@@ -20,7 +20,7 @@ use material::{Material, plastic};
 fn main() {
     env_logger::init().unwrap();
 
-    let camera_position = Vec3::new(0f64, 0f64, 20f64);
+    let camera_position = Vec3::new(0f64, 0f64, 25f64);
     let camera_up = Vec3::new(0f64, 1f64, 0f64).as_unit_vector();
     let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_unit_vector();
     let camera_right = camera_direction.cross(camera_up).as_unit_vector();
@@ -39,9 +39,11 @@ fn main() {
     let grid_center = camera_position + camera_direction * pixel_grid_distance;
     let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
-    let sphere = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, plastic::create(Color::new(1f64, 0f64, 0f64)));
+    let red_plastic = plastic::create(Color::new(1f64, 0f64, 0f64));
+    let sphere1 = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, red_plastic);
+    let sphere2 = objects::Sphere::new(Vec3::new(10f64, 10f64, 0f64), 5f64, red_plastic);
     let light = objects::Light::new(Vec3::new(3f64, 6f64, 5f64), Color::new(1f64, 1f64, 1f64));
-    let scene = Scene::new(vec![&sphere], vec![&light], Color::new(0f64, 0f64, 0f64));
+    let scene = Scene::new(vec![&sphere1, &sphere2], vec![&light], Color::new(0f64, 0f64, 0f64), 3);
 
     let mut img = RgbImage::new(width, height);
 
