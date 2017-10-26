@@ -1,12 +1,16 @@
-- texture (image, procedural)
+- texture (image, procedural) - K
+- procedural shapes - K
+- 3D FRACTALS - K
 - BRDF
-- global illumination (photon mapping?)
+- global illumination (photon mapping?) - K
 - field of view
 - depth of field
-- refraction (and total internal reflection)
+- refraction (and total internal reflection) - K
 - caustics
 - subsurface scattering
 - normal mapping
-- spatial indexing (kd-tree, r-tree?)
+- spatial indexing (kd-tree, r-tree?) - K
 - parallelization
 - attenuation
+- interactivity
+- scene import
