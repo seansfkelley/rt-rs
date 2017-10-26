@@ -7,6 +7,7 @@ mod vector;
 mod objects;
 mod color;
 mod scene;
+mod material;
 
 use color::Color;
 use vector::Vec3;
@@ -14,6 +15,7 @@ use scene::Scene;
 use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
+use material::{Material, plastic};
 
 fn main() {
     env_logger::init().unwrap();
@@ -37,8 +39,7 @@ fn main() {
     let grid_center = camera_position + camera_direction * pixel_grid_distance;
     let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
-
-    let sphere = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, Color::new(1f64, 0f64, 0f64));
+    let sphere = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, plastic::create(Color::new(1f64, 0f64, 0f64)));
     let light = objects::Light::new(Vec3::new(3f64, 6f64, 5f64), Color::new(1f64, 1f64, 1f64));
     let scene = Scene::new(vec![&sphere], vec![&light], Color::new(0f64, 0f64, 0f64));
 

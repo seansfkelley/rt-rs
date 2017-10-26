@@ -1,11 +1,6 @@
 use vector::Vec3;
 use color::Color;
-
-pub struct Material {
-    diffuse: Color,
-    specular: Color,
-    specular_exponent: f64,
-}
+use material::Material;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {

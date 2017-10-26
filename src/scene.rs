@@ -18,7 +18,7 @@ impl<'a> Scene<'a> {
 
     pub fn raytrace(&self, ray: objects::Ray) -> Color {
         match self.cast_ray(ray) {
-            Some(intersection) => { intersection.material },
+            Some(intersection) => { intersection.material.ambient },
             None => { self.background_color }
         }
     }
