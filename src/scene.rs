@@ -20,10 +20,10 @@ impl<'a> Scene<'a> {
     }
 
     pub fn raytrace(&self, ray: Ray) -> Color {
-        self.raytrace_limited(ray, 0)
+        self.raytrace_depth_limited(ray, 0)
     }
 
-    pub fn raytrace_limited(&self, ray: Ray, depth: u32) -> Color {
+    pub fn raytrace_depth_limited(&self, ray: Ray, depth: u32) -> Color {
         if depth > self.depth_limit {
             self.background_color
         } else {
@@ -34,7 +34,7 @@ impl<'a> Scene<'a> {
                         let new_origin = ray.at(intersection.distance);
                         let new_direction = ray.direction.rotate(intersection.normal, PI);
                         let new_ray = Ray::new(new_origin, new_direction);
-                        phong * (1f64 - intersection.material.reflectivity) + self.raytrace_limited(new_ray, depth + 1) * intersection.material.reflectivity
+                        phong * (1f64 - intersection.material.reflectivity) + self.raytrace_depth_limited(new_ray, depth + 1) * intersection.material.reflectivity
                     } else {
                         phong
                     }
@@ -50,20 +50,22 @@ impl<'a> Scene<'a> {
         for o in &self.objects {
             match o.intersect(&ray) {
                 Some(intersection) => {
-                    // TODO: Didn't use matching because borrowing got weird. Fix.
-                    if closest.is_some() {
-                        if intersection.distance < closest.unwrap().distance {
+                    match &closest {
+                        &Some(previous_intersection) => {
+                            if intersection.distance < previous_intersection.distance {
+                                closest = Some(intersection);
+                            }
+                        },
+                        &None => {
                             closest = Some(intersection);
                         }
-                    } else {
-                        closest = Some(intersection);
                     }
                 },
                 None => {}
             }
         }
 
-        return closest;
+        closest
     }
 
     fn phong(&self, ray: Ray, intersection: Intersection) -> Color {
