@@ -7,6 +7,8 @@ pub struct Color {
     pub b: f64,
 }
 
+pub const BLACK: Color = Color { r: 0f64, g: 0f64, b: 0f64 };
+
 impl Color {
     pub fn new(r: f64, g: f64, b: f64) -> Color {
         Color { r, g, b }

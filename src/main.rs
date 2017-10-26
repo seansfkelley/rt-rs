@@ -29,7 +29,7 @@ fn main() {
 
     let width = 512u32;
     let height = 512u32;
-    let antialias = 2;
+    let antialias = 4u32;
 
     let x_step = camera_right * pixel_grid_width / width as f64;
     let y_step = -camera_up * pixel_grid_height / height as f64;
@@ -46,16 +46,16 @@ fn main() {
     let mut rng = rand::thread_rng();
     let mut img = RgbImage::new(width, height);
 
-    // TODO: Antialiasing.
     for x in 0..width {
         for y in 0..height {
+            let mut color = color::BLACK;
             for sample_x in 0..antialias {
                 for sample_y in 0..antialias {
                     let (x_min, x_max, y_min, y_max) = (
                         sample_x as f64 / antialias as f64,
-                        1f64 + sample_x as f64 / antialias as f64,
+                        (1f64 + sample_x as f64) / antialias as f64,
                         sample_y as f64 / antialias as f64,
-                        1f64 + sample_y as f64 / antialias as f64
+                        (1f64 + sample_y as f64) / antialias as f64
                     );
 
                     let (x_jitter, y_jitter) = (
@@ -63,15 +63,14 @@ fn main() {
                         rng.next_f64() * (y_max - y_min) + y_min,
                     );
 
-                    println!("{} {}", x_jitter, y_jitter);
-
                     // TODO: Scalar multiplication for non-floats?
                     let origin = grid_start + x_step * (x as f64 - x_jitter) + y_step * (y as f64 - y_jitter);
                     let direction = (origin - camera_position).as_unit_vector();
                     let ray = objects::Ray::new(origin, direction);
-                    img.put_pixel(x, y, *Rgb::from_slice(&scene.raytrace(ray).as_bytes()));
+                    color = color + scene.raytrace(ray);
                 }
             }
+            img.put_pixel(x, y, *Rgb::from_slice(&(color / (antialias * antialias) as f64).as_bytes()));
         }
     }
 
