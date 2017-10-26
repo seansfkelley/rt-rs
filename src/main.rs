@@ -6,9 +6,11 @@ extern crate image;
 mod vector;
 mod objects;
 mod color;
+mod scene;
 
 use color::Color;
 use vector::Vec3;
+use scene::Scene;
 use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
@@ -35,10 +37,9 @@ fn main() {
     let grid_center = camera_position + camera_direction * pixel_grid_distance;
     let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
+
     let sphere = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, Color::new(1f64, 0f64, 0f64));
-    let scene: Vec<&objects::Intersectable> = vec![
-        &sphere
-    ];
+    let scene = Scene::new(vec![&sphere]);
     let background_color = Color::new(0f64, 0f64, 0f64);
 
     let mut img = RgbImage::new(width, height);
@@ -51,23 +52,7 @@ fn main() {
             let direction = (origin - camera_position).as_unit_vector();
             let ray = objects::Ray::new(origin, direction);
 
-            let mut closest: Option<objects::Intersection> = Option::None;
-
-            for o in &scene {
-                match o.intersect(&ray) {
-                    Some(intersection) => {
-                        // TODO: Didn't use matching because borrowing got weird. Fix.
-                        if closest.is_some() {
-                            if intersection.distance < closest.unwrap().distance {
-                                closest = Some(intersection);
-                            }
-                        } else {
-                            closest = Some(intersection);
-                        }
-                    },
-                    None => {}
-                }
-            }
+            let closest = scene.cast_ray(ray);
 
             let color = match closest {
                 Some(intersection) => { intersection.material },
