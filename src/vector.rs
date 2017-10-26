@@ -1,11 +1,13 @@
-use std::ops::{Add, Sub, Div, Mul};
+use std::ops::{Add, Sub, Div, Mul, Neg};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
-    x: f64,
-    y: f64,
-    z: f64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
+
+pub type Color = Vec3;
 
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
@@ -82,6 +84,18 @@ impl Mul<f64> for Vec3 {
             x: self.x * multiplicand,
             y: self.y * multiplicand,
             z: self.z * multiplicand,
+        }
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Vec3 {
+        Vec3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
         }
     }
 }

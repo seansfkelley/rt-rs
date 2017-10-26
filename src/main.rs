@@ -6,7 +6,7 @@ extern crate image;
 mod vector;
 mod objects;
 
-use vector::Vec3;
+use vector::{ Vec3, Color };
 use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
@@ -14,8 +14,66 @@ use std::path::Path;
 fn main() {
     env_logger::init().unwrap();
 
-    let mut img = RgbImage::new(512, 512);
-    img.put_pixel(20, 20, Rgb::from_channels(255, 0, 0, 0));
+    let camera_position = Vec3::new(0f64, 0f64, 10f64);
+    let camera_up = Vec3::new(0f64, 1f64, 0f64).as_unit_vector();
+    let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_unit_vector();
+    let camera_right = camera_direction.cross(camera_up).as_unit_vector();
+
+    // TODO: Replace with proper FoV calculations.
+    let pixel_grid_distance = 5f64;
+    let pixel_grid_width = 5f64;
+    let pixel_grid_height = 5f64;
+
+    let width = 512u32;
+    let height = 512u32;
+
+    let x_step = camera_right * pixel_grid_width / width as f64;
+    let y_step = -camera_up * pixel_grid_height / height as f64;
+    let grid_center = camera_position + camera_direction * pixel_grid_distance;
+    let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
+
+    let sphere = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, Color::new(255f64, 0f64, 0f64));
+    let scene: Vec<&objects::Intersectable> = vec![
+        &sphere
+    ];
+    let background_color = Color::new(0f64, 0f64, 0f64);
+
+    let mut img = RgbImage::new(width, height);
+
+    for x in 0..width {
+        for y in 0..height {
+            // TODO: Scalar multiplication for non-floats?
+            let origin = grid_start + x_step * x as f64 + y_step * y as f64;
+            let direction = (origin - camera_position).as_unit_vector();
+            let ray = objects::Ray::new(origin, direction);
+
+            let mut closest: Option<objects::Intersection> = Option::None;
+
+            for o in &scene {
+                match o.intersect(&ray) {
+                    Some(intersection) => {
+                        // TODO: Didn't use matching because borrowing got weird. Fix.
+                        if closest.is_some() {
+                            if intersection.distance < closest.unwrap().distance {
+                                closest = Some(intersection);
+                            }
+                        } else {
+                            closest = Some(intersection);
+                        }
+                    },
+                    None => {}
+                }
+            }
+
+            let color = match closest {
+                Some(intersection) => { intersection.material },
+                None => { background_color }
+            };
+
+            img.put_pixel(x, y, Rgb::from_channels(color.x as u8, color.y as u8, color.y as u8, 0));
+        }
+    }
+
     let ref mut fout = File::create(&Path::new("out.png")).unwrap();
-    let _ = image::ImageRgb8(img).save(fout, image::PNG);
+    image::ImageRgb8(img).save(fout, image::PNG).unwrap();
 }

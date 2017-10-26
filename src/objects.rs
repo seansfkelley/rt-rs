@@ -1,23 +1,42 @@
-use vector::Vec3;
+use vector::{ Vec3, Color };
 
+// TODO: Actual material.
+type Material = Color;
+
+#[derive(Debug, Clone, Copy)]
 pub struct Ray {
   origin: Vec3,
   direction: Vec3,
 }
 
+impl Ray {
+  pub fn new(origin: Vec3, direction: Vec3) -> Ray {
+    Ray { origin, direction }
+  }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Intersection {
-  distance: f64,
-  normal: Vec3,
-  // material
+  pub distance: f64,
+  pub normal: Vec3,
+  pub material: Material,
 }
 
 pub trait Intersectable {
   fn intersect(&self, ray: &Ray) -> Option<Intersection>;
 }
 
-struct Sphere {
+#[derive(Debug)]
+pub struct Sphere {
   center: Vec3,
   radius: f64,
+  material: Material,
+}
+
+impl Sphere {
+  pub fn new(center: Vec3, radius: f64, material: Material) -> Sphere {
+    Sphere { center, radius, material }
+  }
 }
 
 impl Intersectable for Sphere {
@@ -41,7 +60,8 @@ impl Intersectable for Sphere {
 
         Some(Intersection {
           distance: t,
-          normal: ((ray.direction * t + ray.origin) - self.center).as_unit_vector()
+          normal: ((ray.direction * t + ray.origin) - self.center).as_unit_vector(),
+          material: self.material
         })
       }
     }
