@@ -1,6 +1,5 @@
 use objects::*;
 use color::Color;
-use std::f64::consts::PI;
 
 pub struct Scene<'a> {
     objects: Vec<&'a Intersectable>,
@@ -32,7 +31,7 @@ impl<'a> Scene<'a> {
                     let phong = self.phong(ray, intersection);
                     if intersection.material.reflectivity > 0f64 {
                         let new_origin = ray.at(intersection.distance);
-                        let new_direction = ray.direction.rotate(intersection.normal, PI);
+                        let new_direction = ray.direction.reflect(intersection.normal);
                         let new_ray = Ray::new(new_origin, new_direction);
                         phong * (1f64 - intersection.material.reflectivity) + self.raytrace_depth_limited(new_ray, depth + 1) * intersection.material.reflectivity
                     } else {

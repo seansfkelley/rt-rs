@@ -12,7 +12,11 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
-    pub fn cross(self, other: Vec3) -> Vec3 {
+    fn assert_normalized(&self) {
+        assert!((self.magnitude() - 1f64).abs() < 1e-10);
+    }
+
+    pub fn cross(&self, other: Vec3) -> Vec3 {
         Vec3 {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,
@@ -20,26 +24,25 @@ impl Vec3 {
         }
     }
 
-    pub fn dot(self, other: Vec3) -> f64 {
+    pub fn dot(&self, other: Vec3) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    pub fn magnitude2(self) -> f64 {
-        self.dot(self)
+    pub fn magnitude2(&self) -> f64 {
+        self.dot(*self)
     }
 
-    pub fn magnitude(self) -> f64 {
+    pub fn magnitude(&self) -> f64 {
         self.magnitude2().sqrt()
     }
 
-    pub fn as_unit_vector(self) -> Vec3 {
-        self / self.magnitude()
+    pub fn as_unit_vector(&self) -> Vec3 {
+        *self / self.magnitude()
     }
 
-    pub fn rotate(self, axis: Vec3, theta: f64) -> Vec3 {
-        // https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
-        assert!((axis.magnitude() - 1f64).abs() < 1e-10);
-        self * theta.cos() + axis.cross(self) * theta.sin() + axis * (axis.dot(self)) * (1f64 - theta.cos())
+    pub fn reflect(&self, axis: Vec3) -> Vec3 {
+        self.assert_normalized();
+        *self - axis * (2f64 * self.dot(axis))
     }
 }
 
