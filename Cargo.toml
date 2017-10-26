@@ -5,3 +5,4 @@ authors = ["Sean Kelley <seansfkelley@gmail.com>"]
 
 [dependencies]
 image = "0.17.0"
+rand = "0.3.17"

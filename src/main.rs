@@ -1,4 +1,5 @@
 extern crate image;
+extern crate rand;
 
 mod vector;
 mod objects;
@@ -6,6 +7,7 @@ mod color;
 mod scene;
 mod material;
 
+use rand::Rng;
 use color::Color;
 use vector::Vec3;
 use scene::Scene;
@@ -27,8 +29,8 @@ fn main() {
 
     let width = 512u32;
     let height = 512u32;
+    let antialias = 2;
 
-    // TODO: Offset by half a unit so the ray is going through the center of the grid space.
     let x_step = camera_right * pixel_grid_width / width as f64;
     let y_step = -camera_up * pixel_grid_height / height as f64;
     let grid_center = camera_position + camera_direction * pixel_grid_distance;
@@ -41,16 +43,35 @@ fn main() {
     let light2 = objects::Light::new(Vec3::new(-10f64, -10f64, 7f64), Color::new(0.4f64, 0.4f64, 0.4f64));
     let scene = Scene::new(vec![&sphere1, &sphere2], vec![&light1, &light2], Color::new(0f64, 0f64, 0f64), 3);
 
+    let mut rng = rand::thread_rng();
     let mut img = RgbImage::new(width, height);
 
     // TODO: Antialiasing.
     for x in 0..width {
         for y in 0..height {
-            // TODO: Scalar multiplication for non-floats?
-            let origin = grid_start + x_step * x as f64 + y_step * y as f64;
-            let direction = (origin - camera_position).as_unit_vector();
-            let ray = objects::Ray::new(origin, direction);
-            img.put_pixel(x, y, *Rgb::from_slice(&scene.raytrace(ray).as_bytes()));
+            for sample_x in 0..antialias {
+                for sample_y in 0..antialias {
+                    let (x_min, x_max, y_min, y_max) = (
+                        sample_x as f64 / antialias as f64,
+                        1f64 + sample_x as f64 / antialias as f64,
+                        sample_y as f64 / antialias as f64,
+                        1f64 + sample_y as f64 / antialias as f64
+                    );
+
+                    let (x_jitter, y_jitter) = (
+                        rng.next_f64() * (x_max - x_min) + x_min,
+                        rng.next_f64() * (y_max - y_min) + y_min,
+                    );
+
+                    println!("{} {}", x_jitter, y_jitter);
+
+                    // TODO: Scalar multiplication for non-floats?
+                    let origin = grid_start + x_step * (x as f64 - x_jitter) + y_step * (y as f64 - y_jitter);
+                    let direction = (origin - camera_position).as_unit_vector();
+                    let ray = objects::Ray::new(origin, direction);
+                    img.put_pixel(x, y, *Rgb::from_slice(&scene.raytrace(ray).as_bytes()));
+                }
+            }
         }
     }
 
