@@ -14,9 +14,9 @@ impl Color {
 
   pub fn as_bytes(&self) -> [u8; 3] {
     [
-      (self.r * 255f64) as u8,
-      (self.g * 255f64) as u8,
-      (self.b * 255f64) as u8,
+        (self.r * 255f64) as u8,
+        (self.g * 255f64) as u8,
+        (self.b * 255f64) as u8,
     ]
   }
 }
