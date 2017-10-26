@@ -7,7 +7,9 @@
 - antialiasing
 - reflection (and total internal reflection)
 - refraction
-- translucent materials (waxy)
+- caustics
+- translucent materials (waxy -- subsurface scattering)
 - normal mapping
 - spatial indexing (kd-tree, r-tree?)
 - parallelization
+- attenuation
