@@ -20,10 +20,10 @@ impl<'a> Scene<'a> {
     }
 
     pub fn raytrace(&self, ray: Ray) -> Color {
-        self.raytrace_limited(ray, 0)
+        self.raytrace_depth_limited(ray, 0)
     }
 
-    pub fn raytrace_limited(&self, ray: Ray, depth: u32) -> Color {
+    pub fn raytrace_depth_limited(&self, ray: Ray, depth: u32) -> Color {
         if depth > self.depth_limit {
             self.background_color
         } else {
@@ -34,7 +34,7 @@ impl<'a> Scene<'a> {
                         let new_origin = ray.at(intersection.distance);
                         let new_direction = ray.direction.rotate(intersection.normal, PI);
                         let new_ray = Ray::new(new_origin, new_direction);
-                        phong * (1f64 - intersection.material.reflectivity) + self.raytrace_limited(new_ray, depth + 1) * intersection.material.reflectivity
+                        phong * (1f64 - intersection.material.reflectivity) + self.raytrace_depth_limited(new_ray, depth + 1) * intersection.material.reflectivity
                     } else {
                         phong
                     }
