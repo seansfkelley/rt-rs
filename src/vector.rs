@@ -36,6 +36,11 @@ impl Vec3 {
         self / self.magnitude()
     }
 
+    pub fn rotate(self, axis: Vec3, theta: f64) -> Vec3 {
+        // https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
+        assert!((axis.magnitude() - 1f64).abs() < 1e-10);
+        self * theta.cos() + axis.cross(self) * theta.sin() + axis * (axis.dot(self)) * (1f64 - theta.cos())
+    }
 }
 
 impl Add for Vec3 {

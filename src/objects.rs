@@ -1,21 +1,28 @@
 use vector::Vec3;
 use color::Color;
 
+#[derive(Debug, Clone, Copy)]
 pub struct Material {
-    diffuse: Color,
-    specular: Color,
-    specular_exponent: f64,
+    pub ambient: Color,
+    pub diffuse: Color,
+    pub specular: Color,
+    pub specular_exponent: f64,
+    pub reflectivity: f64,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
-    origin: Vec3,
-    direction: Vec3,
+    pub origin: Vec3,
+    pub direction: Vec3,
 }
 
 impl Ray {
     pub fn new(origin: Vec3, direction: Vec3) -> Ray {
         Ray { origin, direction }
+    }
+
+    pub fn at(&self, distance: f64) -> Vec3 {
+        self.origin + self.direction * distance
     }
 }
 
@@ -76,7 +83,7 @@ impl Intersectable for Sphere {
 
                 Some(Intersection {
                     distance: t,
-                    normal: ((ray.direction * t + ray.origin) - self.center).as_unit_vector(),
+                    normal: (ray.at(t) - self.center).as_unit_vector(),
                     material: self.material
                 })
             }
