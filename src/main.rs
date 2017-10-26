@@ -15,8 +15,11 @@ fn main() {
 
     println!("Hello, world!");
 
-    let normal = Vec3::new(1f64, 2f64, 3f64);
-    let ray = Vec3::new(4f64, 5f64, 6f64);
-    let thing = normal.cross(&ray);
+    let normal = Vec3::new(1f64, 3f64, 5f64);
+    let ray = Vec3::new(10f64, 8f64, 9f64);
+    let thing = normal.cross(ray);
     println!("normal: {:?}, ray: {:?}, result: {:?}", normal, ray, thing);
+    println!("add: {:?}", normal + ray);
+    let test = normal;
+    let test2 = ray;
 }
