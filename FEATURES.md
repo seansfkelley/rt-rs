@@ -1,14 +1,11 @@
-- phong/shadows
 - texture (image, procedural)
 - BRDF
 - global illumination (photon mapping?)
 - field of view
 - depth of field
-- antialiasing
-- reflection (and total internal reflection)
-- refraction
+- refraction (and total internal reflection)
 - caustics
-- translucent materials (waxy -- subsurface scattering)
+- subsurface scattering
 - normal mapping
 - spatial indexing (kd-tree, r-tree?)
 - parallelization
