@@ -73,8 +73,9 @@ impl Intersectable for Sphere {
                 let t_distance = (r_sq - d_sq).sqrt();
                 let t0 = t_center - t_distance;
                 let t1 = t_center + t_distance;
-                let t = if t0 <= 0f64 { t0 } else { t1 };
-                let location = ray.at(t - 0.00001f64);
+                let mut t = if t0 <= 0f64 { t0 } else { t1 };
+                t -= 0.00000001f64;
+                let location = ray.at(t);
                 Some(Intersection {
                     distance: t,
                     location,
