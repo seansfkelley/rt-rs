@@ -13,10 +13,11 @@ impl Color {
     }
 
     pub fn as_bytes(&self) -> [u8; 3] {
+        let clamped = self.clamp();
         [
-            (self.r * 255f64) as u8,
-            (self.g * 255f64) as u8,
-            (self.b * 255f64) as u8,
+            (clamped.r * 255f64) as u8,
+            (clamped.g * 255f64) as u8,
+            (clamped.b * 255f64) as u8,
         ]
     }
 

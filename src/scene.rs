@@ -72,9 +72,9 @@ impl<'a> Scene<'a> {
         let material = intersection.material;
         let mut color = intersection.material.ambient;
         for light in &self.lights {
-            let unobstructed_light = self.cast_ray(Ray::new(intersection.location, light.position)).is_none();
+            let light_direction = (light.position - intersection.location).as_unit_vector();
+            let unobstructed_light = self.cast_ray(Ray::new(intersection.location, light_direction)).is_none();
             if unobstructed_light {
-                let light_direction = (light.position - intersection.location).as_unit_vector();
                 let diffuse_illumination = material.diffuse * light.color * intersection.normal.dot(light_direction).max(0f64);
                 let specular_illumination = material.specular * light.color * intersection.normal.dot((light_direction - ray.direction).as_unit_vector()).max(0f64).powf(material.specular_exponent);
                 color = color + diffuse_illumination + specular_illumination;

@@ -42,7 +42,7 @@ fn main() {
     let red_plastic = plastic::create(Color::new(1f64, 0f64, 0f64));
     let sphere1 = objects::Sphere::new(Vec3::new(0f64, 0f64, 0f64), 5f64, red_plastic);
     let sphere2 = objects::Sphere::new(Vec3::new(10f64, 10f64, 0f64), 5f64, red_plastic);
-    let light = objects::Light::new(Vec3::new(1f64, 1f64, 5f64), Color::new(1f64, 1f64, 1f64));
+    let light = objects::Light::new(Vec3::new(1f64, 1f64, 10f64), Color::new(1f64, 1f64, 1f64));
     let scene = Scene::new(vec![&sphere1, &sphere2], vec![&light], Color::new(0f64, 0f64, 0f64), 3);
 
     let mut img = RgbImage::new(width, height);
