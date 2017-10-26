@@ -27,6 +27,7 @@ fn main() {
     let width = 512u32;
     let height = 512u32;
 
+    // TODO: Offset by half a unit so the ray is going through the center of the grid space.
     let x_step = camera_right * pixel_grid_width / width as f64;
     let y_step = -camera_up * pixel_grid_height / height as f64;
     let grid_center = camera_position + camera_direction * pixel_grid_distance;
@@ -40,6 +41,7 @@ fn main() {
 
     let mut img = RgbImage::new(width, height);
 
+    // TODO: Antialiasing.
     for x in 0..width {
         for y in 0..height {
             // TODO: Scalar multiplication for non-floats?
