@@ -1,13 +1,26 @@
 use objects;
+use color::Color;
 
 pub struct Scene<'a> {
     objects: Vec<&'a objects::Intersectable>,
     lights: Vec<&'a objects::Light>,
+    background_color: Color,
 }
 
 impl<'a> Scene<'a> {
-    pub fn new(objects: Vec<&'a objects::Intersectable>, lights: Vec<&'a objects::Light>) -> Scene<'a> {
-        Scene { objects, lights }
+    pub fn new(
+        objects: Vec<&'a objects::Intersectable>,
+        lights: Vec<&'a objects::Light>,
+        background_color: Color
+    ) -> Scene<'a> {
+        Scene { objects, lights, background_color }
+    }
+
+    pub fn raytrace(&self, ray: objects::Ray) -> Color {
+        match self.cast_ray(ray) {
+            Some(intersection) => { intersection.material },
+            None => { self.background_color }
+        }
     }
 
     pub fn cast_ray(&self, ray: objects::Ray) -> Option<objects::Intersection> {

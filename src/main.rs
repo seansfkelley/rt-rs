@@ -52,15 +52,7 @@ fn main() {
             let origin = grid_start + x_step * x as f64 + y_step * y as f64;
             let direction = (origin - camera_position).as_unit_vector();
             let ray = objects::Ray::new(origin, direction);
-
-            let closest = scene.cast_ray(ray);
-
-            let color = match closest {
-                Some(intersection) => { intersection.material },
-                None => { background_color }
-            };
-
-            img.put_pixel(x, y, *Rgb::from_slice(&color.as_bytes()));
+            img.put_pixel(x, y, *Rgb::from_slice(&scene.raytrace(ray).as_bytes()));
         }
     }
 
