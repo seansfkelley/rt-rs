@@ -4,6 +4,7 @@ extern crate env_logger;
 extern crate image;
 
 mod vector;
+mod objects;
 
 use vector::Vec3;
 use image::{RgbImage, Rgb, Pixel};
