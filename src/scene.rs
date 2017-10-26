@@ -2,16 +2,16 @@ use objects::*;
 use color::Color;
 
 pub struct Scene<'a> {
-    objects: Vec<&'a SceneObject<'a>>,
-    lights: Vec<&'a Light>,
+    objects: Vec<Box<SceneObject<'a>>>,
+    lights: Vec<Box<Light>>,
     background_color: Color,
     depth_limit: u32,
 }
 
 impl<'a> Scene<'a> {
     pub fn new(
-        objects: Vec<&'a SceneObject<'a>>,
-        lights: Vec<&'a Light>,
+        objects: Vec<Box<SceneObject<'a>>>,
+        lights: Vec<Box<Light>>,
         background_color: Color,
         depth_limit: u32
     ) -> Scene<'a> {
@@ -34,7 +34,7 @@ impl<'a> Scene<'a> {
                             let light_direction = (light.position - intersection.location).as_unit_vector();
                             self.cast_ray(Ray::new(intersection.location, light_direction)).is_some()
                         })
-                        .map(|light| *light)
+                        .map(|light| light.as_ref())
                         .collect();
 
                     let material = intersection.object.material();
@@ -56,7 +56,7 @@ impl<'a> Scene<'a> {
     fn cast_ray(&self, ray: Ray) -> Option<Intersection<'a>> {
         let mut closest: Option<Intersection<'a>> = Option::None;
 
-        for o in &self.objects {
+        for o in self.objects {
             match o.intersect(&ray) {
                 Some(intersection) => {
                     if closest.is_some() {

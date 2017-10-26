@@ -62,7 +62,7 @@ impl<'a> Sphere<'a> {
 impl<'a> SceneObject<'a> for Sphere<'a> {
     // TODO: Verify this implementation against pbrt.
     // TODO: Should transform ray into world space first so the rest of the math is easy.
-    fn intersect(&'a self, ray: &Ray) -> Option<Intersection> {
+    fn intersect(&'a self, ray: &Ray) -> Option<Intersection<'a>> {
         let l = self.center - ray.origin;
         let t_center = l.dot(ray.direction);
         if t_center <= 0f64 {
