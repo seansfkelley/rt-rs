@@ -1,6 +1,8 @@
 use vector::Vec3;
 use color::Color;
 use material::Material;
+use util::Clamp;
+use std::f64::consts::PI;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
@@ -31,35 +33,36 @@ impl Light {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Intersection {
+pub struct Intersection<'a> {
     pub distance: f64,
     pub location: Vec3,
     pub normal: Vec3,
-    pub material: Material,
+    pub uv: (f64, f64),
+    pub object: &'a SceneObject<'a>,
 }
 
-pub trait Intersectable {
-    fn intersect(&self, ray: &Ray) -> Option<Intersection>;
+pub trait SceneObject<'a> {
+    fn intersect(&'a self, ray: &Ray) -> Option<Intersection<'a>>;
+    fn material(&self) -> &'a Material;
 }
 
 #[derive(Debug)]
-pub struct Sphere {
+pub struct Sphere<'a> {
     center: Vec3,
     radius: f64,
-    material: Material,
+    material: &'a Material,
 }
 
-impl Sphere {
-    pub fn new(center: Vec3, radius: f64, material: Material) -> Sphere {
+impl<'a> Sphere<'a> {
+    pub fn new(center: Vec3, radius: f64, material: &'a Material) -> Sphere<'a> {
         Sphere { center, radius, material }
     }
 }
 
-impl Intersectable for Sphere {
-    // TODO: Understand what I actually wrote here.
-    // from http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
-    fn intersect(&self, ray: &Ray) -> Option<Intersection> {
+impl<'a> SceneObject<'a> for Sphere<'a> {
+    // TODO: Verify this implementation against pbrt.
+    // TODO: Should transform ray into world space first so the rest of the math is easy.
+    fn intersect(&'a self, ray: &Ray) -> Option<Intersection> {
         let l = self.center - ray.origin;
         let t_center = l.dot(ray.direction);
         if t_center <= 0f64 {
@@ -74,15 +77,28 @@ impl Intersectable for Sphere {
                 let t0 = t_center - t_distance;
                 let t1 = t_center + t_distance;
                 let mut t = if t0 <= 0f64 { t1 } else { t0 };
-                t -= 0.00000001f64;
+                // TODO: pbrt recommends not twiddling t, but instead providing a precision value in the result that callers can use to twiddle the result as they want.
+                t -= 1e-10;
                 let location = ray.at(t);
+
+                // pbrt pg. 119
+                // Make sure we transform into object space!
+                let mut phi = (location.y - self.center.y).atan2(location.x - self.center.x);
+                if phi < 0f64 {
+                    phi += 2f64 * PI;
+                }
+                let theta = ((location.z - self.center.z) / self.radius).clamp(-1f64, 1f64).acos();
+
                 Some(Intersection {
                     distance: t,
                     location,
                     normal: (location - self.center).as_unit_vector(),
-                    material: self.material
+                    uv: (phi / (2f64 * PI), theta / PI),
+                    object: self,
                 })
             }
         }
     }
+
+    fn material(&self) -> &'a Material { self.material }
 }

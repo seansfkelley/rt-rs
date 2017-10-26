@@ -2,7 +2,7 @@ use objects::*;
 use color::Color;
 
 pub struct Scene<'a> {
-    objects: Vec<&'a Intersectable>,
+    objects: Vec<&'a SceneObject<'a>>,
     lights: Vec<&'a Light>,
     background_color: Color,
     depth_limit: u32,
@@ -10,7 +10,7 @@ pub struct Scene<'a> {
 
 impl<'a> Scene<'a> {
     pub fn new(
-        objects: Vec<&'a Intersectable>,
+        objects: Vec<&'a SceneObject<'a>>,
         lights: Vec<&'a Light>,
         background_color: Color,
         depth_limit: u32
@@ -28,14 +28,24 @@ impl<'a> Scene<'a> {
         } else {
             match self.cast_ray(ray) {
                 Some(intersection) => {
-                    let phong = self.phong(ray, intersection);
-                    if intersection.material.reflectivity > 0f64 {
+                    let visible_lights: Vec<&Light> = self.lights
+                        .iter()
+                        .filter(|light| {
+                            let light_direction = (light.position - intersection.location).as_unit_vector();
+                            self.cast_ray(Ray::new(intersection.location, light_direction)).is_some()
+                        })
+                        .map(|light| *light)
+                        .collect();
+
+                    let material = intersection.object.material();
+                    let color = material.get_color(&ray, &intersection, visible_lights);
+                    if material.reflectivity() > 0f64 {
                         let new_origin = ray.at(intersection.distance);
                         let new_direction = ray.direction.reflect(intersection.normal);
                         let new_ray = Ray::new(new_origin, new_direction);
-                        phong * (1f64 - intersection.material.reflectivity) + self.raytrace_depth_limited(new_ray, depth + 1) * intersection.material.reflectivity
+                        color * (1f64 - material.reflectivity()) + self.raytrace_depth_limited(new_ray, depth + 1) * material.reflectivity()
                     } else {
-                        phong
+                        color
                     }
                 },
                 None => { self.background_color }
@@ -43,21 +53,18 @@ impl<'a> Scene<'a> {
         }
     }
 
-    fn cast_ray(&self, ray: Ray) -> Option<Intersection> {
-        let mut closest: Option<Intersection> = Option::None;
+    fn cast_ray(&self, ray: Ray) -> Option<Intersection<'a>> {
+        let mut closest: Option<Intersection<'a>> = Option::None;
 
         for o in &self.objects {
             match o.intersect(&ray) {
                 Some(intersection) => {
-                    match &closest {
-                        &Some(previous_intersection) => {
-                            if intersection.distance < previous_intersection.distance {
-                                closest = Some(intersection);
-                            }
-                        },
-                        &None => {
+                    if closest.is_some() {
+                        if intersection.distance < closest.as_ref().unwrap().distance {
                             closest = Some(intersection);
                         }
+                    } else {
+                        closest = Some(intersection);
                     }
                 },
                 None => {}
@@ -65,21 +72,6 @@ impl<'a> Scene<'a> {
         }
 
         closest
-    }
-
-    fn phong(&self, ray: Ray, intersection: Intersection) -> Color {
-        let material = intersection.material;
-        let mut color = intersection.material.ambient;
-        for light in &self.lights {
-            let light_direction = (light.position - intersection.location).as_unit_vector();
-            let unobstructed_light = self.cast_ray(Ray::new(intersection.location, light_direction)).is_none();
-            if unobstructed_light {
-                let diffuse_illumination = material.diffuse * light.color * intersection.normal.dot(light_direction).max(0f64);
-                let specular_illumination = material.specular * light.color * intersection.normal.dot((light_direction - ray.direction).as_unit_vector()).max(0f64).powf(material.specular_exponent);
-                color = color + diffuse_illumination + specular_illumination;
-            }
-        }
-        color
     }
 }
 

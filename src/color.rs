@@ -1,4 +1,5 @@
-use std::ops::{Add, Sub, Div, Mul};
+use std::ops::{ Add, Sub, Div, Mul };
+use util::Clamp;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Color {
@@ -25,9 +26,9 @@ impl Color {
 
     pub fn clamp(&self) -> Color {
         Color {
-            r: self.r.max(0f64).min(1f64),
-            g: self.g.max(0f64).min(1f64),
-            b: self.b.max(0f64).min(1f64),
+            r: self.r.clamp(0f64, 1f64),
+            g: self.g.clamp(0f64, 1f64),
+            b: self.b.clamp(0f64, 1f64),
         }
     }
 }

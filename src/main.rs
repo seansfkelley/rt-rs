@@ -6,6 +6,7 @@ mod objects;
 mod color;
 mod scene;
 mod material;
+mod util;
 
 use rand::Rng;
 use color::Color;
@@ -37,10 +38,11 @@ fn main() {
 
     let cyan_plastic = material::plastic(Color::new(0f64, 0.7f64, 0.7f64));
     let yellow_plastic = material::plastic(Color::new(0.7f64, 0.7f64, 0f64));
+    let mirror = material::mirror();
 
-    let sphere1 = objects::Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, cyan_plastic);
-    let sphere2 = objects::Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, yellow_plastic);
-    let sphere3 = objects::Sphere::new(Vec3::new(-5f64, 4f64, 0f64), 3f64, material::MIRROR);
+    let sphere1 = objects::Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, &cyan_plastic);
+    let sphere2 = objects::Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, &yellow_plastic);
+    let sphere3 = objects::Sphere::new(Vec3::new(-5f64, 4f64, 0f64), 3f64, &mirror);
 
     let light1 = objects::Light::new(Vec3::new(5f64, 5f64, 10f64), Color::new(0.4f64, 0.4f64, 0.4f64));
     let light2 = objects::Light::new(Vec3::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64));
