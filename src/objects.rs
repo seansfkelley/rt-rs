@@ -10,6 +10,7 @@ pub struct Ray {
 
 impl Ray {
     pub fn new(origin: Vec3, direction: Vec3) -> Ray {
+        assert!((direction.magnitude() - 1f64).abs() < 1e-10);
         Ray { origin, direction }
     }
 
