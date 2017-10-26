@@ -50,20 +50,22 @@ impl<'a> Scene<'a> {
         for o in &self.objects {
             match o.intersect(&ray) {
                 Some(intersection) => {
-                    // TODO: Didn't use matching because borrowing got weird. Fix.
-                    if closest.is_some() {
-                        if intersection.distance < closest.unwrap().distance {
+                    match &closest {
+                        &Some(previous_intersection) => {
+                            if intersection.distance < previous_intersection.distance {
+                                closest = Some(intersection);
+                            }
+                        },
+                        &None => {
                             closest = Some(intersection);
                         }
-                    } else {
-                        closest = Some(intersection);
                     }
                 },
                 None => {}
             }
         }
 
-        return closest;
+        closest
     }
 
     fn phong(&self, intersection: Intersection) -> Color {
