@@ -32,7 +32,7 @@ impl Scene {
                         .iter()
                         .filter(|light| {
                             let light_direction = (light.position - intersection.location).as_unit_vector();
-                            self.cast_ray(Ray::new(intersection.location, light_direction)).is_some()
+                            self.cast_ray(Ray::new(intersection.location, light_direction)).is_none()
                         })
                         .map(|light| light.as_ref())
                         .collect();
