@@ -3,6 +3,7 @@ use color::Color;
 use material::Material;
 use util::Clamp;
 use std::f64::consts::PI;
+use std::rc::Rc;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
@@ -43,23 +44,23 @@ pub struct Intersection<'a> {
 
 pub trait SceneObject {
     fn intersect(&self, ray: &Ray) -> Option<Intersection>;
-    fn material(&self) -> &Material;
+    fn material(&self) -> Rc<Material>;
 }
 
 #[derive(Debug)]
-pub struct Sphere<'a> {
+pub struct Sphere {
     center: Vec3,
     radius: f64,
-    material: &'a Material,
+    material: Rc<Material>,
 }
 
-impl<'a> Sphere<'a> {
-    pub fn new(center: Vec3, radius: f64, material: &'a Material) -> Sphere<'a> {
+impl Sphere {
+    pub fn new(center: Vec3, radius: f64, material: Rc<Material>) -> Sphere {
         Sphere { center, radius, material }
     }
 }
 
-impl<'a> SceneObject for Sphere<'a> {
+impl SceneObject for Sphere {
     // TODO: Verify this implementation against pbrt.
     // TODO: Should transform ray into world space first so the rest of the math is easy.
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
@@ -100,5 +101,5 @@ impl<'a> SceneObject for Sphere<'a> {
         }
     }
 
-    fn material(&self) -> &Material { self.material }
+    fn material(&self) -> Rc<Material> { Rc::clone(&self.material) }
 }
