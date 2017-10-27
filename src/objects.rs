@@ -4,6 +4,7 @@ use material::Material;
 use util::Clamp;
 use std::f64::consts::PI;
 use std::rc::Rc;
+use std::ops::{Sub};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
@@ -102,4 +103,32 @@ impl SceneObject for Sphere {
     }
 
     fn material(&self) -> Rc<Material> { Rc::clone(&self.material) }
+}
+
+impl<'a> Sub<&'a SceneObject> for SceneObject {
+    type Output = SceneObject;
+
+    // Couldn't get impl trait working :(
+    fn sub(&self, rhs: &SceneObject) -> SceneObject {
+        struct Anon<'b> {
+            lhs: &'b (SceneObject + 'b),
+            rhs: &'b (SceneObject + 'b),
+        }
+
+        impl<'b> SceneObject for Anon<'b> {
+            fn intersect(&self, ray: &Ray) -> Option<Intersection> {
+                self.lhs.intersect(ray)
+                    .map(|self_intersection| match self.rhs.intersect(ray) {
+                        Some(_) => None(),
+                        None => self_intersection
+                    })
+            }
+
+            fn material(&self) -> Rc<Material> {
+                self.lhs.material()
+            }
+        }
+
+        Anon { lhs: self, rhs }
+    }
 }
