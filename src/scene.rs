@@ -38,7 +38,7 @@ impl Scene {
                         .collect();
 
                     let material = intersection.object.material();
-                    let color = material.get_color(&ray, &intersection, visible_lights);
+                    let color = material.get_color(&ray, &intersection, &visible_lights);
                     if material.reflectivity() > 0f64 {
                         let new_origin = ray.at(intersection.distance);
                         let new_direction = ray.direction.reflect(intersection.normal);

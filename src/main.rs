@@ -38,9 +38,9 @@ fn main() {
     let grid_center = camera_position + camera_direction * pixel_grid_distance;
     let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
-    let cyan_plastic = Rc::new(material::plastic(Color::new(0f64, 0.7f64, 0.7f64)));
-    let yellow_plastic = Rc::new(material::plastic(Color::new(0.7f64, 0.7f64, 0f64)));
-    let mirror = Rc::new(material::mirror());
+    let cyan_plastic = Rc::new(material::PhongMaterial::plastic(Color::new(0f64, 0.7f64, 0.7f64)));
+    let yellow_plastic = Rc::new(material::PhongMaterial::plastic(Color::new(0.7f64, 0.7f64, 0f64)));
+    let mirror = Rc::new(material::PhongMaterial::mirror());
 
     let scene_objects: Vec<Box<SceneObject>> = vec![
         Box::new(Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, cyan_plastic)),
