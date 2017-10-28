@@ -23,42 +23,18 @@ pub trait Material: Debug {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct PhongMaterial {
-    ambient: Color,
-    diffuse: Color,
-    specular: Color,
-    specular_exponent: f64,
-    reflectivity: f64,
+pub struct FlatMaterial {
+    pub color: Color,
+    pub specular_exponent: f64,
+    pub reflectivity: f64,
 }
 
-impl PhongMaterial {
-    pub fn plastic<'a>(color: Color) -> PhongMaterial {
-        PhongMaterial {
-            ambient: color * 0.1,
-            diffuse: color,
-            specular: color * 0.5,
-            specular_exponent: 2f64,
-            reflectivity: 0.1,
-        }
-    }
-
-    pub fn mirror<'a>() -> PhongMaterial {
-        PhongMaterial {
-            ambient: Color { r: 0f64, g: 0f64, b: 0f64 },
-            diffuse: Color { r: 0.05f64, g: 0.05f64, b: 0.05f64 },
-            specular: Color { r: 1f64, g: 1f64, b: 1f64 },
-            specular_exponent: 10f64,
-            reflectivity: 0.95,
-        }
-    }
-}
-
-impl Material for PhongMaterial {
+impl Material for FlatMaterial {
     fn get_lighting(&self, _intersection: &Intersection) -> ComputedLighting {
         ComputedLighting {
-            ambient: self.ambient,
-            diffuse: self.diffuse,
-            specular: SpecularLighting(self.specular, self.specular_exponent),
+            ambient: self.color * 0.1f64,
+            diffuse: self.color,
+            specular: SpecularLighting(self.color * 0.5f64, self.specular_exponent),
             reflective: ReflectiveLighting(WHITE, self.reflectivity),
         }
     }
@@ -92,7 +68,7 @@ impl Material for ImageTextureMaterial {
         // TODO: How to do more properly??
         ComputedLighting {
             ambient: color * 0.1f64,
-            diffuse: color * 0.5f64,
+            diffuse: color,
             specular: SpecularLighting(BLACK, 0f64),
             reflective: ReflectiveLighting(color, self.reflectivity),
         }
@@ -118,7 +94,7 @@ impl Material for CheckerboardMaterial {
         // TODO: How to do more properly??
         ComputedLighting {
             ambient: color * 0.1f64,
-            diffuse: color * 0.5f64,
+            diffuse: color,
             specular: SpecularLighting(BLACK, 0f64),
             reflective: ReflectiveLighting(BLACK, 0f64),
         }
