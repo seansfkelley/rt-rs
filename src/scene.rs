@@ -1,5 +1,5 @@
 use objects::*;
-use color::Color;
+use color::{ Color, BLACK };
 
 pub struct Scene {
     objects: Vec<Box<SceneObject>>,
@@ -28,22 +28,28 @@ impl Scene {
         } else {
             match self.cast_ray(ray) {
                 Some(intersection) => {
-                    let visible_lights: Vec<&Light> = self.lights
+                    let lighting = intersection.object.material().get_lighting(&ray, &intersection);
+
+                    let color: Color = self.lights
                         .iter()
                         .filter(|light| {
                             let light_direction = (light.position - intersection.location).as_unit_vector();
                             self.cast_ray(Ray::new(intersection.location, light_direction)).is_none()
                         })
-                        .map(|light| light.as_ref())
-                        .collect();
+                        .fold(BLACK, |color, light| {
+                            let light_direction = (light.position - intersection.location).as_unit_vector();
+                            let diffuse_illumination = lighting.diffuse * light.color * intersection.normal.dot(light_direction).max(0f64);
+                            let specular_illumination = lighting.specular.0 * light.color * intersection.normal.dot((light_direction - ray.direction).as_unit_vector()).max(0f64).powf(lighting.specular.1);
+                            color + diffuse_illumination + specular_illumination
+                        });
 
-                    let material = intersection.object.material();
-                    let color = material.get_color(&ray, &intersection, &visible_lights);
-                    if material.reflectivity() > 0f64 {
+                    let reflectivity = lighting.reflective.1;
+
+                    if reflectivity > 0f64 {
                         let new_origin = ray.at(intersection.distance);
                         let new_direction = ray.direction.reflect(intersection.normal);
                         let new_ray = Ray::new(new_origin, new_direction);
-                        color * (1f64 - material.reflectivity()) + self.raytrace_depth_limited(new_ray, depth + 1) * material.reflectivity()
+                        color * (1f64 - reflectivity) + self.raytrace_depth_limited(new_ray, depth + 1) * reflectivity
                     } else {
                         color
                     }

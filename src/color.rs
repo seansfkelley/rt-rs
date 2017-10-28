@@ -1,4 +1,4 @@
-use std::ops::{ Add, Sub, Div, Mul };
+use std::ops::{ Add, Sub, Div, Mul, AddAssign, SubAssign, DivAssign, MulAssign };
 use util::Clamp;
 
 #[derive(Debug, Copy, Clone)]
@@ -9,6 +9,7 @@ pub struct Color {
 }
 
 pub const BLACK: Color = Color { r: 0f64, g: 0f64, b: 0f64 };
+pub const WHITE: Color = Color { r: 1f64, g: 1f64, b: 1f64 };
 
 impl Color {
     pub fn new(r: f64, g: f64, b: f64) -> Color {
@@ -45,6 +46,14 @@ impl Add for Color {
     }
 }
 
+impl AddAssign for Color {
+    fn add_assign(&mut self, other: Color) {
+        self.r += other.r;
+        self.g += other.g;
+        self.b += other.b;
+    }
+}
+
 impl Sub for Color {
     type Output = Color;
 
@@ -54,6 +63,14 @@ impl Sub for Color {
             g: self.g - other.g,
             b: self.b - other.b,
         }
+    }
+}
+
+impl SubAssign for Color {
+    fn sub_assign(&mut self, other: Color) {
+        self.r -= other.r;
+        self.g -= other.g;
+        self.b -= other.b;
     }
 }
 
@@ -69,6 +86,14 @@ impl Div<f64> for Color {
     }
 }
 
+impl DivAssign for Color {
+    fn div_assign(&mut self, other: Color) {
+        self.r /= other.r;
+        self.g /= other.g;
+        self.b /= other.b;
+    }
+}
+
 impl Mul<f64> for Color {
     type Output = Color;
 
@@ -81,7 +106,15 @@ impl Mul<f64> for Color {
     }
 }
 
-impl Mul<Color> for Color {
+impl MulAssign<f64> for Color {
+    fn mul_assign(&mut self, multiplicand: f64) {
+        self.r *= multiplicand;
+        self.g *= multiplicand;
+        self.b *= multiplicand;
+    }
+}
+
+impl Mul for Color {
     type Output = Color;
 
     fn mul(self, other: Color) -> Color {
@@ -90,5 +123,13 @@ impl Mul<Color> for Color {
             g: self.g * other.g,
             b: self.b * other.b,
         }
+    }
+}
+
+impl MulAssign for Color {
+    fn mul_assign(&mut self, other: Color) {
+        self.r *= other.r;
+        self.g *= other.g;
+        self.b *= other.b;
     }
 }

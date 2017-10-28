@@ -1,13 +1,25 @@
 use objects::*;
-use color::{ Color, BLACK };
+use color::{ Color, BLACK, WHITE };
 use std::path::Path;
 use std::fmt::Debug;
 use image;
 use image::{ RgbImage, Pixel };
 
+type SpecularExponent = f64;
+pub struct SpecularLighting(pub Color, pub SpecularExponent);
+
+type Reflectivity = f64;
+pub struct ReflectiveLighting(pub Color, pub Reflectivity);
+
+pub struct ComputedLighting {
+    pub ambient: Color,
+    pub diffuse: Color,
+    pub specular: SpecularLighting,
+    pub reflective: ReflectiveLighting,
+}
+
 pub trait Material: Debug {
-    fn reflectivity(&self) -> f64;
-    fn get_color(&self, ray: &Ray, intersection: &Intersection, lights: &Vec<&Light>) -> Color;
+    fn get_lighting(&self, ray: &Ray, intersection: &Intersection) -> ComputedLighting;
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -42,17 +54,13 @@ impl PhongMaterial {
 }
 
 impl Material for PhongMaterial {
-    fn reflectivity(&self) -> f64 { self.reflectivity }
-
-    fn get_color(&self, ray: &Ray, intersection: &Intersection, lights: &Vec<&Light>) -> Color {
-        let mut color = self.ambient;
-        for light in lights {
-            let light_direction = (light.position - intersection.location).as_unit_vector();
-            let diffuse_illumination = self.diffuse * light.color * intersection.normal.dot(light_direction).max(0f64);
-            let specular_illumination = self.specular * light.color * intersection.normal.dot((light_direction - ray.direction).as_unit_vector()).max(0f64).powf(self.specular_exponent);
-            color = color + diffuse_illumination + specular_illumination;
+    fn get_lighting(&self, ray: &Ray, intersection: &Intersection) -> ComputedLighting {
+        ComputedLighting {
+            ambient: self.ambient,
+            diffuse: self.diffuse,
+            specular: SpecularLighting(self.specular, self.specular_exponent),
+            reflective: ReflectiveLighting(WHITE, self.reflectivity),
         }
-        color
     }
 }
 
@@ -75,29 +83,18 @@ impl ImageTextureMaterial {
 }
 
 impl Material for ImageTextureMaterial {
-    fn reflectivity(&self) -> f64 { self.reflectivity }
-
-    fn get_color(&self, _ray: &Ray, intersection: &Intersection, _lights: &Vec<&Light>) -> Color {
+    fn get_lighting(&self, _ray: &Ray, intersection: &Intersection) -> ComputedLighting {
         let (width, height) = self.image.dimensions();
         let pixel = self.image.get_pixel((width as f64 * intersection.uv.0) as u32, (height as f64 * intersection.uv.1) as u32);
         let rgb = pixel.channels();
-        Color::new(rgb[0] as f64 / 255f64, rgb[1] as f64 / 255f64, rgb[2] as f64 / 255f64)
-    }
-}
+        let color = Color::new(rgb[0] as f64 / 255f64, rgb[1] as f64 / 255f64, rgb[2] as f64 / 255f64);
 
-#[derive(Debug)]
-pub struct UnionMaterial {
-    materials: Vec<(Box<Material>, f64)>,
-}
-
-impl Material for UnionMaterial {
-    fn reflectivity(&self) -> f64 { 0f64 }
-
-    fn get_color(&self, ray: &Ray, intersection: &Intersection, lights: &Vec<&Light>) -> Color {
-        let mut color = BLACK;
-        for &(ref material, blending_factor) in &self.materials {
-            color = color + material.get_color(ray, intersection, lights) * blending_factor;
+        // TODO: How to do more properly??
+        ComputedLighting {
+            ambient: color * 0.1f64,
+            diffuse: color * 0.5f64,
+            specular: SpecularLighting(BLACK, 0f64),
+            reflective: ReflectiveLighting(color, self.reflectivity),
         }
-        color
     }
 }
