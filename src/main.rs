@@ -53,7 +53,7 @@ fn main() {
         Box::new(Light::new(Vec3::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
     ];
 
-    let scene = Scene::new(scene_objects, scene_lights, Color::new(0f64, 0f64, 0f64), 3);
+    let scene = Scene::new(scene_objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 3);
 
     let mut rng = rand::thread_rng();
     let mut img = RgbImage::new(width, height);
