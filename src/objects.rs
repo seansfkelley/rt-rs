@@ -105,30 +105,27 @@ impl SceneObject for Sphere {
     fn material(&self) -> Rc<Material> { Rc::clone(&self.material) }
 }
 
-impl<'a> Sub<&'a SceneObject> for SceneObject {
-    type Output = SceneObject;
+pub struct SubtractedSceneObject<'a> {
+    lhs: &'a (SceneObject + 'a),
+    rhs: &'a (SceneObject + 'a),
+}
 
-    // Couldn't get impl trait working :(
-    fn sub(&self, rhs: &SceneObject) -> SceneObject {
-        struct Anon<'b> {
-            lhs: &'b (SceneObject + 'b),
-            rhs: &'b (SceneObject + 'b),
-        }
-
-        impl<'b> SceneObject for Anon<'b> {
-            fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-                self.lhs.intersect(ray)
-                    .map(|self_intersection| match self.rhs.intersect(ray) {
-                        Some(_) => None(),
-                        None => self_intersection
-                    })
-            }
-
-            fn material(&self) -> Rc<Material> {
-                self.lhs.material()
-            }
-        }
-
-        Anon { lhs: self, rhs }
+impl<'a> SceneObject for SubtractedSceneObject<'a> {
+    fn intersect(&self, ray: &Ray) -> Option<Intersection> {
+        self.lhs.intersect(ray)
+            .and_then(|self_intersection| {
+                match self.rhs.intersect(ray) {
+                    Some(_) => None,
+                    None => Some(self_intersection)
+                }
+            })
     }
+
+    fn material(&self) -> Rc<Material> {
+        self.lhs.material()
+    }
+}
+
+pub fn subtractSceneObjects<'a>(lhs: &'a SceneObject, rhs: &'a SceneObject) -> SubtractedSceneObject<'a> {
+    SubtractedSceneObject { lhs, rhs }
 }
