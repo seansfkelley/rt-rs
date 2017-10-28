@@ -1,4 +1,4 @@
-- texture (image, procedural) - K
+- procedural textures - K
 - procedural shapes - K
 - 3D FRACTALS - K
 - BRDF
@@ -15,3 +15,4 @@
 - interactivity
 - scene import
 - displacement mapping
+- transform matrices (for rotating/translating/scaling scene objects)
