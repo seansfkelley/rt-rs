@@ -22,13 +22,13 @@ impl Scene {
         self.raytrace_depth_limited(ray, 0)
     }
 
-    pub fn raytrace_depth_limited(&self, ray: Ray, depth: u32) -> Color {
+    fn raytrace_depth_limited(&self, ray: Ray, depth: u32) -> Color {
         if depth > self.depth_limit {
             self.background_color
         } else {
             match self.cast_ray(ray) {
                 Some(intersection) => {
-                    let lighting = intersection.object.material().get_lighting(&ray, &intersection);
+                    let lighting = intersection.object.material().get_lighting(&intersection);
 
                     let mut color: Color = self.lights
                         .iter()

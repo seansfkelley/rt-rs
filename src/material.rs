@@ -19,7 +19,7 @@ pub struct ComputedLighting {
 }
 
 pub trait Material: Debug {
-    fn get_lighting(&self, ray: &Ray, intersection: &Intersection) -> ComputedLighting;
+    fn get_lighting(&self, intersection: &Intersection) -> ComputedLighting;
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -54,7 +54,7 @@ impl PhongMaterial {
 }
 
 impl Material for PhongMaterial {
-    fn get_lighting(&self, ray: &Ray, intersection: &Intersection) -> ComputedLighting {
+    fn get_lighting(&self, _intersection: &Intersection) -> ComputedLighting {
         ComputedLighting {
             ambient: self.ambient,
             diffuse: self.diffuse,
@@ -83,7 +83,7 @@ impl ImageTextureMaterial {
 }
 
 impl Material for ImageTextureMaterial {
-    fn get_lighting(&self, _ray: &Ray, intersection: &Intersection) -> ComputedLighting {
+    fn get_lighting(&self, intersection: &Intersection) -> ComputedLighting {
         let (width, height) = self.image.dimensions();
         let pixel = self.image.get_pixel((width as f64 * intersection.uv.0) as u32, (height as f64 * intersection.uv.1) as u32);
         let rgb = pixel.channels();
@@ -95,6 +95,32 @@ impl Material for ImageTextureMaterial {
             diffuse: color * 0.5f64,
             specular: SpecularLighting(BLACK, 0f64),
             reflective: ReflectiveLighting(color, self.reflectivity),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CheckerboardMaterial {
+    pub checks_per_unit: u32,
+    pub color_a: Color,
+    pub color_b: Color,
+}
+
+impl Material for CheckerboardMaterial {
+    fn get_lighting(&self, intersection: &Intersection) -> ComputedLighting {
+        let check_size = 1f64 / self.checks_per_unit as f64;
+        let color =
+            if (intersection.uv.0 / check_size) as u32 % 2 == (intersection.uv.1 / check_size) as u32 % 2 {
+                self.color_a
+            } else {
+                self.color_b
+            };
+        // TODO: How to do more properly??
+        ComputedLighting {
+            ambient: color * 0.1f64,
+            diffuse: color * 0.5f64,
+            specular: SpecularLighting(BLACK, 0f64),
+            reflective: ReflectiveLighting(BLACK, 0f64),
         }
     }
 }

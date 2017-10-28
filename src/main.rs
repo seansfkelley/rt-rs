@@ -10,7 +10,7 @@ mod util;
 
 use objects::*;
 use rand::Rng;
-use color::Color;
+use color::{ Color, BLACK, WHITE };
 use vector::Vec3;
 use scene::Scene;
 use image::{RgbImage, Rgb, Pixel};
@@ -39,13 +39,14 @@ fn main() {
     let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
     let cyan_plastic = Rc::new(material::PhongMaterial::plastic(Color::new(0f64, 0.7f64, 0.7f64)));
+    let bw_checkerboard = Rc::new(material::CheckerboardMaterial { checks_per_unit: 32, color_a: BLACK, color_b: WHITE });
     let yellow_plastic = Rc::new(material::PhongMaterial::plastic(Color::new(0.7f64, 0.7f64, 0f64)));
     let mirror = Rc::new(material::PhongMaterial::mirror());
 
     let scene_objects: Vec<Box<SceneObject>> = vec![
         Box::new(Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, cyan_plastic)),
         Box::new(Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, yellow_plastic)),
-        Box::new(Sphere::new(Vec3::new(-5f64, 4f64, 0f64), 3f64, mirror)),
+        Box::new(Sphere::new(Vec3::new(-5f64, 4f64, 0f64), 3f64, bw_checkerboard)),
     ];
 
     let scene_lights: Vec<Box<Light>> = vec![
