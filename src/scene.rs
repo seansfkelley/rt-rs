@@ -30,7 +30,7 @@ impl Scene {
                 Some(intersection) => {
                     let lighting = intersection.object.material().get_lighting(&ray, &intersection);
 
-                    let color: Color = self.lights
+                    let mut color: Color = self.lights
                         .iter()
                         .filter(|light| {
                             let light_direction = (light.position - intersection.location).as_unit_vector();
@@ -49,10 +49,10 @@ impl Scene {
                         let new_origin = ray.at(intersection.distance);
                         let new_direction = ray.direction.reflect(intersection.normal);
                         let new_ray = Ray::new(new_origin, new_direction);
-                        color * (1f64 - reflectivity) + self.raytrace_depth_limited(new_ray, depth + 1) * reflectivity
-                    } else {
-                        color
+                        color = (1f64 - reflectivity) * color + reflectivity * self.raytrace_depth_limited(new_ray, depth + 1)
                     }
+
+                    color
                 },
                 None => { self.background_color }
             }

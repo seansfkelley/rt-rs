@@ -106,6 +106,14 @@ impl Mul<f64> for Color {
     }
 }
 
+impl Mul<Color> for f64 {
+    type Output = Color;
+
+    fn mul(self, other: Color) -> Color {
+        other * self
+    }
+}
+
 impl MulAssign<f64> for Color {
     fn mul_assign(&mut self, multiplicand: f64) {
         self.r *= multiplicand;
