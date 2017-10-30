@@ -27,14 +27,16 @@ impl Scene {
             self.background_color
         } else {
             match self.cast_ray(ray) {
-                Some(intersection) => {
-                    let lighting = intersection.object.material().get_lighting(&intersection);
+                Some(hit) => {
+                    let intersection = hit.enter.as_ref().unwrap();
+                    let lighting = hit.object.material().get_lighting(&intersection);
 
                     let mut color: Color = self.lights
                         .iter()
                         .filter(|light| {
                             let light_direction = (light.position - intersection.location).as_unit_vector();
-                            self.cast_ray(Ray::new(intersection.location, light_direction)).is_none()
+                            let adjusted_location = intersection.location + (intersection.normal * 1e-9);
+                            self.cast_ray(Ray::new(adjusted_location, light_direction)).is_none()
                         })
                         .fold(BLACK, |color, light| {
                             let light_direction = (light.position - intersection.location).as_unit_vector();
@@ -59,18 +61,18 @@ impl Scene {
         }
     }
 
-    fn cast_ray(&self, ray: Ray) -> Option<Intersection> {
-        let mut closest: Option<Intersection> = Option::None;
+    fn cast_ray(&self, ray: Ray) -> Option<Hit> {
+        let mut closest: Option<Hit> = Option::None;
 
         for o in &self.objects {
             match o.intersect(&ray) {
-                Some(intersection) => {
-                    if closest.is_some() {
-                        if intersection.distance < closest.as_ref().unwrap().distance {
-                            closest = Some(intersection);
+                Some(hit) => {
+                    if closest.is_some() && hit.enter.is_some() {
+                        if hit.enter.as_ref().unwrap().distance < closest.as_ref().unwrap().enter.as_ref().unwrap().distance {
+                            closest = Some(hit);
                         }
                     } else {
-                        closest = Some(intersection);
+                        closest = Some(hit);
                     }
                 },
                 None => {}

@@ -42,14 +42,15 @@ fn main() {
     let bw_checkerboard = Rc::new(material::CheckerboardMaterial { checks_per_unit: 32, color_a: BLACK, color_b: WHITE });
     let mirror = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });
 
-    let yellow_sphere = Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, yellow_plastic);
-    let bite = Sphere::new(Vec3::new(5f64, 5f64, 2f64), 5f64, Rc::new(material::mirror()));
+    let yellow_matte = Rc::new(material::FlatMaterial { color: Color::new(0.7f64, 0.7f64, 0f64), specular_exponent: 0f64, reflectivity: 0f64 });
+    let yellow_sphere = Rc::new(Sphere::new(Vec3::new(4f64, -4f64, 0f64), 3f64, yellow_matte.clone()));
+    let bite = Rc::new(Sphere::new(Vec3::new(3f64, -3.5f64, 0.5f64), 3f64, yellow_matte));
 
     let scene_objects: Vec<Box<SceneObject>> = vec![
-        Box::new(Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, cyan_plastic)),
-        Box::new(Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, mirror)),
-        Box::new(Sphere::new(Vec3::new(-5f64, 4f64, 0f64), 3f64, bw_checkerboard)),
-        Box::new(subtractSceneObjects(&yellow_sphere, &bite)),
+//        Box::new(Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, cyan_plastic)),
+//        Box::new(Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, mirror)),
+//        Box::new(Sphere::new(Vec3::new(-5f64, 4f64, 0f64), 3f64, bw_checkerboard)),
+        Box::new(subtract_scene_objects(yellow_sphere, bite)),
     ];
 
     let scene_lights: Vec<Box<Light>> = vec![
@@ -57,7 +58,7 @@ fn main() {
         Box::new(Light::new(Vec3::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
     ];
 
-    let scene = Scene::new(scene_objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 3);
+    let scene = Scene::new(scene_objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 0);
 
     let mut rng = rand::thread_rng();
     let mut img = RgbImage::new(width, height);
