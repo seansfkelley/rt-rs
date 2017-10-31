@@ -47,9 +47,9 @@ fn main() {
     let bite = Rc::new(Sphere::new(Vec3::new(3f64, -3.5f64, 0.5f64), 3f64, yellow_matte));
 
     let scene_objects: Vec<Box<SceneObject>> = vec![
-//        Box::new(Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, cyan_plastic)),
-//        Box::new(Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, mirror)),
-//        Box::new(Sphere::new(Vec3::new(-5f64, 4f64, 0f64), 3f64, bw_checkerboard)),
+        Box::new(Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, cyan_plastic)),
+        Box::new(Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, mirror)),
+        Box::new(Sphere::new(Vec3::new(-5f64, 4f64, 0f64), 3f64, bw_checkerboard)),
         Box::new(subtract_scene_objects(yellow_sphere, bite)),
     ];
 

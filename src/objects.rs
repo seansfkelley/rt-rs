@@ -4,7 +4,6 @@ use material::Material;
 use util::Clamp;
 use std::f64::consts::PI;
 use std::rc::Rc;
-use std::ops::{Sub};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
@@ -143,6 +142,7 @@ impl SceneObject for SubtractedSceneObject {
                         let rhs_exit = rhs_hit.exit.distance;
                         if lhs_enter < rhs_enter || lhs_enter > rhs_exit {
                             // Oh god
+                            // TODO: borrow
                             // lhs_hit_option
                             self.lhs.intersect(ray)
                         } else {
@@ -165,6 +165,7 @@ impl SceneObject for SubtractedSceneObject {
                         }
                     },
                     // Oh god
+                    // TODO: borrow
                     // lhs_hit_option
                     None => self.lhs.intersect(ray),
                 }
