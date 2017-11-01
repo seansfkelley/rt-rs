@@ -48,7 +48,6 @@ pub struct Hit<'a> {
 }
 
 pub trait SceneObject {
-    // All intersections in order
     fn intersect(&self, ray: &Ray) -> Option<Hit>;
     fn material(&self) -> Rc<Material>;
 }
