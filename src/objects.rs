@@ -45,6 +45,18 @@ pub struct Hit<'a> {
     pub enter: Option<Intersection>,
     pub exit: Intersection,
     pub object: &'a (SceneObject + 'a),
+    pub debug: bool,
+}
+
+impl<'a> Hit<'a> {
+    pub fn debug(self, debug: bool) -> Hit<'a> {
+        Hit {
+            enter: self.enter,
+            exit: self.exit,
+            object: self.object,
+            debug,
+        }
+    }
 }
 
 pub trait SceneObject {
@@ -90,7 +102,7 @@ impl SceneObject for Sphere {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
         let l = self.center - ray.origin;
         let t_center = l.dot(ray.direction);
-        if t_center <= 0f64 {
+        if t_center + self.radius <= 0f64 {
             None
         } else {
             let d_sq = l.magnitude2() - t_center * t_center;
@@ -101,17 +113,20 @@ impl SceneObject for Sphere {
                 let t_distance = (r_sq - d_sq).sqrt();
                 let t0 = t_center - t_distance;
                 let t1 = t_center + t_distance;
+                let exit = self.get_intersection(t1, ray);
                 if t0 <= 0f64 {
                     Some(Hit {
                         enter: None,
-                        exit: self.get_intersection(t1, ray),
-                        object: self
+                        exit,
+                        object: self,
+                        debug: false,
                     })
                 } else {
                     Some(Hit {
                         enter: Some(self.get_intersection(t0, ray)),
-                        exit: self.get_intersection(t1, ray),
-                        object: self
+                        exit,
+                        object: self,
+                        debug: false,
                     })
                 }
             }
@@ -154,6 +169,7 @@ impl SceneObject for SubtractedSceneObject {
                                     }),
                                     exit: lhs_hit.exit,
                                     object: lhs_hit.object,
+                                    debug: false,
                                 })
                             } else {
                                 None
