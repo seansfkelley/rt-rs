@@ -1,8 +1,11 @@
 [package]
 name = "rt-rs"
 version = "0.1.0"
-authors = ["Sean Kelley <seansfkelley@gmail.com>"]
+authors = ["Sean Kelley <seansfkelley@gmail.com>", "Kevin Verdieck <kevinverdieck@gmail.com>"]
 
 [dependencies]
 image = "0.17.0"
 rand = "0.3.17"
+
+[dev-dependencies]
+stainless = "0.1.12"

@@ -5,5 +5,5 @@ Raytracer written in Rust.
 Debug running:
 
 ```
-./run.sh
+./scripts/run.sh
 ```

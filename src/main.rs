@@ -1,3 +1,6 @@
+#![feature(plugin)]
+#![cfg_attr(test, plugin(stainless))]
+
 extern crate image;
 extern crate rand;
 
@@ -7,6 +10,8 @@ mod color;
 mod scene;
 mod material;
 mod util;
+mod test;
+mod transform;
 
 use objects::*;
 use rand::Rng;
