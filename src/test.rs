@@ -12,6 +12,15 @@ const TEST_MATRIX: Mat4 = Mat4 {
     ],
 };
 
+const INVERTIBLE_TEST_MATRIX: Mat4 = Mat4 {
+    cells: [
+        [2f64, 4f64, 8f64, 16f64],
+        [3f64, 9f64, 27f64, 81f64],
+        [4f64, 16f64, 64f64, 256f64],
+        [5f64, 25f64, 125f64, 625f64],
+    ],
+};
+
 const TEST_VECTOR: Vec3 = Vec3 { x: 1f64, y: 2f64, z: 3f64 };
 
 describe! mat4 {
@@ -39,6 +48,28 @@ describe! mat4 {
 
         it "should identity multiply" {
             assert_eq!(IDENTITY * TEST_VECTOR, TEST_VECTOR);
+        }
+    }
+
+    describe! inverse {
+        it "should be empty for undefined inversions" {
+            assert_eq!(TEST_MATRIX.invert(), None);
+        }
+
+        it "should be identity for identity" {
+            assert_eq!(IDENTITY.invert(), Some(IDENTITY));
+        }
+
+        it "should invert" {
+            let expected: Mat4 = Mat4 {
+                cells: [
+                    [5f64, (-20f64 / 3f64), (15f64 / 4f64), (-4f64 / 5f64)],
+                    [(-47f64 / 12f64), (19f64/3f64), (-31f64 / 8f64), (13f64/15f64)],
+                    [1f64, (-11f64/6f64), (5f64/4f64), (-3f64/10f64)],
+                    [(-1f64/12f64), (1f64/6f64), (-1f64/8f64), (1f64/30f64)],
+                ],
+            };
+            assert_eq!(INVERTIBLE_TEST_MATRIX.invert(), Some(expected));
         }
     }
 }
