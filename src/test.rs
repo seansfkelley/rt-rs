@@ -1,10 +1,10 @@
 #![cfg(test)]
 
-use transform::{Mat4, IDENTITY};
+use transform::{Mat4, IDENTITY, X_AXIS, Y_AXIS};
 use vector::Vec3;
 use std::f64::consts::PI;
 
-static TEST_MATRIX: Mat4 = Mat4 {
+const TEST_MATRIX: Mat4 = Mat4 {
     cells: [
         [1f64, 2f64, 3f64, 4f64],
         [5f64, 6f64, 7f64, 8f64],
@@ -13,7 +13,7 @@ static TEST_MATRIX: Mat4 = Mat4 {
     ],
 };
 
-static INVERTIBLE_TEST_MATRIX: Mat4 = Mat4 {
+const INVERTIBLE_TEST_MATRIX: Mat4 = Mat4 {
     cells: [
         [2f64, 4f64, 8f64, 16f64],
         [3f64, 9f64, 27f64, 81f64],
@@ -22,9 +22,7 @@ static INVERTIBLE_TEST_MATRIX: Mat4 = Mat4 {
     ],
 };
 
-static X_AXIS: Vec3 = Vec3 { x: 1f64, y: 0f64, z: 0f64 };
-static Y_AXIS: Vec3 = Vec3 { x: 0f64, y: 1f64, z: 0f64 };
-static TEST_VECTOR: Vec3 = Vec3 { x: 1f64, y: 2f64, z: 3f64 };
+const TEST_VECTOR: Vec3 = Vec3 { x: 1f64, y: 2f64, z: 3f64 };
 
 describe! mat4 {
     it "should start with zeroes" {
@@ -83,6 +81,11 @@ describe! mat4 {
             assert_eq!(Mat4::create_rotation(PI, &X_AXIS) * TEST_VECTOR, expected);
         }
 
+        it "should rotate around x-axis at different angles" {
+            let expected = Vec3 { x: 4f64, y: -6.392304845413263f64, z: 12.92820323027551f64 };
+            assert_eq!(Mat4::create_rotation(PI / 3f64, &X_AXIS) * (TEST_VECTOR * 4f64), expected);
+        }
+
         it "should rotate around y-axis" {
             let transform = Mat4::create_rotation(PI, &Y_AXIS);
             let start = Vec3 { x: 1f64, y: -2f64, z: -3f64 };
@@ -93,6 +96,50 @@ describe! mat4 {
         it "should compose rotations" {
             let transform = Mat4::create_rotation(PI, &X_AXIS).rotate(PI, &Y_AXIS);
             let expected = Vec3 { x: -0.9999999999999997f64, y: -1.9999999999999996f64, z: 3.0000000000000004f64 };
+            assert_eq!(transform * TEST_VECTOR, expected);
+        }
+
+        it "should be reversed by inverse" {
+            let transform = Mat4::create_rotation(PI, &X_AXIS).rotate(PI, &Y_AXIS);
+            let inverse = transform.invert().unwrap();
+            assert_eq!(inverse * (transform * TEST_VECTOR), TEST_VECTOR);
+        }
+    }
+
+    describe! translation {
+        it "should translate" {
+            let expected = Vec3 { x: 2f64, y: 2f64, z: 3f64 };
+            assert_eq!(Mat4::create_translation(&X_AXIS) * TEST_VECTOR, expected);
+        }
+
+        it "should compose translations" {
+            let expected = Vec3 { x: 3f64, y: 4f64, z: 6f64 };
+            let transform = Mat4::create_translation(&X_AXIS)
+                .translate(&TEST_VECTOR);
+            assert_eq!(transform * TEST_VECTOR, expected);
+        }
+    }
+
+    describe! scale {
+        it "should scale" {
+            let expected = Vec3 { x: 1f64, y: 0f64, z: 0f64 };
+            assert_eq!(Mat4::create_scale(&X_AXIS) * TEST_VECTOR, expected);
+        }
+
+        it "should compose scales" {
+            let expected = Vec3 { x: 2f64, y: 0.5f64, z: 0f64 };
+            let transform = Mat4::create_scale(&Vec3 { x: 2f64, y: 0.5f64, z: 1f64 })
+                .scale(&Vec3 { x: 1f64, y: 0.5f64, z: 0f64 });
+            assert_eq!(transform * TEST_VECTOR, expected);
+        }
+    }
+
+    describe! composition {
+        it "should compose" {
+            let expected = Vec3 { x: 10f64, y: -6.000000000000002f64, z: -6.999999999999999f64 };
+            let transform = Mat4::create_scale(&Vec3 { x: 2f64, y: 1f64, z: 1f64 })
+                .rotate(PI, &X_AXIS)
+                .translate(&Vec3 { x: 4f64, y: 4f64, z: 4f64 });
             assert_eq!(transform * TEST_VECTOR, expected);
         }
     }
