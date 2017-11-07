@@ -1,0 +1,6 @@
+machine:
+  services:
+    - docker
+test:
+  override:
+    - docker run -it --rm -v $(pwd):/source -w /source scorpil/rust:1.21 cargo test
