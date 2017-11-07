@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-RUST_BACKTRACE=1 cargo +nightly test --verbose
+RUST_BACKTRACE=full cargo +nightly test --verbose

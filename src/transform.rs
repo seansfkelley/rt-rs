@@ -3,10 +3,11 @@ use vector::Vec3;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Mat4 {
+    // Row-major
     pub cells: [[f64; 4]; 4],
 }
 
-pub const IDENTITY: Mat4 = Mat4 {
+pub static IDENTITY: Mat4 = Mat4 {
     cells: [
         [1f64, 0f64, 0f64, 0f64],
         [0f64, 1f64, 0f64, 0f64],
@@ -20,9 +21,54 @@ impl Mat4 {
         Mat4 { cells: [[0f64; 4]; 4] }
     }
 
-    //    pub fn rotate(&self, theta: f64) -> Mat4 {
-    //
-    //    }
+    pub fn create_translation(translation: &Vec3) -> Mat4 {
+        let mut cells = IDENTITY.cells;
+        cells[0][3] = translation.x;
+        cells[1][3] = translation.y;
+        cells[2][3] = translation.z;
+        Mat4 { cells }
+    }
+
+    pub fn create_scale(scale: &Vec3) -> Mat4 {
+        let mut cells = [[0f64; 4]; 4];
+        cells[0][0] = scale.x;
+        cells[1][1] = scale.y;
+        cells[2][2] = scale.z;
+        cells[3][3] = 1f64;
+        Mat4 { cells }
+    }
+
+    pub fn create_rotation(theta: f64, axis: &Vec3) -> Mat4 {
+        axis.assert_normalized();
+        let mut cells = [[0f64; 4]; 4];
+        let cos_theta = theta.cos();
+        let sin_theta = theta.sin();
+        let one_minus_cos_theta = 1f64 - cos_theta;
+        let one_minus_sin_theta = 1f64 - sin_theta;
+        cells[0][0] = cos_theta + axis.x * axis.x * one_minus_cos_theta;
+        cells[0][1] = axis.x * axis.y * one_minus_cos_theta - axis.z * sin_theta;
+        cells[0][2] = axis.x * axis.z * one_minus_cos_theta + axis.y * sin_theta;
+        cells[1][0] = axis.y * axis.x * one_minus_cos_theta + axis.z * sin_theta;
+        cells[1][1] = cos_theta + axis.y * axis.y * one_minus_cos_theta;
+        cells[1][2] = axis.y * axis.z * one_minus_cos_theta - axis.x * sin_theta;
+        cells[2][0] = axis.z * axis.x * one_minus_cos_theta - axis.y * sin_theta;
+        cells[2][1] = axis.z * axis.y * one_minus_cos_theta + axis.x * sin_theta;
+        cells[2][2] = cos_theta + axis.z * axis.z * one_minus_cos_theta;
+        cells[3][3] = 1f64;
+        Mat4 { cells }
+    }
+
+    pub fn translate(&self, translation: &Vec3) -> Mat4 {
+        *self * Mat4::create_translation(translation)
+    }
+
+    pub fn scale(&self, scale: &Vec3) -> Mat4 {
+        *self * Mat4::create_scale(scale)
+    }
+
+    pub fn rotate(&self, theta: f64, axis: &Vec3) -> Mat4 {
+        *self * Mat4::create_rotation(theta, axis)
+    }
 
     pub fn get_cell(&self, x: usize, y: usize) -> f64 {
         self.cells[y][x]

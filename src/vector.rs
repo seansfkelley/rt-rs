@@ -12,8 +12,8 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
-    fn assert_normalized(&self) {
-        assert!((self.magnitude() - 1f64).abs() < 1e-10);
+    pub fn assert_normalized(&self) {
+        debug_assert!((self.magnitude() - 1f64).abs() < 1e-10);
     }
 
     pub fn cross(&self, other: Vec3) -> Vec3 {
