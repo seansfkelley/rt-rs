@@ -12,6 +12,10 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
+    pub fn uniform(value: f64) -> Vec3 {
+        Vec3 { x: value, y: value, z: value }
+    }
+
     pub fn assert_normalized(&self) {
         debug_assert!((self.magnitude() - 1f64).abs() < 1e-10);
     }

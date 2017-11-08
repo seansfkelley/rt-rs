@@ -25,7 +25,7 @@ impl Mat4 {
         Mat4 { cells: [[0f64; 4]; 4] }
     }
 
-    pub fn create_translation(translation: &Vec3) -> Mat4 {
+    pub fn create_translation(translation: Vec3) -> Mat4 {
         let mut cells = IDENTITY.cells;
         cells[0][3] = translation.x;
         cells[1][3] = translation.y;
@@ -33,7 +33,7 @@ impl Mat4 {
         Mat4 { cells }
     }
 
-    pub fn create_scale(scale: &Vec3) -> Mat4 {
+    pub fn create_scale(scale: Vec3) -> Mat4 {
         let mut cells = [[0f64; 4]; 4];
         cells[0][0] = scale.x;
         cells[1][1] = scale.y;
@@ -42,7 +42,7 @@ impl Mat4 {
         Mat4 { cells }
     }
 
-    pub fn create_rotation(theta: f64, axis: &Vec3) -> Mat4 {
+    pub fn create_rotation(theta: f64, axis: Vec3) -> Mat4 {
         axis.assert_normalized();
         let mut cells = [[0f64; 4]; 4];
         let cos_theta = theta.cos();
@@ -66,15 +66,15 @@ impl Mat4 {
         Mat4 { cells }
     }
 
-    pub fn translate(&self, translation: &Vec3) -> Mat4 {
+    pub fn translate(&self, translation: Vec3) -> Mat4 {
         *self * Mat4::create_translation(translation)
     }
 
-    pub fn scale(&self, scale: &Vec3) -> Mat4 {
+    pub fn scale(&self, scale: Vec3) -> Mat4 {
         *self * Mat4::create_scale(scale)
     }
 
-    pub fn rotate(&self, theta: f64, axis: &Vec3) -> Mat4 {
+    pub fn rotate(&self, theta: f64, axis: Vec3) -> Mat4 {
         *self * Mat4::create_rotation(theta, axis)
     }
 

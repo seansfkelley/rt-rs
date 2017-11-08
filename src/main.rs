@@ -22,6 +22,8 @@ use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
 use std::rc::Rc;
+use transform::Mat4;
+use objects::sphere::Sphere;
 
 fn main() {
     let camera_position = Vec3::new(0f64, 0f64, 25f64);
@@ -48,13 +50,15 @@ fn main() {
     let mirror = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });
 
     let yellow_matte = Rc::new(material::FlatMaterial { color: Color::new(0.7f64, 0.7f64, 0f64), specular_exponent: 0f64, reflectivity: 0f64 });
-    let yellow_sphere = Rc::new(Sphere::new(Vec3::new(4f64, -4f64, 0f64), 3f64, yellow_matte.clone()));
-    let bite = Rc::new(Sphere::new(Vec3::new(3f64, -3.5f64, 0.5f64), 3f64, yellow_matte));
+    let yellow_sphere_transform = Mat4::create_scale(Vec3::uniform(3f64)).translate(Vec3::new(4f64, -4f64, 0f64));
+    let yellow_sphere = Rc::new(Sphere::new(yellow_sphere_transform, yellow_matte.clone()));
+    let bite_transform = Mat4::create_scale(Vec3::uniform(3f64)).translate(Vec3::new(3f64, -3.5f64, 0.5f64));
+    let bite = Rc::new(Sphere::new(bite_transform, yellow_matte));
 
     let scene_objects: Vec<Box<SceneObject>> = vec![
-        Box::new(Sphere::new(Vec3::new(-4f64, -4f64, 2f64), 1f64, cyan_plastic)),
-        Box::new(Sphere::new(Vec3::new(4f64, 4f64, 0f64), 5f64, mirror)),
-        Box::new(Sphere::new(Vec3::new(-5f64, 4f64, 0f64), 3f64, bw_checkerboard)),
+        Box::new(Sphere::new(Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64)), cyan_plastic)),
+        Box::new(Sphere::new(Mat4::create_scale(Vec3::uniform(5f64)).translate(Vec3::new(4f64, 4f64, 0f64)), mirror)),
+        Box::new(Sphere::new(Mat4::create_scale(Vec3::uniform(3f64)).translate(Vec3::new(-5f64, 4f64, 0f64)), bw_checkerboard)),
         Box::new(subtract_scene_objects(yellow_sphere, bite)),
     ];
 
