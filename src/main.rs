@@ -103,7 +103,7 @@ fn main() {
                             )
                         };
 
-                    let origin = grid_start + x_step * (x as f64 - x_jitter) + y_step * (y as f64 - y_jitter);
+                    let origin = grid_start + x_step * (x as f64 + x_jitter) + y_step * (y as f64 + y_jitter);
                     let direction = (origin - camera_position).as_unit_vector();
                     let ray = Ray::new(origin, direction);
                     color = color + scene.raytrace(ray);
