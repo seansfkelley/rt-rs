@@ -23,7 +23,6 @@ use std::fs::File;
 use std::path::Path;
 use std::rc::Rc;
 use transform::Mat4;
-use objects::sphere::Sphere;
 
 fn main() {
     let camera_position = Vec3::new(0f64, 0f64, 25f64);
@@ -59,7 +58,7 @@ fn main() {
         Box::new(Sphere::new(1f64, Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64)), &cyan_plastic)),
         Box::new(Sphere::new(5f64, Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64)), &mirror)),
         Box::new(Sphere::new(3f64, Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64)), &bw_checkerboard)),
-        Box::new(subtract_scene_objects(yellow_sphere, bite)),
+        Box::new(Difference::new(yellow_sphere, bite)),
         Box::new(TriangleMesh::new(
             vec![
                 Vec3::new(-3f64, -3f64, 0f64),

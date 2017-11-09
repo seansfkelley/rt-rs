@@ -1,11 +1,7 @@
-use vector::{Vec3, ORIGIN};
-use color::Color;
-use material::Material;
-use util::Clamp;
-use transform::Mat4;
+use super::*;
 use std::f64::consts::PI;
 use std::rc::Rc;
-use super::{Ray, Hit, Intersection, SceneObject};
+use transform::Mat4;
 
 #[derive(Debug)]
 pub struct Sphere {

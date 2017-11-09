@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Div, Mul, Neg};
+use std::ops::Mul;
 use vector::Vec3;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
