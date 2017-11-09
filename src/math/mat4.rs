@@ -79,15 +79,6 @@ impl Mat4 {
         *self * Mat4::create_rotation(theta, axis)
     }
 
-    // TODO: make sure this is real
-    pub fn without_scale(&self) -> Mat4 {
-        let mut cells = self.cells.clone();
-        cells[0][3] = 0f64;
-        cells[1][3] = 0f64;
-        cells[2][3] = 0f64;
-        Mat4 { cells }
-    }
-
     pub fn transpose(&self) -> Mat4 {
         let mut cells = self.cells.clone();
         for x in 0..4 {

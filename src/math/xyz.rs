@@ -201,6 +201,7 @@ xyz_sub!(Point, Point, Vec3);
 xyz_sub!(Point, Vec3, Point);
 xyz_mul!(Point);
 xyz_div!(Point);
+xyz_dot!(Point);
 xyz_convertible!(Point, Vec3, to_vector);
 
 xyz_base!(Normal);

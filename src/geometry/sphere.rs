@@ -8,8 +8,6 @@ use material::Material;
 #[derive(Debug)]
 pub struct Sphere {
     radius: f64,
-    // TODO: Should only have a material and we should create a
-    // `TransformedObject` that is a scene object and a transform
     transform: Transform,
     material: Rc<Material>,
 }
@@ -43,41 +41,61 @@ impl Sphere {
     }
 }
 
+// pbrt pg. 118
+fn quadratic(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
+    let d = b * b - 4f64 * a * c;
+    if d <= 0f64 {
+        None
+    } else {
+        let sqrt_d = d.sqrt();
+        let q = -0.5f64 * (b + (if b < 0f64 { -sqrt_d } else { sqrt_d }));
+        let (t0, t1) = (q / a, c / q);
+        if t0 > t1 {
+            Some((t1, t0))
+        } else {
+            Some((t0, t1))
+        }
+    }
+}
+
 impl SceneObject for Sphere {
-    // TODO: Verify this implementation against pbrt.
     fn intersect(&self, world_ray: &Ray) -> Option<Hit> {
         let object_ray = world_ray.transform(&self.transform);
-        let l = -object_ray.origin.to_vector();
-        let t_center = l.dot(&object_ray.direction);
 
-        if t_center + self.radius <= 0f64 {
-            None
-        } else {
-            let d_sq = l.magnitude2() - t_center * t_center;
-            let r_sq = self.radius * self.radius; // could cache?
-            if d_sq > r_sq {
-                None
-            } else {
-                let t_distance = (r_sq - d_sq).sqrt();
-                let t0 = t_center - t_distance;
-                let t1 = t_center + t_distance;
-                let exit = self.get_intersection(t1, world_ray, &object_ray);
-                if t0 <= 0f64 {
-                    Some(Hit {
-                        enter: None,
-                        exit,
-                        object: self,
-                        debug: false,
-                    })
+        let (a, b, c) = (
+            object_ray.direction.magnitude2(),
+            2f64 * (object_ray.direction.dot(&object_ray.origin)),
+            object_ray.origin.dot(&object_ray.origin) - self.radius * self.radius
+        );
+
+        let exit = match quadratic(a, b, c) {
+            Some((t0, t1)) => {
+                if t1 < 0f64 {
+                    None
+                } else if t0 < 0f64 {
+                    Some(self.get_intersection(t1, world_ray, &object_ray))
                 } else {
-                    Some(Hit {
-                        enter: Some(self.get_intersection(t0, world_ray, &object_ray)),
-                        exit,
-                        object: self,
-                        debug: false,
-                    })
+                    Some(self.get_intersection(t0, world_ray, &object_ray))
                 }
-            }
+            },
+            None => None,
+        };
+
+        match exit {
+            Some(intersection) => {
+                Some(Hit {
+                    enter: Some(intersection),
+                    exit: Intersection {
+                        distance: -100f64,
+                        location: Point::new(0f64, 0f64, 0f64),
+                        normal: Normal::new(0f64, 0f64, 0f64),
+                        uv: (0f64, 0f64),
+                    },
+                    object: self,
+                    debug: false
+                })
+            },
+            None => None,
         }
     }
 
