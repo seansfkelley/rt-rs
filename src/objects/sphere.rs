@@ -1,4 +1,4 @@
-use vector::Vec3;
+use vector::{Vec3, ORIGIN};
 use color::Color;
 use material::Material;
 use util::Clamp;
@@ -53,11 +53,12 @@ impl SceneObject for Sphere {
         let l = -object_ray.origin;
         let t_center = l.dot(object_ray.direction);
 
-        println!("world_ray: {:?}", object_ray);
+        println!("world_ray: {:?}", world_ray);
         println!("inverse_transform: {:?}", self.inverse_transform);
         println!("object_ray: {:?}", object_ray);
         println!("l: {:?}", l);
         println!("t_center: {:?}", t_center);
+        println!("world_space_center: {:?}", self.transform * ORIGIN);
         if t_center + RADIUS <= 0f64 {
             println!("none 1");
             None

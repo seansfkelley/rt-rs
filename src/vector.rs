@@ -7,6 +7,8 @@ pub struct Vec3 {
     pub z: f64,
 }
 
+pub const ORIGIN: Vec3 = Vec3 { x: 0f64, y: 0f64, z: 0f64 };
+
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
         Vec3 { x, y, z }
