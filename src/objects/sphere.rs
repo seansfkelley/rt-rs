@@ -53,6 +53,8 @@ impl SceneObject for Sphere {
         let l = -object_ray.origin;
         let t_center = l.dot(object_ray.direction);
 
+        println!("world_ray: {:?}", object_ray);
+        println!("inverse_transform: {:?}", self.inverse_transform);
         println!("object_ray: {:?}", object_ray);
         println!("l: {:?}", l);
         println!("t_center: {:?}", t_center);
