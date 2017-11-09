@@ -19,13 +19,13 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(radius: f64, transform: Mat4, material: Rc<Material>) -> Sphere {
+    pub fn new(radius: f64, transform: Mat4, material: &Rc<Material>) -> Sphere {
         let inverse_transform = transform.invert().unwrap();
         Sphere {
             radius,
             transform,
             inverse_transform_without_scale: inverse_transform.without_scale(),
-            material,
+            material: Rc::clone(material),
             inverse_transform,
         }
     }

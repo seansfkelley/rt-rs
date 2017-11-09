@@ -176,13 +176,15 @@ describe! ray {
 
 describe! sphere {
     it "should simply intersect" {
-        let sphere = Sphere::new(IDENTITY, Rc::new(YELLOW_MATTE));
+        let yellow_matte: Rc<material::Material> = Rc::new(YELLOW_MATTE);
+        let sphere = Sphere::new(1f64, IDENTITY, &yellow_matte);
         assert!(sphere.intersect(&STRAIGHT_RAY).is_some());
         assert!(sphere.intersect(&OFFSET_RAY).is_none());
     }
 
     it "should intersect translations" {
-        let sphere = Sphere::new(Mat4::create_translation(Vec3::new(5f64, 0f64, 0f64)), Rc::new(YELLOW_MATTE));
+        let yellow_matte: Rc<material::Material> = Rc::new(YELLOW_MATTE);
+        let sphere = Sphere::new(1f64, Mat4::create_translation(Vec3::new(5f64, 0f64, 0f64)), &yellow_matte);
         assert!(sphere.intersect(&STRAIGHT_RAY).is_none());
         assert!(sphere.intersect(&OFFSET_RAY).is_some());
     }

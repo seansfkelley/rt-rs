@@ -38,28 +38,36 @@ fn main() {
 
     let width = 512u32;
     let height = 512u32;
-    let antialias = 4u32;
+    let antialias = 2u32;
 
     let x_step = camera_right * pixel_grid_width / width as f64;
     let y_step = -camera_up * pixel_grid_height / height as f64;
     let grid_center = camera_position + camera_direction * pixel_grid_distance;
     let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
-    let cyan_plastic = Rc::new(material::FlatMaterial { color: Color::new(0f64, 0.7f64, 0.7f64), specular_exponent: 1f64, reflectivity: 0.1f64 });
-    let bw_checkerboard = Rc::new(material::CheckerboardMaterial { checks_per_unit: 32, color_a: BLACK, color_b: WHITE });
-    let mirror = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });
+    let cyan_plastic: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0f64, 0.7f64, 0.7f64), specular_exponent: 1f64, reflectivity: 0.1f64 });
+    let bw_checkerboard: Rc<material::Material> = Rc::new(material::CheckerboardMaterial { checks_per_unit: 32, color_a: BLACK, color_b: WHITE });
+    let mirror: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });
+    let yellow_matte: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.7f64, 0.7f64, 0f64), specular_exponent: 0f64, reflectivity: 0f64 });
 
-    let yellow_matte = Rc::new(material::FlatMaterial { color: Color::new(0.7f64, 0.7f64, 0f64), specular_exponent: 0f64, reflectivity: 0f64 });
     let yellow_sphere_transform = Mat4::create_translation(Vec3::new(4f64, -4f64, 0f64));
-    let yellow_sphere = Rc::new(Sphere::new(3f64, yellow_sphere_transform, yellow_matte.clone()));
+    let yellow_sphere = Rc::new(Sphere::new(3f64, yellow_sphere_transform, &yellow_matte));
     let bite_transform = Mat4::create_translation(Vec3::new(3f64, -3.5f64, 0.5f64));
-    let bite = Rc::new(Sphere::new(3f64, bite_transform, yellow_matte));
+    let bite = Rc::new(Sphere::new(3f64, bite_transform, &yellow_matte));
 
     let scene_objects: Vec<Box<SceneObject>> = vec![
-        Box::new(Sphere::new(1f64, Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64)), cyan_plastic)),
-        Box::new(Sphere::new(5f64, Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64)), mirror)),
-        Box::new(Sphere::new(3f64, Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64)), bw_checkerboard)),
+        Box::new(Sphere::new(1f64, Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64)), &cyan_plastic)),
+        Box::new(Sphere::new(5f64, Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64)), &mirror)),
+        Box::new(Sphere::new(3f64, Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64)), &bw_checkerboard)),
         Box::new(subtract_scene_objects(yellow_sphere, bite)),
+        Box::new(TriangleMesh::new(
+            vec![
+                Vec3::new(-3f64, -3f64, 0f64),
+                Vec3::new(3f64, -3f64, 0f64),
+                Vec3::new(0f64, 3f64, 0f64),
+            ],
+            vec![], vec![], vec![(0, 1, 2)], &cyan_plastic
+        ))
     ];
 
     let scene_lights: Vec<Box<Light>> = vec![
@@ -77,19 +85,23 @@ fn main() {
             let mut color = color::BLACK;
             for sample_x in 0..antialias {
                 for sample_y in 0..antialias {
-                    let (x_min, x_max, y_min, y_max) = (
-                        sample_x as f64 / antialias as f64,
-                        (1f64 + sample_x as f64) / antialias as f64,
-                        sample_y as f64 / antialias as f64,
-                        (1f64 + sample_y as f64) / antialias as f64
-                    );
+                    let (x_jitter, y_jitter) =
+                        if antialias == 1 {
+                            (0.5f64, 0.5f64)
+                        } else {
+                            let (x_min, x_max, y_min, y_max) = (
+                                sample_x as f64 / antialias as f64,
+                                (1f64 + sample_x as f64) / antialias as f64,
+                                sample_y as f64 / antialias as f64,
+                                (1f64 + sample_y as f64) / antialias as f64
+                            );
 
-                    let (x_jitter, y_jitter) = (
-                        rng.next_f64() * (x_max - x_min) + x_min,
-                        rng.next_f64() * (y_max - y_min) + y_min,
-                    );
+                            (
+                                rng.next_f64() * (x_max - x_min) + x_min,
+                                rng.next_f64() * (y_max - y_min) + y_min,
+                            )
+                        };
 
-                    // TODO: Scalar multiplication for non-floats?
                     let origin = grid_start + x_step * (x as f64 - x_jitter) + y_step * (y as f64 - y_jitter);
                     let direction = (origin - camera_position).as_unit_vector();
                     let ray = Ray::new(origin, direction);
