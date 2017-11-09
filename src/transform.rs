@@ -26,7 +26,7 @@ impl Mat4 {
     }
 
     pub fn create_translation(translation: Vec3) -> Mat4 {
-        let mut cells = IDENTITY.cells;
+        let mut cells = IDENTITY.cells.clone();
         cells[0][3] = translation.x;
         cells[1][3] = translation.y;
         cells[2][3] = translation.z;
@@ -76,6 +76,25 @@ impl Mat4 {
 
     pub fn rotate(&self, theta: f64, axis: Vec3) -> Mat4 {
         *self * Mat4::create_rotation(theta, axis)
+    }
+
+    // TODO: make sure this is real
+    pub fn without_scale(&self) -> Mat4 {
+        let mut cells = self.cells.clone();
+        cells[0][3] = 0f64;
+        cells[1][3] = 0f64;
+        cells[2][3] = 0f64;
+        Mat4 { cells }
+    }
+
+    pub fn transpose(&self) -> Mat4 {
+        let mut cells = self.cells.clone();
+        for x in 0..4 {
+            for y in 0..4 {
+                cells[y][x] = self.cells[x][y];
+            }
+        }
+        Mat4 { cells }
     }
 
     pub fn get_cell(&self, x: usize, y: usize) -> f64 {

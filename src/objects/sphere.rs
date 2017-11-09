@@ -9,18 +9,22 @@ use super::{Ray, Hit, Intersection, SceneObject};
 
 #[derive(Debug)]
 pub struct Sphere {
+    radius: f64,
+    // TODO: Should only have a material and we should create a
+    // `TransformedObject` that is a scene object and a transform
     transform: Mat4,
-    inverse_transform: Mat4,
+    inverse_transform: Mat4, // derivative, but should be cached
+    inverse_transform_without_scale: Mat4, // derivative, but should be cached
     material: Rc<Material>,
 }
 
-const RADIUS: f64 = 1f64;
-
 impl Sphere {
-    pub fn new(transform: Mat4, material: Rc<Material>) -> Sphere {
+    pub fn new(radius: f64, transform: Mat4, material: Rc<Material>) -> Sphere {
         let inverse_transform = transform.invert().unwrap();
         Sphere {
+            radius,
             transform,
+            inverse_transform_without_scale: inverse_transform.without_scale(),
             material,
             inverse_transform,
         }
@@ -40,7 +44,9 @@ impl Sphere {
         Intersection {
             distance: world_location.dot(world_ray.direction),
             location: world_location,
-            normal: (self.transform * object_location).as_unit_vector(),
+            // TODO: cache transpose
+            // http://www.unknownroad.com/rtfm/graphics/rt_normals.html
+            normal: (self.transform.transpose() * object_location).as_unit_vector(),
             uv: (phi / (2f64 * PI), theta / PI),
         }
     }
@@ -49,26 +55,19 @@ impl Sphere {
 impl SceneObject for Sphere {
     // TODO: Verify this implementation against pbrt.
     fn intersect(&self, world_ray: &Ray) -> Option<Hit> {
-        let object_ray = world_ray.transform(self.inverse_transform);
+        let object_ray = world_ray.transform(self.inverse_transform, self.inverse_transform_without_scale);
         let l = -object_ray.origin;
         let t_center = l.dot(object_ray.direction);
 
-        println!("world_ray: {:?}", world_ray);
-        println!("inverse_transform: {:?}", self.inverse_transform);
-        println!("object_ray: {:?}", object_ray);
-        println!("l: {:?}", l);
-        println!("t_center: {:?}", t_center);
-        println!("world_space_center: {:?}", self.transform * ORIGIN);
-        if t_center + RADIUS <= 0f64 {
-            println!("none 1");
+        if t_center + self.radius <= 0f64 {
             None
         } else {
             let d_sq = l.magnitude2() - t_center * t_center;
-            if d_sq > RADIUS {
-                println!("none 2");
+            let r_sq = self.radius * self.radius; // could cache?
+            if d_sq > r_sq {
                 None
             } else {
-                let t_distance = (RADIUS - d_sq).sqrt();
+                let t_distance = (r_sq - d_sq).sqrt();
                 let t0 = t_center - t_distance;
                 let t1 = t_center + t_distance;
                 let exit = self.get_intersection(t1, world_ray, &object_ray);

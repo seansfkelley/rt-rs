@@ -1,6 +1,7 @@
 - procedural textures - K
 - procedural shapes - K
 - 3D FRACTALS - K
+- TransformedObject
 - BRDF
 - global illumination (photon mapping?) - K
 - field of view

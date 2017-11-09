@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use transform::{Mat4, IDENTITY, X_AXIS, Y_AXIS};
-use vector::Vec3;
+use vector::{Vec3,ORIGIN};
 use std;
 use std::f64::consts::PI;
 use objects::*;
@@ -29,6 +29,10 @@ const INVERTIBLE_TEST_MATRIX: Mat4 = Mat4 {
 };
 
 const TEST_VECTOR: Vec3 = Vec3 { x: 1f64, y: 2f64, z: 3f64 };
+
+const YELLOW_MATTE: material::FlatMaterial = material::FlatMaterial { color: Color { r: 0.7f64, g: 0.7f64, b: 0f64 }, specular_exponent: 0f64, reflectivity: 0f64 };
+const STRAIGHT_RAY: Ray = Ray { origin: Vec3 { x: 0f64, y: 0f64, z: 5f64 }, direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 } };
+const OFFSET_RAY: Ray = Ray { origin: Vec3 { x: 5f64, y: 0f64, z: 5f64 }, direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 } };
 
 describe! mat4 {
     it "should start with zeroes" {
@@ -151,9 +155,24 @@ describe! mat4 {
     }
 }
 
-const YELLOW_MATTE: material::FlatMaterial = material::FlatMaterial { color: Color { r: 0.7f64, g: 0.7f64, b: 0f64 }, specular_exponent: 0f64, reflectivity: 0f64 };
-const STRAIGHT_RAY: Ray = Ray { origin: Vec3 { x: 0f64, y: 0f64, z: 5f64 }, direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 } };
-const OFFSET_RAY: Ray = Ray { origin: Vec3 { x: 5f64, y: 0f64, z: 5f64 }, direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 } };
+describe! ray {
+    it "should transform" {
+        let transform = Mat4::create_rotation(PI, X_AXIS);
+        let ray = Ray::new(ORIGIN, Vec3::new(0f64, 0f64, -1f64));
+        let transformed_ray = ray.transform(transform, transform.without_scale());
+        assert_eq!(transformed_ray.origin, ORIGIN);
+        assert_eq!(transformed_ray.direction, Vec3::new(0f64, 0.00000000000000012246467991473532f64, 1f64));
+    }
+
+    it "should transform and direction should ignore translation" {
+        let transform = Mat4::create_rotation(PI, X_AXIS)
+            .translate(X_AXIS);
+        let ray = Ray::new(ORIGIN, Vec3::new(0f64, 0f64, -1f64));
+        let transformed_ray = ray.transform(transform, transform.without_scale());
+        assert_eq!(transformed_ray.origin, X_AXIS);
+        assert_eq!(transformed_ray.direction, Vec3::new(0f64, 0.00000000000000012246467991473532f64, 1f64));
+    }
+}
 
 describe! sphere {
     it "should simply intersect" {
@@ -164,7 +183,7 @@ describe! sphere {
 
     it "should intersect translations" {
         let sphere = Sphere::new(Mat4::create_translation(Vec3::new(5f64, 0f64, 0f64)), Rc::new(YELLOW_MATTE));
-//        assert!(sphere.intersect(&STRAIGHT_RAY).is_none());
+        assert!(sphere.intersect(&STRAIGHT_RAY).is_none());
         assert!(sphere.intersect(&OFFSET_RAY).is_some());
     }
 }

@@ -24,9 +24,9 @@ impl Ray {
         self.origin + self.direction * distance
     }
 
-    pub fn transform(&self, transform: Mat4) -> Ray {
+    pub fn transform(&self, transform: Mat4, transform_without_scale: Mat4) -> Ray {
         let origin = transform * self.origin;
-        let direction = (transform * self.direction).as_unit_vector();
+        let direction = (transform_without_scale * self.direction).as_unit_vector();
         Ray { origin, direction }
     }
 }
