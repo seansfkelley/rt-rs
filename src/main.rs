@@ -36,7 +36,7 @@ fn main() {
 
     let width = 512u32;
     let height = 512u32;
-    let antialias = 4u32;
+    let antialias = 2u32;
 
     let x_step = camera_right * pixel_grid_width / width as f64;
     let y_step = -camera_up * pixel_grid_height / height as f64;
@@ -81,19 +81,23 @@ fn main() {
             let mut color = color::BLACK;
             for sample_x in 0..antialias {
                 for sample_y in 0..antialias {
-                    let (x_min, x_max, y_min, y_max) = (
-                        sample_x as f64 / antialias as f64,
-                        (1f64 + sample_x as f64) / antialias as f64,
-                        sample_y as f64 / antialias as f64,
-                        (1f64 + sample_y as f64) / antialias as f64
-                    );
+                    let (x_jitter, y_jitter) =
+                        if antialias == 1 {
+                            (0.5f64, 0.5f64)
+                        } else {
+                            let (x_min, x_max, y_min, y_max) = (
+                                sample_x as f64 / antialias as f64,
+                                (1f64 + sample_x as f64) / antialias as f64,
+                                sample_y as f64 / antialias as f64,
+                                (1f64 + sample_y as f64) / antialias as f64
+                            );
 
-                    let (x_jitter, y_jitter) = (
-                        rng.next_f64() * (x_max - x_min) + x_min,
-                        rng.next_f64() * (y_max - y_min) + y_min,
-                    );
+                            (
+                                rng.next_f64() * (x_max - x_min) + x_min,
+                                rng.next_f64() * (y_max - y_min) + y_min,
+                            )
+                        };
 
-                    // TODO: Scalar multiplication for non-floats?
                     let origin = grid_start + x_step * (x as f64 - x_jitter) + y_step * (y as f64 - y_jitter);
                     let direction = (origin - camera_position).as_unit_vector();
                     let ray = Ray::new(origin, direction);
