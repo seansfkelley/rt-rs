@@ -18,3 +18,4 @@
 - displacement mapping
 - transform matrices (for rotating/translating/scaling scene objects)
 - Revolving beziers
+- use any geometry as a light source

@@ -1,7 +1,9 @@
-use super::*;
 use std::f64::consts::PI;
 use std::rc::Rc;
+
+use core::*;
 use transform::Mat4;
+use material::Material;
 
 #[derive(Debug)]
 pub struct Sphere {

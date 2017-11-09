@@ -1,4 +1,7 @@
-use super::*;
+use std::rc::Rc;
+
+use core::*;
+use material::Material;
 
 pub struct Difference {
     lhs: Rc<SceneObject>,

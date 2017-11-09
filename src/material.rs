@@ -1,4 +1,4 @@
-use objects::*;
+use core::*;
 use color::{ Color, BLACK, WHITE };
 use std::path::Path;
 use std::fmt::Debug;

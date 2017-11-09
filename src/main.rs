@@ -4,8 +4,9 @@
 extern crate image;
 extern crate rand;
 
+mod core;
 mod vector;
-mod objects;
+mod geometry;
 mod color;
 mod scene;
 mod material;
@@ -13,7 +14,8 @@ mod util;
 mod test;
 mod transform;
 
-use objects::*;
+use geometry::*;
+use core::*;
 use rand::Rng;
 use color::{ Color, BLACK, WHITE };
 use vector::Vec3;

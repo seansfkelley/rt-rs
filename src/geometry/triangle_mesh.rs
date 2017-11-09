@@ -1,5 +1,8 @@
-use super::*;
+use std::rc::Rc;
+
+use core::*;
 use vector::Vec3;
+use material::Material;
 
 pub type TriangleIndices = (usize, usize, usize);
 

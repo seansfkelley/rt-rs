@@ -1,4 +1,4 @@
-use objects::*;
+use core::*;
 use color::{Color, BLACK};
 
 pub struct Scene {
