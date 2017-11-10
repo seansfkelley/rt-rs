@@ -21,6 +21,7 @@ use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
 use std::rc::Rc;
+use std::f64::consts::PI;
 
 fn main() {
     let cyan_plastic: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0f64, 0.7f64, 0.7f64), specular_exponent: 1f64, reflectivity: 0.1f64 });
@@ -67,50 +68,56 @@ fn main() {
 
     let width = 512u32;
     let height = 512u32;
+    let frames = 1u32;
 
-    let camera = Camera::look_at_origin(Point::new(0f64, 0f64, 25f64), Vec3::new(0f64, 1f64, 0f64));
+    let mut camera = Camera::look_at_origin(Point::new(0f64, 0f64, 25f64), Vec3::new(0f64, 1f64, 0f64));
+    let ref rotation = Transform::new(Mat4::create_rotation((2f64 * PI) / frames as f64, Y_AXIS));
 
-    let x_step = camera.right * pixel_grid_width / width as f64;
-    let y_step = -camera.up * pixel_grid_height / height as f64;
-    let grid_center = camera.position + camera.direction * pixel_grid_distance;
-    let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
+    for i in 0..frames {
+        let x_step = camera.right * pixel_grid_width / width as f64;
+        let y_step = -camera.up * pixel_grid_height / height as f64;
+        let grid_center = camera.position + camera.direction * pixel_grid_distance;
+        let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
-    let mut rng = rand::thread_rng();
-    let antialias = 4u32;
-    let mut img = RgbImage::new(width, height);
+        let mut rng = rand::thread_rng();
+        let antialias = 2u32;
+        let mut img = RgbImage::new(width, height);
 
-    for x in 0..width {
-        for y in 0..height {
-            let mut color = color::BLACK;
-            for sample_x in 0..antialias {
-                for sample_y in 0..antialias {
-                    let (x_jitter, y_jitter) =
-                        if antialias == 1 {
-                            (0.5f64, 0.5f64)
-                        } else {
-                            let (x_min, x_max, y_min, y_max) = (
-                                sample_x as f64 / antialias as f64,
-                                (1f64 + sample_x as f64) / antialias as f64,
-                                sample_y as f64 / antialias as f64,
-                                (1f64 + sample_y as f64) / antialias as f64
-                            );
+        for x in 0..width {
+            for y in 0..height {
+                let mut color = color::BLACK;
+                for sample_x in 0..antialias {
+                    for sample_y in 0..antialias {
+                        let (x_jitter, y_jitter) =
+                            if antialias == 1 {
+                                (0.5f64, 0.5f64)
+                            } else {
+                                let (x_min, x_max, y_min, y_max) = (
+                                    sample_x as f64 / antialias as f64,
+                                    (1f64 + sample_x as f64) / antialias as f64,
+                                    sample_y as f64 / antialias as f64,
+                                    (1f64 + sample_y as f64) / antialias as f64
+                                );
 
-                            (
-                                rng.next_f64() * (x_max - x_min) + x_min,
-                                rng.next_f64() * (y_max - y_min) + y_min,
-                            )
-                        };
+                                (
+                                    rng.next_f64() * (x_max - x_min) + x_min,
+                                    rng.next_f64() * (y_max - y_min) + y_min,
+                                )
+                            };
 
-                    let origin = grid_start + x_step * (x as f64 + x_jitter) + y_step * (y as f64 + y_jitter);
-                    let direction = (origin - camera.position).as_normalized();
-                    let ray = Ray::new(origin, direction);
-                    color = color + scene.raytrace(ray);
+                        let origin = grid_start + x_step * (x as f64 + x_jitter) + y_step * (y as f64 + y_jitter);
+                        let direction = (origin - camera.position).as_normalized();
+                        let ray = Ray::new(origin, direction);
+                        color = color + scene.raytrace(ray);
+                    }
                 }
+                img.put_pixel(x, y, *Rgb::from_slice(&(color / (antialias * antialias) as f64).as_bytes()));
             }
-            img.put_pixel(x, y, *Rgb::from_slice(&(color / (antialias * antialias) as f64).as_bytes()));
         }
-    }
 
-    let ref mut fout = File::create(&Path::new("out.png")).unwrap();
-    image::ImageRgb8(img).save(fout, image::PNG).unwrap();
+        let ref mut fout = File::create(&Path::new(&format!("out/{:02}.png", i))).unwrap();
+        image::ImageRgb8(img).save(fout, image::PNG).unwrap();
+
+        camera = camera.transform(rotation);
+    }
 }
