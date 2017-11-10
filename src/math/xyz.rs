@@ -134,7 +134,7 @@ macro_rules! xyz_cross {
 macro_rules! xyz_normalizable {
     ($name:ident) => {
         impl $name {
-            pub fn as_unit_vector(&self) -> $name {
+            pub fn as_normalized(&self) -> $name {
                 *self / self.magnitude()
             }
 
@@ -146,6 +146,20 @@ macro_rules! xyz_normalizable {
                 self.magnitude2().sqrt()
             }
 
+        }
+    };
+}
+
+macro_rules! xyz_convertible {
+    ($name:ident, $result:ident, $fnname: ident) => {
+        impl $name {
+            pub fn $fnname(&self) -> $result {
+                $result {
+                    x: self.x,
+                    y: self.y,
+                    z: self.z,
+                }
+            }
         }
     };
 }
@@ -165,12 +179,14 @@ xyz_cross!(Vec3, Vec3, Vec3);
 xyz_normalizable!(Vec3);
 
 xyz_base!(Point);
+xyz_neg!(Point);
 xyz_add!(Point, Point, Point);
 xyz_add!(Point, Vec3, Point);
 xyz_sub!(Point, Point, Vec3);
 xyz_sub!(Point, Vec3, Point);
 xyz_mul!(Point);
 xyz_div!(Point);
+xyz_convertible!(Point, Vec3, to_vector);
 
 xyz_base!(Normal);
 xyz_neg!(Normal);
@@ -183,6 +199,7 @@ xyz_div!(Normal);
 xyz_dot!(Normal, Normal);
 xyz_cross!(Normal, Vec3, Vec3);
 xyz_normalizable!(Normal);
+xyz_convertible!(Normal, Vec3, to_vector);
 
 impl Vec3 {
     // TODO: Remove this?

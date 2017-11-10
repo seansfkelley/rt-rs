@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 use std::ops::Mul;
-use super::Vec3;
+use super::xyz::*;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Mat4 {
-    // Row-major
+    // (row, column)
     pub cells: [[f64; 4]; 4],
 }
 
@@ -251,26 +251,5 @@ impl Mul for Mat4 {
         }
 
         Mat4 { cells }
-    }
-}
-
-impl Mul<Vec3> for Mat4 {
-    type Output = Vec3;
-
-    fn mul(self, other: Vec3) -> Vec3 {
-        let mut vec4 = [0f64; 4];
-
-        for i in 0..4 {
-            vec4[i] = self.get_cell(0, i) * other.x
-                + self.get_cell(1, i) * other.y
-                + self.get_cell(2, i) * other.z
-                + self.get_cell(3, i);
-        }
-
-        Vec3 {
-            x: vec4[0],
-            y: vec4[1],
-            z: vec4[2],
-        }
     }
 }

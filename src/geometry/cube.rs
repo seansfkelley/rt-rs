@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use core::*;
+use math::Mat4;
 use material::Material;
-use transform::Mat4;
 
 #[derive(Debug)]
 pub struct Cube {

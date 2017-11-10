@@ -2,7 +2,6 @@ use std::f64::consts::PI;
 use std::rc::Rc;
 
 use core::*;
-use transform::Mat4;
 use material::Material;
 
 #[derive(Debug)]
@@ -10,27 +9,22 @@ pub struct Sphere {
     radius: f64,
     // TODO: Should only have a material and we should create a
     // `TransformedObject` that is a scene object and a transform
-    transform: Mat4,
-    inverse_transform: Mat4, // derivative, but should be cached
-    inverse_transform_without_scale: Mat4, // derivative, but should be cached
+    transform: Transform,
     material: Rc<Material>,
 }
 
 impl Sphere {
-    pub fn new(radius: f64, transform: Mat4, material: &Rc<Material>) -> Sphere {
-        let inverse_transform = transform.invert().unwrap();
+    pub fn new(radius: f64, transform: Transform, material: &Rc<Material>) -> Sphere {
         Sphere {
             radius,
             transform,
-            inverse_transform_without_scale: inverse_transform.without_scale(),
             material: Rc::clone(material),
-            inverse_transform,
         }
     }
 
     fn get_intersection(&self, t: f64, world_ray: &Ray, object_ray: &Ray) -> Intersection {
         let object_location = object_ray.at(t);
-        let world_location = self.transform * object_location;
+        let world_location = object_location.transform(&self.transform);
 
         // pbrt pg. 119
         let mut phi = object_location.y.atan2(object_location.x);
@@ -42,9 +36,7 @@ impl Sphere {
         Intersection {
             distance: world_location.dot(world_ray.direction),
             location: world_location,
-            // TODO: cache transpose
-            // http://www.unknownroad.com/rtfm/graphics/rt_normals.html
-            normal: (self.transform.transpose() * object_location).as_unit_vector(),
+            normal: object_location.transform(&self.transform).as_normalized(),
             uv: (phi / (2f64 * PI), theta / PI),
         }
     }
@@ -53,7 +45,7 @@ impl Sphere {
 impl SceneObject for Sphere {
     // TODO: Verify this implementation against pbrt.
     fn intersect(&self, world_ray: &Ray) -> Option<Hit> {
-        let object_ray = world_ray.transform(self.inverse_transform, self.inverse_transform_without_scale);
+        let object_ray = world_ray.transform(&self.transform);
         let l = -object_ray.origin;
         let t_center = l.dot(object_ray.direction);
 

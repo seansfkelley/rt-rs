@@ -24,9 +24,9 @@ use std::rc::Rc;
 
 fn main() {
     let camera_position = Vec3::new(0f64, 0f64, 25f64);
-    let camera_up = Vec3::new(0f64, 1f64, 0f64).as_unit_vector();
-    let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_unit_vector();
-    let camera_right = camera_direction.cross(camera_up).as_unit_vector();
+    let camera_up = Vec3::new(0f64, 1f64, 0f64).as_normalized();
+    let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_normalized();
+    let camera_right = camera_direction.cross(camera_up).as_normalized();
 
     // TODO: Replace with proper FoV calculations.
     let pixel_grid_distance = 5f64;
@@ -47,15 +47,15 @@ fn main() {
     let mirror: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });
     let yellow_matte: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.7f64, 0.7f64, 0f64), specular_exponent: 0f64, reflectivity: 0f64 });
 
-    let yellow_sphere_transform = Mat4::create_translation(Vec3::new(4f64, -4f64, 0f64));
+    let yellow_sphere_transform = Transform::new(Mat4::create_translation(Vec3::new(4f64, -4f64, 0f64)));
     let yellow_sphere = Rc::new(Sphere::new(3f64, yellow_sphere_transform, &yellow_matte));
-    let bite_transform = Mat4::create_translation(Vec3::new(3f64, -3.5f64, 0.5f64));
+    let bite_transform = Transform::new(Mat4::create_translation(Vec3::new(3f64, -3.5f64, 0.5f64)));
     let bite = Rc::new(Sphere::new(3f64, bite_transform, &yellow_matte));
 
     let scene_objects: Vec<Box<SceneObject>> = vec![
-        Box::new(Sphere::new(1f64, Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64)), &cyan_plastic)),
-        Box::new(Sphere::new(5f64, Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64)), &mirror)),
-        Box::new(Sphere::new(3f64, Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64)), &bw_checkerboard)),
+        Box::new(Sphere::new(1f64, Transform::new(Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64))), &cyan_plastic)),
+        Box::new(Sphere::new(5f64, Transform::new(Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64))), &mirror)),
+        Box::new(Sphere::new(3f64, Transform::new(Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64))), &bw_checkerboard)),
         Box::new(Difference::new(yellow_sphere, bite)),
         Box::new(TriangleMesh::new(
             vec![
@@ -68,8 +68,8 @@ fn main() {
     ];
 
     let scene_lights: Vec<Box<Light>> = vec![
-        Box::new(Light::new(Vec3::new(5f64, 5f64, 10f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
-        Box::new(Light::new(Vec3::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
+        Box::new(Light::new(Point::new(5f64, 5f64, 10f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
+        Box::new(Light::new(Point::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
     ];
 
     let scene = Scene::new(scene_objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 0);
@@ -100,7 +100,7 @@ fn main() {
                         };
 
                     let origin = grid_start + x_step * (x as f64 + x_jitter) + y_step * (y as f64 + y_jitter);
-                    let direction = (origin - camera_position).as_unit_vector();
+                    let direction = (origin - camera_position).as_normalized();
                     let ray = Ray::new(origin, direction);
                     color = color + scene.raytrace(ray);
                 }

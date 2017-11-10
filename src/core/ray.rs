@@ -1,25 +1,18 @@
-use math::Vec3;
-use transform::Mat4;
+use math::*;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
-    pub origin: Vec3,
+    pub origin: Point,
     pub direction: Vec3,
 }
 
 impl Ray {
-    pub fn new(origin: Vec3, direction: Vec3) -> Ray {
+    pub fn new(origin: Point, direction: Vec3) -> Ray {
         direction.assert_normalized();
         Ray { origin, direction }
     }
 
-    pub fn at(&self, distance: f64) -> Vec3 {
+    pub fn at(&self, distance: f64) -> Point {
         self.origin + self.direction * distance
-    }
-
-    pub fn transform(&self, transform: Mat4, transform_without_scale: Mat4) -> Ray {
-        let origin = transform * self.origin;
-        let direction = (transform_without_scale * self.direction).as_unit_vector();
-        Ray { origin, direction }
     }
 }
