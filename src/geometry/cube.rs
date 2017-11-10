@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use core::*;
 use super::Geometry;
 

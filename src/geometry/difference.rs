@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use core::*;
-use material::Material;
 use geometry::Geometry;
 
 #[derive(Debug)]

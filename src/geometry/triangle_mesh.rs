@@ -1,8 +1,5 @@
-use std::rc::Rc;
-
 use core::*;
 use math::*;
-use material::Material;
 use geometry::Geometry;
 
 pub type TriangleIndices = (usize, usize, usize);

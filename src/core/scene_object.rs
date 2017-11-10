@@ -1,5 +1,4 @@
 use std::rc::Rc;
-use std::f64::consts::PI;
 use super::ray::Ray;
 use super::intersection::Hit;
 use material::Material;

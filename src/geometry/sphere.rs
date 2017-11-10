@@ -1,10 +1,7 @@
 use std::f64::consts::PI;
-use std::rc::Rc;
 
 use core::*;
-use material::Material;
 use geometry::Geometry;
-use util::Clamp;
 use math::*;
 
 #[derive(Debug)]
