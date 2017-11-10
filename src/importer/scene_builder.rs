@@ -10,12 +10,12 @@ pub struct SceneBuilder {
     camera_look_at: Option<Point>,
     antialias: Option<u32>,
     pub materials: HashMap<String, Box<Material>>,
+    transform_stack: Vec<Mat4>,
 }
 
 macro_rules! optional_setter {
     ($name:ident, $type:ty) => {
         pub fn $name(&mut self, input: $type) {
-            println!("setting {}", stringify!($name));
             self.$name = Some(input);
         }
     };
@@ -43,6 +43,21 @@ impl SceneBuilder {
 
     pub fn register_material(&mut self, name: &str, material: Box<Material>) {
         self.materials.insert(name.to_owned(), material);
+    }
+
+    pub fn push_transform(&mut self, mat: Mat4) {
+        let transform = match self.transform_stack.last() {
+            Some(transform) => mat * (*transform), // left-multiply new transformation!
+            None => mat,
+        };
+        self.transform_stack.push(transform);
+    }
+
+    pub fn pop_transform(&mut self) {
+        match self.transform_stack.pop() {
+            Some(_) => panic!("tried to pop an empty transform stack"),
+            None => {},
+        }
     }
 
     pub fn build_camera(&self) -> Camera {

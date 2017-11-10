@@ -2,7 +2,7 @@ camera_position 0 0 25
 camera_up 0 1 0
 camera_look_at 0 0 0
 
-antialias 2
+antialias 1
 
 material cyan_plastic flat {
   color 0 .7 .7
@@ -25,3 +25,8 @@ material yellow_matte flat {
 material bw_checks checkerboard {
   checks_per_unit 32
 }
+
+transform scale 1 2 3
+transform rotate 45 1 2 3
+transform pop
+transform pop
