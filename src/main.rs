@@ -48,23 +48,28 @@ fn main() {
     let yellow_matte: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.7f64, 0.7f64, 0f64), specular_exponent: 0f64, reflectivity: 0f64 });
 
     let yellow_sphere_transform = Mat4::create_translation(Vec3::new(4f64, -4f64, 0f64));
-    let yellow_sphere = Rc::new(Sphere::new(3f64, yellow_sphere_transform, &yellow_matte));
+    let ref unit_sphere = Rc::new(Sphere::new(1f64));
+    let ref three_sphere = Rc::new(Sphere::new(3f64));
+    let ref five_sphere = Rc::new(Sphere::new(5f64));
     let bite_transform = Mat4::create_translation(Vec3::new(3f64, -3.5f64, 0.5f64));
-    let bite = Rc::new(Sphere::new(3f64, bite_transform, &yellow_matte));
+    let bite_positive = Rc::new(Shape::new(three_sphere, yellow_sphere_transform));
+    let bite_negative = Rc::new(SceneObject::new(three_sphere, bite_transform, &yellow_matte));
+    let bite = Rc::new(Difference::new(bite_positive, bite_negative));
+    let triangle_mesh_geo = Rc::new(TriangleMesh::new(
+        vec![
+            Vec3::new(-3f64, -3f64, 0f64),
+            Vec3::new(3f64, -3f64, 0f64),
+            Vec3::new(0f64, 3f64, 0f64),
+        ],
+        vec![], vec![], vec![(0, 1, 2)],
+    ));
 
-    let scene_objects: Vec<Box<SceneObject>> = vec![
-        Box::new(Sphere::new(1f64, Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64)), &cyan_plastic)),
-        Box::new(Sphere::new(5f64, Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64)), &mirror)),
-        Box::new(Sphere::new(3f64, Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64)), &bw_checkerboard)),
-        Box::new(Difference::new(yellow_sphere, bite)),
-        Box::new(TriangleMesh::new(
-            vec![
-                Vec3::new(-3f64, -3f64, 0f64),
-                Vec3::new(3f64, -3f64, 0f64),
-                Vec3::new(0f64, 3f64, 0f64),
-            ],
-            vec![], vec![], vec![(0, 1, 2)], &cyan_plastic
-        ))
+    let scene_objects: Vec<SceneObject> = vec![
+        SceneObject::new(unit_sphere, Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64)), &cyan_plastic),
+        SceneObject::new(five_sphere, Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64)), &mirror),
+        SceneObject::new(three_sphere, Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64)), &bw_checkerboard),
+        SceneObject::from_geo(&bite, &yellow_matte),
+        SceneObject::from_geo(&triangle_mesh_geo, &cyan_plastic),
     ];
 
     let scene_lights: Vec<Box<Light>> = vec![

@@ -2,19 +2,21 @@ use std::rc::Rc;
 
 use core::*;
 use material::Material;
+use geometry::Geometry;
 
+#[derive(Debug)]
 pub struct Difference {
-    lhs: Rc<SceneObject>,
-    rhs: Rc<SceneObject>,
+    lhs: Rc<Geometry>,
+    rhs: Rc<Geometry>,
 }
 
 impl Difference {
-    pub fn new(lhs: Rc<SceneObject>, rhs: Rc<SceneObject>) -> Difference {
+    pub fn new<G1: Geometry, G2: Geometry>(lhs: Rc<G1>, rhs: Rc<G2>) -> Difference {
         Difference { lhs, rhs }
     }
 }
 
-impl SceneObject for Difference {
+impl Geometry for Difference {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
         let lhs_hit_option = self.lhs.intersect(ray);
 
@@ -41,7 +43,6 @@ impl SceneObject for Difference {
                                         uv: rhs_hit.exit.uv,
                                     }),
                                     exit: lhs_hit.exit,
-                                    object: lhs_hit.object,
                                     debug: false,
                                 })
                             } else {
@@ -54,9 +55,5 @@ impl SceneObject for Difference {
             },
             None => None,
         }
-    }
-
-    fn material(&self) -> Rc<Material> {
-        self.lhs.material()
     }
 }

@@ -2,7 +2,7 @@ use core::*;
 use color::{Color, BLACK};
 
 pub struct Scene {
-    objects: Vec<Box<SceneObject>>,
+    objects: Vec<SceneObject>,
     lights: Vec<Box<Light>>,
     background_color: Color,
     depth_limit: u32,
@@ -12,7 +12,7 @@ static DEBUG_SHADOW_COLOR: Color = Color { r: 0f64, g: 0f64, b: 1f64 };
 static DEBUG_BASE_COLOR: Color = Color { r: 1f64, g: 0f64, b: 0f64 };
 impl Scene {
     pub fn new(
-        objects: Vec<Box<SceneObject>>,
+        objects: Vec<SceneObject>,
         lights: Vec<Box<Light>>,
         background_color: Color,
         depth_limit: u32
@@ -29,16 +29,18 @@ impl Scene {
             self.background_color
         } else {
             match self.cast_ray(ray) {
-                Some(hit) => {
+                Some(material_hit) => {
+                    let hit = material_hit.hit;
+                    let material = material_hit.material;
                     let intersection = hit.enter.as_ref().unwrap();
-                    let lighting = hit.object.material().get_lighting(&intersection);
+                    let lighting = material.get_lighting(&intersection);
 
                     let mut color: Color = self.lights
                         .iter()
                         .filter(|light| {
                             let adjusted_location = intersection.location - (ray.direction * 1e-9f64);
                             let light_direction = (light.position - adjusted_location).as_unit_vector();
-                            self.cast_ray(Ray::new(adjusted_location, light_direction)).map(|hit| hit.enter).is_none()
+                            self.cast_ray(Ray::new(adjusted_location, light_direction)).map(|hit| hit.hit.enter).is_none()
                         })
                         .fold(BLACK, |color, light| {
                             if hit.debug {
@@ -71,19 +73,19 @@ impl Scene {
         }
     }
 
-    fn cast_ray(&self, ray: Ray) -> Option<Hit> {
-        let mut closest: Option<Hit> = Option::None;
+    fn cast_ray(&self, ray: Ray) -> Option<MaterialHit> {
+        let mut closest: Option<MaterialHit> = Option::None;
 
         for o in &self.objects {
             match o.intersect(&ray) {
                 Some(hit) => {
                     if hit.enter.is_some() {
                         if closest.is_some() {
-                            if hit.enter.as_ref().unwrap().distance < closest.as_ref().unwrap().enter.as_ref().unwrap().distance {
-                                closest = Some(hit);
+                            if hit.enter.as_ref().unwrap().distance < closest.as_ref().unwrap().hit.enter.as_ref().unwrap().distance {
+                                closest = Some(MaterialHit { hit, material: o.material });
                             }
                         } else {
-                            closest = Some(hit);
+                            closest = Some(MaterialHit { hit, material: o.material });
                         }
                     }
                 },

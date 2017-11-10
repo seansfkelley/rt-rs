@@ -1,5 +1,6 @@
 use math::Vec3;
-use super::scene_object::SceneObject;
+use material::Material;
+use std::rc::Rc;
 
 pub type Uv = (f64, f64);
 
@@ -10,19 +11,22 @@ pub struct Intersection {
     pub uv: Uv,
 }
 
-pub struct Hit<'a> {
+pub struct Hit {
     pub enter: Option<Intersection>,
     pub exit: Intersection,
-    pub object: &'a (SceneObject + 'a),
     pub debug: bool,
 }
 
-impl<'a> Hit<'a> {
-    pub fn debug(self, debug: bool) -> Hit<'a> {
+pub struct MaterialHit {
+    pub hit: Hit,
+    pub material: Rc<Material>,
+}
+
+impl Hit {
+    pub fn debug(self, debug: bool) -> Hit {
         Hit {
             enter: self.enter,
             exit: self.exit,
-            object: self.object,
             debug,
         }
     }

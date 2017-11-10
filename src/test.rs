@@ -160,7 +160,7 @@ describe! ray {
     it "should transform" {
         let transform = Mat4::create_rotation(PI, X_AXIS);
         let ray = Ray::new(ORIGIN, Vec3::new(0f64, 0f64, -1f64));
-        let transformed_ray = ray.transform(transform, transform.without_scale());
+        let transformed_ray = ray.transform(transform, transform.without_translation());
         assert_eq!(transformed_ray.origin, ORIGIN);
         assert_eq!(transformed_ray.direction, Vec3::new(0f64, 0.00000000000000012246467991473532f64, 1f64));
     }
@@ -169,7 +169,7 @@ describe! ray {
         let transform = Mat4::create_rotation(PI, X_AXIS)
             .translate(X_AXIS);
         let ray = Ray::new(ORIGIN, Vec3::new(0f64, 0f64, -1f64));
-        let transformed_ray = ray.transform(transform, transform.without_scale());
+        let transformed_ray = ray.transform(transform, transform.without_translation());
         assert_eq!(transformed_ray.origin, X_AXIS);
         assert_eq!(transformed_ray.direction, Vec3::new(0f64, 0.00000000000000012246467991473532f64, 1f64));
     }

@@ -4,59 +4,43 @@ use std::rc::Rc;
 use core::*;
 use transform::Mat4;
 use material::Material;
+use geometry::Geometry;
+use util::Clamp;
 
 #[derive(Debug)]
 pub struct Sphere {
     radius: f64,
-    // TODO: Should only have a material and we should create a
-    // `TransformedObject` that is a scene object and a transform
-    transform: Mat4,
-    inverse_transform: Mat4, // derivative, but should be cached
-    inverse_transform_without_scale: Mat4, // derivative, but should be cached
-    material: Rc<Material>,
 }
 
 impl Sphere {
-    pub fn new(radius: f64, transform: Mat4, material: &Rc<Material>) -> Sphere {
-        let inverse_transform = transform.invert().unwrap();
-        Sphere {
-            radius,
-            transform,
-            inverse_transform_without_scale: inverse_transform.without_scale(),
-            material: Rc::clone(material),
-            inverse_transform,
-        }
+    pub fn new(radius: f64) -> Sphere {
+        Sphere { radius }
     }
 
-    fn get_intersection(&self, t: f64, world_ray: &Ray, object_ray: &Ray) -> Intersection {
-        let object_location = object_ray.at(t);
-        let world_location = self.transform * object_location;
+    fn get_intersection(&self, t: f64, ray: &Ray) -> Intersection {
+        let location = ray.at(t);
 
         // pbrt pg. 119
-        let mut phi = object_location.y.atan2(object_location.x);
+        // Make sure we transform into object space!
+        let mut phi = location.y.atan2(location.x);
         if phi < 0f64 {
             phi += 2f64 * PI;
         }
-        let theta = object_location.z.acos();
+        let theta = (location.z / self.radius).clamp(-1f64, 1f64).acos();
 
         Intersection {
-            distance: world_location.dot(world_ray.direction),
-            location: world_location,
-            // TODO: cache transpose
-            // http://www.unknownroad.com/rtfm/graphics/rt_normals.html
-            normal: (self.transform.transpose() * object_location).as_unit_vector(),
+            distance: t,
+            location,
+            normal: location.as_unit_vector(),
             uv: (phi / (2f64 * PI), theta / PI),
         }
     }
 }
 
-impl SceneObject for Sphere {
-    // TODO: Verify this implementation against pbrt.
-    fn intersect(&self, world_ray: &Ray) -> Option<Hit> {
-        let object_ray = world_ray.transform(self.inverse_transform, self.inverse_transform_without_scale);
-        let l = -object_ray.origin;
-        let t_center = l.dot(object_ray.direction);
-
+impl Geometry for Sphere {
+    fn intersect(&self, ray: &Ray) -> Option<Hit> {
+        let l = ray.origin;
+        let t_center = l.dot(ray.direction);
         if t_center + self.radius <= 0f64 {
             None
         } else {
@@ -68,25 +52,21 @@ impl SceneObject for Sphere {
                 let t_distance = (r_sq - d_sq).sqrt();
                 let t0 = t_center - t_distance;
                 let t1 = t_center + t_distance;
-                let exit = self.get_intersection(t1, world_ray, &object_ray);
+                let exit = self.get_intersection(t1, ray);
                 if t0 <= 0f64 {
                     Some(Hit {
                         enter: None,
                         exit,
-                        object: self,
                         debug: false,
                     })
                 } else {
                     Some(Hit {
-                        enter: Some(self.get_intersection(t0, world_ray, &object_ray)),
+                        enter: Some(self.get_intersection(t0, ray)),
                         exit,
-                        object: self,
                         debug: false,
                     })
                 }
             }
         }
     }
-
-    fn material(&self) -> Rc<Material> { Rc::clone(&self.material) }
 }

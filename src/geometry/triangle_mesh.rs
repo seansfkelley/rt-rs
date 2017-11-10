@@ -3,27 +3,28 @@ use std::rc::Rc;
 use core::*;
 use math::Vec3;
 use material::Material;
+use geometry::Geometry;
 
 pub type TriangleIndices = (usize, usize, usize);
 
+#[derive(Debug)]
 pub struct TriangleMesh {
     positions: Vec<Vec3>,
     normals: Vec<Vec3>,
     uvs: Vec<Uv>,
     indices: Vec<TriangleIndices>,
-    material: Rc<Material>,
 }
 
 impl TriangleMesh {
     // FYI, the "front" is when the vertices are in counterclockwise order.
     // > By default, counterclockwise polygons are taken to be front-facing.
     // (https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glFrontFace.xml)
-    pub fn new(positions: Vec<Vec3>, normals: Vec<Vec3>, uvs: Vec<Uv>, indices: Vec<TriangleIndices>, material: &Rc<Material>) -> TriangleMesh {
+    pub fn new(positions: Vec<Vec3>, normals: Vec<Vec3>, uvs: Vec<Uv>, indices: Vec<TriangleIndices>) -> TriangleMesh {
         // TODO: When we actually do UVs and given normals, do this.
         // assert_eq!(positions.len(), normals.len());
         // assert_eq!(positions.len(), uvs.len());
         // TODO: Also check that the coordinates are in-bounds.
-        TriangleMesh { positions, normals, uvs, indices, material: Rc::clone(material) }
+        TriangleMesh { positions, normals, uvs, indices }
     }
 
     fn intersect_triplet(&self, triplet: &TriangleIndices, ray: &Ray) -> Option<Hit> {
@@ -68,13 +69,12 @@ impl TriangleMesh {
                 normal: e1.cross(e2).as_unit_vector(),
                 uv: (0f64, 0f64),
             },
-            object: self,
             debug: false,
         });
     }
 }
 
-impl SceneObject for TriangleMesh {
+impl Geometry for TriangleMesh {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
         for triplet in &self.indices {
             match self.intersect_triplet(&triplet, ray) {
@@ -85,6 +85,4 @@ impl SceneObject for TriangleMesh {
 
         return None;
     }
-
-    fn material(&self) -> Rc<Material> { Rc::clone(&self.material) }
 }

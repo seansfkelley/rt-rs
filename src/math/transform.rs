@@ -80,7 +80,7 @@ impl Mat4 {
     }
 
     // TODO: make sure this is real
-    pub fn without_scale(&self) -> Mat4 {
+    pub fn without_translation(&self) -> Mat4 {
         let mut cells = self.cells.clone();
         cells[0][3] = 0f64;
         cells[1][3] = 0f64;
