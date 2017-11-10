@@ -47,5 +47,19 @@ object {
 }
 transform pop
 
+object {
+  geometry triangle_mesh {
+    positions [
+      -3  -3 -1,
+       3  -3 -1,
+       0   3 -1,
+    ]
+    indices [
+      0 1 2
+    ]
+  }
+  material cyan_plastic
+}
+
 # SceneObject::from_geo(&bite, &yellow_matte),
 # SceneObject::from_geo(&triangle_mesh_geo, &cyan_plastic),

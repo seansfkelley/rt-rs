@@ -14,7 +14,7 @@ Statement: () = {
     "camera_position" <Point> => builder.camera_position(<>),
     "camera_up" <Vec3> => builder.camera_up(<>),
     "camera_look_at" <Point> => builder.camera_look_at(<>),
-    "antialias" <Integer> => builder.antialias(<>),
+    "antialias" <U32> => builder.antialias(<>),
     "material" <name:Identifier> <m:Material> => builder.register_material(name, m),
     "transform pop" => builder.pop_transform(),
     "transform" <Transform> => builder.push_transform(<>),
@@ -24,15 +24,15 @@ Statement: () = {
 Material: Box<Material> = {
     "flat" "{"
         <color:KV<"color", Color>?>
-        <specular_exponent:KV<"specular_exponent", Float>?>
-        <reflectivity:KV<"reflectivity", Float>?>
+        <specular_exponent:KV<"specular_exponent", F64>?>
+        <reflectivity:KV<"reflectivity", F64>?>
     "}" => Box::new(FlatMaterial {
         color: color.unwrap_or(BLACK),
         specular_exponent: specular_exponent.unwrap_or(0f64),
         reflectivity: reflectivity.unwrap_or(0f64),
     }),
     "checkerboard" "{"
-        <checks_per_unit:KV<"checks_per_unit", Integer>?>
+        <checks_per_unit:KV<"checks_per_unit", U32>?>
         <color_a:KV<"color_a", Color>?>
         <color_b:KV<"color_b", Color>?>
     "}" => Box::new(CheckerboardMaterial {
@@ -45,22 +45,51 @@ Material: Box<Material> = {
 Transform: Mat4 = {
     "scale" <Vec3> => Mat4::create_scale(<>),
     "translate" <Vec3> => Mat4::create_translation(<>),
-    "rotate" <theta_degrees:Float> <axis:Vec3> => Mat4::create_rotation(theta_degrees.to_radians(), axis),
+    "rotate" <theta_degrees:F64> <axis:Vec3> => Mat4::create_rotation(theta_degrees.to_radians(), axis),
 };
 
 Object = "{" <KV<"geometry", Geometry>> <KV<"material", Identifier>> "}";
 
 Geometry: Box<Geometry> = {
-    "sphere" "{" <Float> "}" => Box::new(Sphere::new(<>)),
+    "sphere" "{" <F64> "}" => Box::new(Sphere::new(<>)),
+    "triangle_mesh" "{"
+        <positions:KV<"positions", List<Point>>>
+        <normals:KV<"normals", List<Normal>>?>
+        <uvs:KV<"uvs", List<Tuple2<F64, F64>>>?>
+        <indices:KV<"indices", List<Tuple3<Usize, Usize, Usize>>>>
+    "}" => Box::new(TriangleMesh::new(
+        positions,
+        normals.unwrap_or(vec![]),
+        uvs.unwrap_or(vec![]),
+        indices,
+    )),
 };
 
 KV<K, V>: V = K <V>;
 
-Point: Point = <f1:Float> <f2:Float> <f3:Float> => Point { x: f1, y: f2, z: f3 };
-Vec3: Vec3 = <f1:Float> <f2:Float> <f3:Float> => Vec3 { x: f1, y: f2, z: f3 };
-Color: Color = <f1:Float> <f2:Float> <f3:Float> => Color { r: f1, g: f2, b: f3 };
+// Handily adapted from the tutorial!
+// https://github.com/nikomatsakis/lalrpop/blob/master/doc/tutorial.md
+List<T>: Vec<T> = {
+    "[" <v:(<T> ",")*> <e:T?> "]" => match e {
+        None => v,
+        Some(e) => {
+            let mut v = v;
+            v.push(e);
+            v
+        }
+    }
+};
+
+Tuple2<T1, T2>: (T1, T2) = <T1> <T2>;
+Tuple3<T1, T2, T3>: (T1, T2, T3) = <T1> <T2> <T3>;
+
+Point: Point = <f1:F64> <f2:F64> <f3:F64> => Point { x: f1, y: f2, z: f3 };
+Vec3: Vec3 = <f1:F64> <f2:F64> <f3:F64> => Vec3 { x: f1, y: f2, z: f3 };
+Normal: Normal = <f1:F64> <f2:F64> <f3:F64> => Normal { x: f1, y: f2, z: f3 };
+Color: Color = <f1:F64> <f2:F64> <f3:F64> => Color { r: f1, g: f2, b: f3 };
 
 Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
-RawNumber = r"[-+]?[0-9]*\.?[0-9]+"; // Ripped from https://www.regular-expressions.info/floatingpoint.html
-Float: f64 = RawNumber => f64::from_str(<>).unwrap();
-Integer: u32 = RawNumber => u32::from_str(<>).unwrap();
+RawNumber = r"[-+]?[0-9]*\.?[0-9]+"; // Ripped from https://www.regular-expressions.info/F64ingpoint.html
+F64: f64 = RawNumber => f64::from_str(<>).unwrap();
+U32: u32 = RawNumber => u32::from_str(<>).unwrap();
+Usize: usize = RawNumber => usize::from_str(<>).unwrap();
