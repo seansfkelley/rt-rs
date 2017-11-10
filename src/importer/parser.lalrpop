@@ -5,24 +5,27 @@ use importer::scene_builder::SceneBuilder;
 
 grammar(builder: &mut SceneBuilder);
 
+match {
+    // Ripped from https://www.regular-expressions.info/floatingpoint.html
+    r"[-+]?[0-9]*\.?[0-9]+" => FLOAT,
+} else {
+    r"[0-9]+" => INTEGER,
+    _,
+}
+
 pub SceneFile: () = {
-  "camera_position" <p:Point> => {
-    builder.camera_position(p);
-  },
-  "camera_up" <v:Vec3> => {
-    builder.camera_up(v);
-  },
-  "look_at" <p:Point> => {
-    builder.look_at(p);
-  },
+    Statement* => {},
 };
 
-Point: Point = {
-  <f1:Number> <f2:Number> <f3:Number> => Point { x: f1, y: f2, z: f3 },
+Statement: () = {
+    "camera_position" <p:Point> => builder.camera_position(<>),
+    "camera_up" <v:Vec3> => builder.camera_up(<>),
+    "camera_look_at" <p:Point> => builder.camera_look_at(<>),
+    "antialias" <n:Integer> => builder.antialias(<>),
 };
 
-Vec3: Vec3 = {
-  <f1:Number> <f2:Number> <f3:Number> => Vec3 { x: f1, y: f2, z: f3 },
-};
+Point: Point = <f1:Float> <f2:Float> <f3:Float> => Point { x: f1, y: f2, z: f3 };
+Vec3: Vec3 = <f1:Float> <f2:Float> <f3:Float> => Vec3 { x: f1, y: f2, z: f3 };
 
-Number: f64 = <s:r"[0-9]+"> => f64::from_str(s).unwrap();
+Float: f64 = FLOAT => f64::from_str(<>).unwrap();
+Integer: u32 = INTEGER => u32::from_str(<>).unwrap();

@@ -6,6 +6,7 @@ pub mod light;
 pub mod scene_object;
 pub mod shape;
 pub mod transform;
+pub mod render_parameters;
 
 pub use self::camera::*;
 pub use self::color::*;
@@ -15,3 +16,4 @@ pub use self::light::*;
 pub use self::scene_object::*;
 pub use self::shape::*;
 pub use self::transform::*;
+pub use self::render_parameters::*;
