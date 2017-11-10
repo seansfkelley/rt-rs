@@ -32,6 +32,7 @@ pub struct SceneFile {
     pub camera: Camera,
     pub parameters: RenderParamaters,
     pub objects: Vec<SceneObject>,
+    pub lights: Vec<Light>,
 }
 
 pub fn parse(path: &Path) -> SceneFile {
@@ -41,5 +42,6 @@ pub fn parse(path: &Path) -> SceneFile {
         camera: builder.build_camera(),
         parameters: builder.build_render_parameters(),
         objects: builder.objects,
+        lights: builder.lights,
     }
 }

@@ -11,10 +11,13 @@ pub struct SceneBuilder {
     camera_up: Option<Vec3>,
     camera_look_at: Option<Point>,
     antialias: Option<u32>,
+    depth_limit: Option<u32>,
+    background_color: Option<Color>,
     materials: HashMap<String, Rc<Material>>,
-    pub objects: Vec<SceneObject>,
     // TODO: Should transform be an Rc instead? Feels like this can get expensive.
     transform_stack: Vec<Transform>,
+    pub objects: Vec<SceneObject>,
+    pub lights: Vec<Light>,
 }
 
 macro_rules! optional_setter {
@@ -44,6 +47,8 @@ impl SceneBuilder {
     optional_setter!(camera_up, Vec3);
     optional_setter!(camera_look_at, Point);
     optional_setter!(antialias, u32);
+    optional_setter!(depth_limit, u32);
+    optional_setter!(background_color, Color);
 
     pub fn register_material(&mut self, name: &str, material: Box<Material>) {
         self.materials.insert(name.to_owned(), Rc::from(material));
@@ -76,6 +81,10 @@ impl SceneBuilder {
         });
     }
 
+    pub fn add_light(&mut self, light: Light) {
+        self.lights.push(light);
+    }
+
     pub fn build_camera(&self) -> Camera {
         Camera::look_at(
             require_optional!(self, camera_position),
@@ -87,6 +96,8 @@ impl SceneBuilder {
     pub fn build_render_parameters(&self) -> RenderParamaters {
         RenderParamaters {
             antialias: self.antialias.unwrap_or(1),
+            depth_limit: self.antialias.unwrap_or(3),
+            background_color: self.background_color.unwrap_or(BLACK),
         }
     }
 }

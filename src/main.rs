@@ -15,14 +15,12 @@ mod math;
 mod importer;
 
 use core::*;
-use geometry::*;
 use math::*;
 use rand::Rng;
 use scene::Scene;
 use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
-use std::rc::Rc;
 use std::f64::consts::PI;
 
 fn main() {
@@ -43,14 +41,6 @@ fn main() {
     // let bite_positive = Rc::new(Shape::new(three_sphere, yellow_sphere_transform));
     // let bite_negative = Rc::new(SceneObject::new(three_sphere, bite_transform, &yellow_matte));
     // let bite = Rc::new(Difference::new(bite_positive, bite_negative));
-    // let triangle_mesh_geo = Rc::new(TriangleMesh::new(
-    //     vec![
-    //         Point::new(-3f64, -3f64, -1f64),
-    //         Point::new(3f64, -3f64, -1f64),
-    //         Point::new(0f64, 3f64, -1f64),
-    //     ],
-    //     vec![], vec![], vec![(0, 1, 2)],
-    // ));
 
     // let scene_objects: Vec<SceneObject> = vec![
     //     SceneObject::new(unit_sphere, Transform::new(Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64))), &cyan_plastic),
@@ -60,12 +50,12 @@ fn main() {
     //     SceneObject::from_geo(&triangle_mesh_geo, &cyan_plastic),
     // ];
 
-    let scene_lights: Vec<Box<Light>> = vec![
-        Box::new(Light::new(Point::new(5f64, 5f64, 10f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
-        Box::new(Light::new(Point::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
-    ];
-
-    let scene = Scene::new(scene_file.objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 4);
+    let scene = Scene::new(
+        scene_file.objects,
+        scene_file.lights,
+        scene_file.parameters.background_color,
+        scene_file.parameters.depth_limit
+    );
 
     // TODO: Replace with proper FoV calculations.
     let pixel_grid_distance = 5f64;

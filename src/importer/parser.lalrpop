@@ -15,10 +15,13 @@ Statement: () = {
     "camera_up" <Vec3> => builder.camera_up(<>),
     "camera_look_at" <Point> => builder.camera_look_at(<>),
     "antialias" <U32> => builder.antialias(<>),
+    "depth_limit" <U32> => builder.depth_limit(<>),
+    "background_color" <Color> => builder.background_color(<>),
     "material" <name:Identifier> <m:Material> => builder.register_material(name, m),
     "transform pop" => builder.pop_transform(),
     "transform" <Transform> => builder.push_transform(<>),
     "object" <o:Object> => builder.add_object(o.0, o.1),
+    "light" <Light> => builder.add_light(<>),
 };
 
 Material: Box<Material> = {
@@ -64,6 +67,11 @@ Geometry: Box<Geometry> = {
         indices,
     )),
 };
+
+Light: Light = "{"
+    <position:KV<"position", Point>>
+    <color:KV<"color", Color>>
+"}" => Light { position, color };
 
 KV<K, V>: V = K <V>;
 
