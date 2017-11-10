@@ -1,7 +1,6 @@
 - procedural textures - K
 - procedural shapes - K
 - 3D FRACTALS - K
-- TransformedObject
 - BRDF
 - global illumination (photon mapping?) - K
 - field of view
@@ -16,6 +15,5 @@
 - interactivity
 - scene import
 - displacement mapping
-- transform matrices (for rotating/translating/scaling scene objects)
 - Revolving beziers
 - use any geometry as a light source
