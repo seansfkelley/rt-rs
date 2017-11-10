@@ -26,44 +26,46 @@ use std::rc::Rc;
 use std::f64::consts::PI;
 
 fn main() {
-    println!("{:?}", importer::parse(Path::new("scenes/basic.scene")));
+    let scene_file = importer::parse(Path::new("scenes/basic.scene"));
 
-    let cyan_plastic: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0f64, 0.7f64, 0.7f64), specular_exponent: 1f64, reflectivity: 0.1f64 });
-    let bw_checkerboard: Rc<material::Material> = Rc::new(material::CheckerboardMaterial { checks_per_unit: 32, color_a: BLACK, color_b: WHITE });
-    let mirror: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });
-    let yellow_matte: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.7f64, 0.7f64, 0f64), specular_exponent: 0f64, reflectivity: 0f64 });
+    println!("{:?}", scene_file);
 
-    let yellow_sphere_transform = Transform::new(Mat4::create_translation(Vec3::new(4f64, -4f64, 0f64)));
-    let ref unit_sphere = Rc::new(Sphere::new(1f64));
-    let ref three_sphere = Rc::new(Sphere::new(3f64));
-    let ref five_sphere = Rc::new(Sphere::new(5f64));
-    let bite_transform = Transform::new(Mat4::create_translation(Vec3::new(3f64, -3.5f64, 0.5f64)));
-    let bite_positive = Rc::new(Shape::new(three_sphere, yellow_sphere_transform));
-    let bite_negative = Rc::new(SceneObject::new(three_sphere, bite_transform, &yellow_matte));
-    let bite = Rc::new(Difference::new(bite_positive, bite_negative));
-    let triangle_mesh_geo = Rc::new(TriangleMesh::new(
-        vec![
-            Point::new(-3f64, -3f64, -1f64),
-            Point::new(3f64, -3f64, -1f64),
-            Point::new(0f64, 3f64, -1f64),
-        ],
-        vec![], vec![], vec![(0, 1, 2)],
-    ));
+    // let cyan_plastic: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0f64, 0.7f64, 0.7f64), specular_exponent: 1f64, reflectivity: 0.1f64 });
+    // let bw_checkerboard: Rc<material::Material> = Rc::new(material::CheckerboardMaterial { checks_per_unit: 32, color_a: BLACK, color_b: WHITE });
+    // let mirror: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });
+    // let yellow_matte: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.7f64, 0.7f64, 0f64), specular_exponent: 0f64, reflectivity: 0f64 });
 
-    let scene_objects: Vec<SceneObject> = vec![
-        SceneObject::new(unit_sphere, Transform::new(Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64))), &cyan_plastic),
-        SceneObject::new(five_sphere, Transform::new(Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64))), &mirror),
-        SceneObject::new(three_sphere, Transform::new(Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64))), &bw_checkerboard),
-        SceneObject::from_geo(&bite, &yellow_matte),
-        SceneObject::from_geo(&triangle_mesh_geo, &cyan_plastic),
-    ];
+    // let yellow_sphere_transform = Transform::new(Mat4::create_translation(Vec3::new(4f64, -4f64, 0f64)));
+    // let ref unit_sphere = Rc::new(Sphere::new(1f64));
+    // let ref three_sphere = Rc::new(Sphere::new(3f64));
+    // let ref five_sphere = Rc::new(Sphere::new(5f64));
+    // let bite_transform = Transform::new(Mat4::create_translation(Vec3::new(3f64, -3.5f64, 0.5f64)));
+    // let bite_positive = Rc::new(Shape::new(three_sphere, yellow_sphere_transform));
+    // let bite_negative = Rc::new(SceneObject::new(three_sphere, bite_transform, &yellow_matte));
+    // let bite = Rc::new(Difference::new(bite_positive, bite_negative));
+    // let triangle_mesh_geo = Rc::new(TriangleMesh::new(
+    //     vec![
+    //         Point::new(-3f64, -3f64, -1f64),
+    //         Point::new(3f64, -3f64, -1f64),
+    //         Point::new(0f64, 3f64, -1f64),
+    //     ],
+    //     vec![], vec![], vec![(0, 1, 2)],
+    // ));
+
+    // let scene_objects: Vec<SceneObject> = vec![
+    //     SceneObject::new(unit_sphere, Transform::new(Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64))), &cyan_plastic),
+    //     SceneObject::new(five_sphere, Transform::new(Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64))), &mirror),
+    //     SceneObject::new(three_sphere, Transform::new(Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64))), &bw_checkerboard),
+    //     SceneObject::from_geo(&bite, &yellow_matte),
+    //     SceneObject::from_geo(&triangle_mesh_geo, &cyan_plastic),
+    // ];
 
     let scene_lights: Vec<Box<Light>> = vec![
         Box::new(Light::new(Point::new(5f64, 5f64, 10f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
         Box::new(Light::new(Point::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
     ];
 
-    let scene = Scene::new(scene_objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 4);
+    let scene = Scene::new(scene_file.objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 4);
 
     // TODO: Replace with proper FoV calculations.
     let pixel_grid_distance = 5f64;

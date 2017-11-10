@@ -11,11 +11,8 @@ pub struct Shape {
 }
 
 impl Shape {
-    pub fn new<G: Geometry + 'static>(geometry: &Rc<G>, transform: Transform) -> Shape {
-        Shape {
-            geometry: Rc::<G>::clone(geometry),
-            transform,
-        }
+    pub fn new(geometry: Rc<Geometry>, transform: Transform) -> Shape {
+        Shape { geometry, transform }
     }
 
     fn get_intersection(&self, object_intersection: Intersection) -> Intersection {

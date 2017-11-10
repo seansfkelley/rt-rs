@@ -5,7 +5,6 @@ use regex::Regex;
 use std::path::Path;
 use std::fs::File;
 use std::io::Read;
-use std::collections::HashMap;
 
 use core::*;
 use self::scene_builder::SceneBuilder;
@@ -30,9 +29,9 @@ fn strip_comments(s: String) -> String {
 
 #[derive(Debug)]
 pub struct SceneFile {
-    camera: Camera,
-    parameters: RenderParamaters,
-    materials: HashMap<String, Box<Material>>,
+    pub camera: Camera,
+    pub parameters: RenderParamaters,
+    pub objects: Vec<SceneObject>,
 }
 
 pub fn parse(path: &Path) -> SceneFile {
@@ -41,6 +40,6 @@ pub fn parse(path: &Path) -> SceneFile {
     SceneFile {
         camera: builder.build_camera(),
         parameters: builder.build_render_parameters(),
-        materials: builder.materials,
+        objects: builder.objects,
     }
 }

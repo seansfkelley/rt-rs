@@ -1,6 +1,7 @@
 use std::str::FromStr;
 use math::*;
 use core::*;
+use geometry::*;
 use importer::scene_builder::SceneBuilder;
 
 grammar(builder: &mut SceneBuilder);
@@ -17,6 +18,7 @@ Statement: () = {
     "material" <name:Identifier> <m:Material> => builder.register_material(name, m),
     "transform pop" => builder.pop_transform(),
     "transform" <Transform> => builder.push_transform(<>),
+    "object" <o:Object> => builder.add_object(o.0, o.1),
 };
 
 Material: Box<Material> = {
@@ -44,6 +46,12 @@ Transform: Mat4 = {
     "scale" <Vec3> => Mat4::create_scale(<>),
     "translate" <Vec3> => Mat4::create_translation(<>),
     "rotate" <theta_degrees:Float> <axis:Vec3> => Mat4::create_rotation(theta_degrees.to_radians(), axis),
+};
+
+Object = "{" <KV<"geometry", Geometry>> <KV<"material", Identifier>> "}";
+
+Geometry: Box<Geometry> = {
+    "sphere" "{" <Float> "}" => Box::new(Sphere::new(<>)),
 };
 
 KV<K, V>: V = K <V>;

@@ -22,11 +22,30 @@ material yellow_matte flat {
   reflectivity 0
 }
 
-material bw_checks checkerboard {
+material bw_checkerboard checkerboard {
   checks_per_unit 32
 }
 
-transform scale 1 2 3
-transform rotate 45 1 2 3
+transform translate -4 -4 2
+object {
+  geometry sphere { 1 }
+  material cyan_plastic
+}
 transform pop
+
+transform translate 4 4 0
+object {
+  geometry sphere { 5 }
+  material mirror
+}
 transform pop
+
+transform translate -5 4 0
+object {
+  geometry sphere { 3 }
+  material bw_checkerboard
+}
+transform pop
+
+# SceneObject::from_geo(&bite, &yellow_matte),
+# SceneObject::from_geo(&triangle_mesh_geo, &cyan_plastic),

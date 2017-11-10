@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::boxed::Box;
+use std::rc::Rc;
 use core::*;
 use math::*;
+use geometry::*;
 
 #[derive(Debug, Default)]
 pub struct SceneBuilder {
@@ -9,8 +11,10 @@ pub struct SceneBuilder {
     camera_up: Option<Vec3>,
     camera_look_at: Option<Point>,
     antialias: Option<u32>,
-    pub materials: HashMap<String, Box<Material>>,
-    transform_stack: Vec<Mat4>,
+    materials: HashMap<String, Rc<Material>>,
+    pub objects: Vec<SceneObject>,
+    // TODO: Should transform be an Rc instead? Feels like this can get expensive.
+    transform_stack: Vec<Transform>,
 }
 
 macro_rules! optional_setter {
@@ -42,22 +46,34 @@ impl SceneBuilder {
     optional_setter!(antialias, u32);
 
     pub fn register_material(&mut self, name: &str, material: Box<Material>) {
-        self.materials.insert(name.to_owned(), material);
+        self.materials.insert(name.to_owned(), Rc::from(material));
+    }
+
+    fn get_current_transform(&self) -> Transform {
+        match self.transform_stack.last() {
+            Some(transform) => *transform,
+            None => transform::IDENTITY,
+        }
     }
 
     pub fn push_transform(&mut self, mat: Mat4) {
-        let transform = match self.transform_stack.last() {
-            Some(transform) => mat * (*transform), // left-multiply new transformation!
-            None => mat,
-        };
-        self.transform_stack.push(transform);
+        let new_transform_matrix = mat * self.get_current_transform().object_to_world;
+        self.transform_stack.push(Transform::new(new_transform_matrix));
     }
 
     pub fn pop_transform(&mut self) {
         match self.transform_stack.pop() {
-            Some(_) => panic!("tried to pop an empty transform stack"),
-            None => {},
+            Some(_) => {},
+            None => { panic!("tried to pop an empty transform stack"); },
         }
+    }
+
+    pub fn add_object(&mut self, geometry: Box<Geometry>, material_name: &str) {
+        let transform = self.get_current_transform();
+        self.objects.push(SceneObject {
+            shape: Shape::new(Rc::from(geometry), transform),
+            material: Rc::clone(self.materials.get(&material_name.to_owned()).expect(format!("no material named '{}' defined", material_name).as_str())),
+        });
     }
 
     pub fn build_camera(&self) -> Camera {
