@@ -1,8 +1,10 @@
 #![feature(plugin)]
 #![cfg_attr(test, plugin(stainless))]
-
+#[macro_use]
+extern crate lazy_static;
 extern crate image;
 extern crate rand;
+extern crate regex;
 
 mod core;
 mod geometry;

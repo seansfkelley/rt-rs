@@ -45,14 +45,6 @@ impl SceneBuilder {
         self.materials.insert(name.to_owned(), material);
     }
 
-    pub fn make_flat_material(&mut self, name: String, color: Color, specular_exponent: f64, reflectivity: f64) {
-        self.materials.insert(name, Box::new(FlatMaterial {
-            color,
-            specular_exponent,
-            reflectivity
-        }));
-    }
-
     pub fn build_camera(&self) -> Camera {
         Camera::look_at(
             require_optional!(self, camera_position),

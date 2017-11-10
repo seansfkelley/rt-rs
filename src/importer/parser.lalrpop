@@ -10,7 +10,6 @@ match {
     r"[-+]?[0-9]*\.?[0-9]+" => FLOAT,
 } else {
     r"[0-9]+" => INTEGER,
-} else {
     _,
 }
 
@@ -19,7 +18,6 @@ pub SceneFile: () = {
 };
 
 Statement: () = {
-    Comment => {},
     "camera_position" <Point> => builder.camera_position(<>),
     "camera_up" <Vec3> => builder.camera_up(<>),
     "camera_look_at" <Point> => builder.camera_look_at(<>),
@@ -28,21 +26,23 @@ Statement: () = {
 };
 
 Material: Box<Material> = {
-    "flat" "{" "color" <color:Color> "specular_exponent" <specular_exponent:Float> "reflectivity" <reflectivity:Float> "}" => Box::new(FlatMaterial {
-    // "flat" <color:KV<"color", Color> <specular_exponent:KV<"specular_exponent", Float>> <reflectivity:KV<"reflectivity", Float>> => FlatMaterial {
-        color,
-        specular_exponent,
-        reflectivity,
+    "flat" "{"
+        <color:KV<"color", Color>?>
+        <specular_exponent:KV<"specular_exponent", Float>?>
+        <reflectivity:KV<"reflectivity", Float>?>
+    "}" => Box::new(FlatMaterial {
+        color: color.unwrap_or(BLACK),
+        specular_exponent: specular_exponent.unwrap_or(0f64),
+        reflectivity: reflectivity.unwrap_or(0f64),
     }),
 };
 
-KV<K, V>: V = K V;
+KV<K, V>: V = K <V>;
 
 Point: Point = <f1:Float> <f2:Float> <f3:Float> => Point { x: f1, y: f2, z: f3 };
 Vec3: Vec3 = <f1:Float> <f2:Float> <f3:Float> => Vec3 { x: f1, y: f2, z: f3 };
 Color: Color = <f1:Float> <f2:Float> <f3:Float> => Color { r: f1, g: f2, b: f3 };
 
-Comment = r"#.*";
 Identifier = r"[a-zA-Z0-9_]+";
 Float: f64 = FLOAT => f64::from_str(<>).unwrap();
 Integer: u32 = INTEGER => u32::from_str(<>).unwrap();
