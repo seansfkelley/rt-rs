@@ -28,19 +28,15 @@ Statement: () = {
 };
 
 Material: Box<Material> = {
-    "flat" => Box::new(FlatMaterial {
-        color: BLACK,
-        specular_exponent: 0f64,
-        reflectivity: 0f64,
+    "flat" "{" "color" <color:Color> "specular_exponent" <specular_exponent:Float> "reflectivity" <reflectivity:Float> "}" => Box::new(FlatMaterial {
+    // "flat" <color:KV<"color", Color> <specular_exponent:KV<"specular_exponent", Float>> <reflectivity:KV<"reflectivity", Float>> => FlatMaterial {
+        color,
+        specular_exponent,
+        reflectivity,
     }),
-    // "flat" <color:KV<"color", Color> <specular_exponent:KV<"specular_exponent", Float>> <r:KV<"reflectivity", Float>> => FlatMaterial {
-    //     color,
-    //     specular_exponent,
-    //     reflectivity,
-    // },
 };
 
-// KV<K, V>: V = K V;
+KV<K, V>: V = K V;
 
 Point: Point = <f1:Float> <f2:Float> <f3:Float> => Point { x: f1, y: f2, z: f3 };
 Vec3: Vec3 = <f1:Float> <f2:Float> <f3:Float> => Vec3 { x: f1, y: f2, z: f3 };
