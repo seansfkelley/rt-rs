@@ -83,7 +83,7 @@ Geometry: Box<Geometry> = {
     "}" => Box::new(Difference::new(
         Rc::new(Shape::new(Rc::from(positive_geometry), positive_transform.map(Transform::new).unwrap_or(transform::IDENTITY))),
         Rc::new(Shape::new(Rc::from(negative_geometry), negative_transform.map(Transform::new).unwrap_or(transform::IDENTITY))),
-    ))
+    )),
 };
 
 Light: Light = "{"
