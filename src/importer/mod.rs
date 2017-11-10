@@ -6,6 +6,7 @@ use self::scene_builder::SceneBuilder;
 use std::path::Path;
 use std::fs::File;
 use std::io::Read;
+use std::collections::HashMap;
 
 pub fn read_file_contents(path: &Path) -> String {
     let mut contents: String = String::new();
@@ -21,6 +22,7 @@ pub fn read_file_contents(path: &Path) -> String {
 pub struct SceneFile {
     camera: Camera,
     parameters: RenderParamaters,
+    materials: HashMap<String, Box<Material>>,
 }
 
 pub fn parse(path: &Path) -> SceneFile {
@@ -29,5 +31,6 @@ pub fn parse(path: &Path) -> SceneFile {
     SceneFile {
         camera: builder.build_camera(),
         parameters: builder.build_render_parameters(),
+        materials: builder.materials,
     }
 }

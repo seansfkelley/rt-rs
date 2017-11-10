@@ -1,4 +1,6 @@
-use core::{ Camera, RenderParamaters };
+use std::collections::HashMap;
+use std::boxed::Box;
+use core::*;
 use math::*;
 
 #[derive(Debug, Default)]
@@ -7,6 +9,7 @@ pub struct SceneBuilder {
     camera_up: Option<Vec3>,
     camera_look_at: Option<Point>,
     antialias: Option<u32>,
+    pub materials: HashMap<String, Box<Material>>,
 }
 
 macro_rules! optional_setter {
@@ -37,6 +40,18 @@ impl SceneBuilder {
     optional_setter!(camera_up, Vec3);
     optional_setter!(camera_look_at, Point);
     optional_setter!(antialias, u32);
+
+    pub fn register_material(&mut self, name: &str, material: Box<Material>) {
+        self.materials.insert(name.to_owned(), material);
+    }
+
+    pub fn make_flat_material(&mut self, name: String, color: Color, specular_exponent: f64, reflectivity: f64) {
+        self.materials.insert(name, Box::new(FlatMaterial {
+            color,
+            specular_exponent,
+            reflectivity
+        }));
+    }
 
     pub fn build_camera(&self) -> Camera {
         Camera::look_at(

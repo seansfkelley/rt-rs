@@ -1,9 +1,8 @@
-use core::*;
-use color::{ Color, BLACK, WHITE };
 use std::path::Path;
 use std::fmt::Debug;
-use image;
-use image::{ RgbImage, Pixel };
+use image::{ RgbImage, Pixel, open as openImage };
+use color::{ Color, BLACK, WHITE };
+use intersection::Intersection;
 
 type SpecularExponent = f64;
 pub struct SpecularLighting(pub Color, pub SpecularExponent);
@@ -48,7 +47,7 @@ pub struct ImageTextureMaterial {
 
 impl ImageTextureMaterial {
     fn from(p: &Path) -> ImageTextureMaterial {
-        let image = image::open(p).unwrap().to_rgb();
+        let image = openImage(p).unwrap().to_rgb();
         let (width, height) = image.dimensions();
         assert_eq!(width, height);
         ImageTextureMaterial {

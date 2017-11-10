@@ -7,7 +7,6 @@ extern crate rand;
 mod core;
 mod geometry;
 mod scene;
-mod material;
 mod util;
 mod test;
 mod math;
