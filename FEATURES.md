@@ -13,7 +13,6 @@
 - parallelization
 - attenuation
 - interactivity
-- scene import
 - displacement mapping
 - Revolving beziers
 - use any geometry as a light source
