@@ -43,13 +43,13 @@ impl Mat4 {
         Mat4 { cells }
     }
 
+    // TODO: Might have a bug around row/column major-ness.
     pub fn create_rotation(theta: f64, axis: Vec3) -> Mat4 {
         axis.assert_normalized();
         let mut cells = [[0f64; 4]; 4];
         let cos_theta = theta.cos();
         let sin_theta = theta.sin();
         let one_minus_cos_theta = 1f64 - cos_theta;
-        let one_minus_sin_theta = 1f64 - sin_theta;
 
         cells[0][0] = cos_theta + axis.x * axis.x * one_minus_cos_theta;
         cells[0][1] = axis.x * axis.y * one_minus_cos_theta - axis.z * sin_theta;

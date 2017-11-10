@@ -21,21 +21,20 @@ impl Sphere {
         }
     }
 
-    fn get_intersection(&self, t: f64, world_ray: &Ray, object_ray: &Ray) -> Intersection {
-        let object_location = object_ray.at(t);
-        let world_location = object_location.transform(&self.transform);
+    fn get_intersection(&self, t: f64, object_ray: &Ray) -> Intersection {
+        let intersection_point = object_ray.at(t);
 
         // pbrt pg. 119
-        let mut phi = object_location.y.atan2(object_location.x);
+        let mut phi = intersection_point.y.atan2(intersection_point.x);
         if phi < 0f64 {
             phi += 2f64 * PI;
         }
-        let theta = object_location.z.acos();
+        let theta = (intersection_point.z / self.radius).acos();
 
         Intersection {
-            distance: world_location.to_vector().dot(&world_ray.direction),
-            location: world_location,
-            normal: object_location.transform(&self.transform).to_vector().to_normal().as_normalized(),
+            distance: t,
+            location: intersection_point.object_to_world(&self.transform),
+            normal: intersection_point.to_normal().as_normalized().object_to_world(&self.transform),
             uv: (phi / (2f64 * PI), theta / PI),
         }
     }
@@ -60,7 +59,7 @@ fn quadratic(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
 
 impl SceneObject for Sphere {
     fn intersect(&self, world_ray: &Ray) -> Option<Hit> {
-        let object_ray = world_ray.transform(&self.transform);
+        let object_ray = world_ray.world_to_object(&self.transform);
 
         let (a, b, c) = (
             object_ray.direction.magnitude2(),
@@ -68,20 +67,20 @@ impl SceneObject for Sphere {
             object_ray.origin.dot(&object_ray.origin) - self.radius * self.radius
         );
 
-        let exit = match quadratic(a, b, c) {
+        let enter = match quadratic(a, b, c) {
             Some((t0, t1)) => {
                 if t1 < 0f64 {
                     None
                 } else if t0 < 0f64 {
-                    Some(self.get_intersection(t1, world_ray, &object_ray))
+                    Some(self.get_intersection(t1, &object_ray))
                 } else {
-                    Some(self.get_intersection(t0, world_ray, &object_ray))
+                    Some(self.get_intersection(t0, &object_ray))
                 }
             },
             None => None,
         };
 
-        match exit {
+        match enter {
             Some(intersection) => {
                 Some(Hit {
                     enter: Some(intersection),

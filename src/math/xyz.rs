@@ -203,6 +203,7 @@ xyz_mul!(Point);
 xyz_div!(Point);
 xyz_dot!(Point);
 xyz_convertible!(Point, Vec3, to_vector);
+xyz_convertible!(Point, Normal, to_normal);
 
 xyz_base!(Normal);
 xyz_neg!(Normal);
