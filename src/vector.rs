@@ -1,113 +1,197 @@
-use std::ops::{Add, Sub, Div, Mul, Neg};
+use std::ops::{Add, Sub, Div, Mul, Neg, Index};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Vec3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+macro_rules! xyz_base {
+    ($name:ident) => {
+        #[derive(Debug, Copy, Clone, PartialEq)]
+        pub struct $name {
+            pub x: f64,
+            pub y: f64,
+            pub z: f64,
+        }
+
+        impl $name {
+            pub fn new(x: f64, y: f64, z: f64) -> $name {
+                $name { x, y, z }
+            }
+
+            pub fn uniform(value: f64) -> $name {
+                $name { x: value, y: value, z: value }
+            }
+        }
+
+        impl Index<usize> for $name {
+            type Output = f64;
+
+            fn index(&self, index: usize) -> &f64 {
+                match index {
+                    0 => &self.x,
+                    1 => &self.y,
+                    2 => &self.z,
+                    _ => { panic!("index out of range: {}", index); }
+                }
+            }
+        }
+    };
 }
 
-pub const ORIGIN: Vec3 = Vec3 { x: 0f64, y: 0f64, z: 0f64 };
+macro_rules! xyz_op_xyz {
+    ($opname:ident, $fnname:ident, $opsymbol:tt, $lhs:ident, $rhs:ident, $result:ident) => {
+        impl $opname<$rhs> for $lhs {
+            type Output = $result;
+
+            fn $fnname(self, other: $rhs) -> $result {
+                $result {
+                    x: self.x $opsymbol other.x,
+                    y: self.y $opsymbol other.y,
+                    z: self.z $opsymbol other.z,
+                }
+            }
+        }
+    };
+}
+
+macro_rules! xyz_op_f64 {
+    ($opname:ident, $fnname:ident, $opsymbol:tt, $xyz_kind:ident) => {
+        impl $opname<f64> for $xyz_kind {
+            type Output = $xyz_kind;
+
+            fn $fnname(self, other: f64) -> $xyz_kind {
+                $xyz_kind {
+                    x: self.x $opsymbol other,
+                    y: self.y $opsymbol other,
+                    z: self.z $opsymbol other,
+                }
+            }
+        }
+    };
+}
+
+macro_rules! xyz_neg {
+    ($name:ident) => {
+        impl Neg for $name {
+            type Output = $name;
+
+            fn neg(self) -> $name {
+                $name {
+                    x: -self.x,
+                    y: -self.y,
+                    z: -self.z,
+                }
+            }
+        }
+    };
+}
+
+macro_rules! xyz_add {
+    ($lhs:ident, $rhs:ident, $result:ident) => {
+        xyz_op_xyz!(Add, add, +, $lhs, $rhs, $result);
+    };
+}
+
+macro_rules! xyz_sub {
+    ($lhs:ident, $rhs:ident, $result:ident) => {
+        xyz_op_xyz!(Sub, sub, -, $lhs, $rhs, $result);
+    };
+}
+
+macro_rules! xyz_mul {
+    ($name:ident) => {
+        xyz_op_f64!(Mul, mul, *, $name);
+    };
+}
+
+macro_rules! xyz_div {
+    ($name:ident) => {
+        xyz_op_f64!(Div, div, /, $name);
+    };
+}
+
+macro_rules! xyz_dot {
+    ($name:ident, $othername:ident) => {
+        impl $name {
+            pub fn dot(&self, other: $othername) -> f64 {
+                self.x * other.x + self.y * other.y + self.z * other.z
+            }
+        }
+    };
+}
+
+macro_rules! xyz_cross {
+    ($lhs:ident, $rhs:ident, $result:ident) => {
+        impl $lhs {
+            pub fn cross(&self, other: $rhs) -> $result {
+                $result {
+                    x: self.y * other.z - self.z * other.y,
+                    y: self.z * other.x - self.x * other.z,
+                    z: self.x * other.y - self.y * other.x,
+                }
+            }
+        }
+    };
+}
+
+macro_rules! xyz_normalizable {
+    ($name:ident) => {
+        impl $name {
+            pub fn as_unit_vector(&self) -> $name {
+                *self / self.magnitude()
+            }
+
+            pub fn magnitude2(&self) -> f64 {
+                self.dot(*self)
+            }
+
+            pub fn magnitude(&self) -> f64 {
+                self.magnitude2().sqrt()
+            }
+
+        }
+    };
+}
+
+xyz_base!(Vec3);
+xyz_neg!(Vec3);
+xyz_add!(Vec3, Vec3, Vec3);
+xyz_sub!(Vec3, Vec3, Vec3);
+xyz_mul!(Vec3);
+xyz_div!(Vec3);
+xyz_dot!(Vec3, Vec3);
+// TODO: Function overloading!
+// xyz_dot!(Vec3, Normal);
+xyz_cross!(Vec3, Vec3, Vec3);
+// TODO: Function overloading!
+// xyz_cross!(Vec3, Normal, Vec3);
+xyz_normalizable!(Vec3);
+
+xyz_base!(Point);
+xyz_add!(Point, Point, Point);
+xyz_add!(Point, Vec3, Point);
+xyz_sub!(Point, Point, Vec3);
+xyz_sub!(Point, Vec3, Point);
+xyz_mul!(Point);
+xyz_div!(Point);
+
+xyz_base!(Normal);
+xyz_neg!(Normal);
+xyz_add!(Normal, Normal, Normal);
+xyz_sub!(Normal, Normal, Normal);
+xyz_mul!(Normal);
+xyz_div!(Normal);
+// TODO: Function overloading!
+// xyz_dot!(Normal, Vec3);
+xyz_dot!(Normal, Normal);
+xyz_cross!(Normal, Vec3, Vec3);
+xyz_normalizable!(Normal);
 
 impl Vec3 {
-    pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
-        Vec3 { x, y, z }
-    }
-
-    pub fn uniform(value: f64) -> Vec3 {
-        Vec3 { x: value, y: value, z: value }
-    }
-
+    // TODO: Remove this?
     pub fn assert_normalized(&self) {
         debug_assert!((self.magnitude() - 1f64).abs() < 1e-10);
     }
 
-    pub fn cross(&self, other: Vec3) -> Vec3 {
-        Vec3 {
-            x: self.y * other.z - self.z * other.y,
-            y: self.z * other.x - self.x * other.z,
-            z: self.x * other.y - self.y * other.x,
-        }
-    }
-
-    pub fn dot(&self, other: Vec3) -> f64 {
-        self.x * other.x + self.y * other.y + self.z * other.z
-    }
-
-    pub fn magnitude2(&self) -> f64 {
-        self.dot(*self)
-    }
-
-    pub fn magnitude(&self) -> f64 {
-        self.magnitude2().sqrt()
-    }
-
-    pub fn as_unit_vector(&self) -> Vec3 {
-        *self / self.magnitude()
-    }
-
     pub fn reflect(&self, axis: Vec3) -> Vec3 {
+        // If we decide to keep this, should do the normalization ourselves.
         self.assert_normalized();
         *self - axis * (2f64 * self.dot(axis))
-    }
-}
-
-impl Add for Vec3 {
-    type Output = Vec3;
-
-    fn add(self, other: Vec3) -> Vec3 {
-        Vec3 {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
-    }
-}
-
-impl Sub for Vec3 {
-    type Output = Vec3;
-
-    fn sub(self, other: Vec3) -> Vec3 {
-        Vec3 {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
-    }
-}
-
-impl Div<f64> for Vec3 {
-    type Output = Vec3;
-
-    fn div(self, divisor: f64) -> Vec3 {
-        Vec3 {
-            x: self.x / divisor,
-            y: self.y / divisor,
-            z: self.z / divisor,
-        }
-    }
-}
-
-impl Mul<f64> for Vec3 {
-    type Output = Vec3;
-
-    fn mul(self, multiplicand: f64) -> Vec3 {
-        Vec3 {
-            x: self.x * multiplicand,
-            y: self.y * multiplicand,
-            z: self.z * multiplicand,
-        }
-    }
-}
-
-impl Neg for Vec3 {
-    type Output = Vec3;
-
-    fn neg(self) -> Vec3 {
-        Vec3 {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
     }
 }

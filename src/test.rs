@@ -1,13 +1,15 @@
 #![cfg(test)]
 
 use transform::{Mat4, IDENTITY, X_AXIS, Y_AXIS};
-use vector::{Vec3,ORIGIN};
+use vector::Vec3;
 use std;
 use std::f64::consts::PI;
 use geometry::*;
 use std::rc::Rc;
 use material;
 use color::Color;
+
+pub const ORIGIN: Vec3 = Vec3 { x: 0f64, y: 0f64, z: 0f64 };
 
 const TEST_MATRIX: Mat4 = Mat4 {
     cells: [
