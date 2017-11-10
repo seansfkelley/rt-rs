@@ -1,5 +1,6 @@
 use core::*;
 use color::{Color, BLACK};
+use geometry::Geometry;
 
 pub struct Scene {
     objects: Vec<SceneObject>,
