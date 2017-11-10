@@ -17,4 +17,3 @@
 - Revolving beziers
 - use any geometry as a light source
 - add "include" directive for scene files for copy-pasting purposes
-- don't recompile the parser every time if it hasn't changed
