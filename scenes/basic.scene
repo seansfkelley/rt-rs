@@ -2,8 +2,26 @@ camera_position 0 0 25
 camera_up 0 1 0
 camera_look_at 0 0 0
 
+antialias 2
+
 material cyan_plastic flat {
   color 0 .7 .7
   specular_exponent 1
   reflectivity .1
+}
+
+material mirror flat {
+  color 0.9 0.9 0.9
+  specular_exponent 7
+  reflectivity 0.95
+}
+
+material yellow_matte flat {
+  color .7 .7 0
+  specular_exponent 0
+  reflectivity 0
+}
+
+material bw_checks checkerboard {
+  checks_per_unit 32
 }

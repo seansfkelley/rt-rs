@@ -5,14 +5,6 @@ use importer::scene_builder::SceneBuilder;
 
 grammar(builder: &mut SceneBuilder);
 
-match {
-    // Ripped from https://www.regular-expressions.info/floatingpoint.html
-    r"[-+]?[0-9]*\.?[0-9]+" => FLOAT,
-} else {
-    r"[0-9]+" => INTEGER,
-    _,
-}
-
 pub SceneFile: () = {
     Statement* => {},
 };
@@ -35,6 +27,15 @@ Material: Box<Material> = {
         specular_exponent: specular_exponent.unwrap_or(0f64),
         reflectivity: reflectivity.unwrap_or(0f64),
     }),
+    "checkerboard" "{"
+        <checks_per_unit:KV<"checks_per_unit", Integer>?>
+        <color_a:KV<"color_a", Color>?>
+        <color_b:KV<"color_b", Color>?>
+    "}" => Box::new(CheckerboardMaterial {
+        checks_per_unit: checks_per_unit.unwrap_or(10u32),
+        color_a: color_a.unwrap_or(WHITE),
+        color_b: color_b.unwrap_or(BLACK),
+    }),
 };
 
 KV<K, V>: V = K <V>;
@@ -43,6 +44,7 @@ Point: Point = <f1:Float> <f2:Float> <f3:Float> => Point { x: f1, y: f2, z: f3 }
 Vec3: Vec3 = <f1:Float> <f2:Float> <f3:Float> => Vec3 { x: f1, y: f2, z: f3 };
 Color: Color = <f1:Float> <f2:Float> <f3:Float> => Color { r: f1, g: f2, b: f3 };
 
-Identifier = r"[a-zA-Z0-9_]+";
-Float: f64 = FLOAT => f64::from_str(<>).unwrap();
-Integer: u32 = INTEGER => u32::from_str(<>).unwrap();
+Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
+RawNumber = r"[-+]?[0-9]*\.?[0-9]+"; // Ripped from https://www.regular-expressions.info/floatingpoint.html
+Float: f64 = RawNumber => f64::from_str(<>).unwrap();
+Integer: u32 = RawNumber => u32::from_str(<>).unwrap();
