@@ -10,6 +10,7 @@ pub struct SceneBuilder {
     camera_position: Option<Point>,
     camera_up: Option<Vec3>,
     camera_look_at: Option<Point>,
+    image_dimensions: Option<(u32, u32)>,
     antialias: Option<u32>,
     depth_limit: Option<u32>,
     background_color: Option<Color>,
@@ -46,6 +47,7 @@ impl SceneBuilder {
     optional_setter!(camera_position, Point);
     optional_setter!(camera_up, Vec3);
     optional_setter!(camera_look_at, Point);
+    optional_setter!(image_dimensions, (u32, u32));
     optional_setter!(antialias, u32);
     optional_setter!(depth_limit, u32);
     optional_setter!(background_color, Color);
@@ -95,6 +97,7 @@ impl SceneBuilder {
 
     pub fn build_render_parameters(&self) -> RenderParamaters {
         RenderParamaters {
+            image_dimensions: self.image_dimensions.unwrap_or((128u32, 128u32)),
             antialias: self.antialias.unwrap_or(1),
             depth_limit: self.antialias.unwrap_or(3),
             background_color: self.background_color.unwrap_or(BLACK),

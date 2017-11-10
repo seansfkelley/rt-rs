@@ -58,15 +58,19 @@ fn main() {
     );
 
     // TODO: Replace with proper FoV calculations.
+    // TODO: Put into the file.
     let pixel_grid_distance = 5f64;
     let pixel_grid_width = 5f64;
     let pixel_grid_height = 5f64;
 
-    let width = 512u32;
-    let height = 512u32;
-    let frames = 1u32;
+    let (width, height) = scene_file.parameters.image_dimensions;
+    let antialias = scene_file.parameters.antialias;
 
-    let mut camera = Camera::look_at_origin(Point::new(0f64, 0f64, 25f64), Vec3::new(0f64, 1f64, 0f64));
+
+    let mut camera = scene_file.camera.clone();
+
+    // TODO: Put into the file!
+    let frames = 1u32;
     let ref rotation = Transform::new(Mat4::create_rotation((2f64 * PI) / frames as f64, Y_AXIS));
 
     for i in 0..frames {
@@ -76,7 +80,6 @@ fn main() {
         let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
 
         let mut rng = rand::thread_rng();
-        let antialias = 2u32;
         let mut img = RgbImage::new(width, height);
 
         for x in 0..width {

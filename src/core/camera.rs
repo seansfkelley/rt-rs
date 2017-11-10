@@ -1,7 +1,7 @@
 use core::*;
 use math::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Camera {
     pub position: Point,
     pub up: Vec3,
@@ -18,10 +18,6 @@ impl Camera {
             direction,
             right: direction.cross(up).as_normalized(),
         }
-    }
-
-    pub fn look_at_origin(position: Point, up: Vec3) -> Camera {
-        Camera::look_at(position, up, Point::uniform(0f64))
     }
 
     pub fn transform(&self, transform: &Transform) -> Camera {

@@ -10,7 +10,7 @@ pub struct Difference {
 }
 
 impl Difference {
-    pub fn new<G1: Geometry + 'static, G2: Geometry + 'static>(lhs: Rc<G1>, rhs: Rc<G2>) -> Difference {
+    pub fn new(lhs: Rc<Geometry>, rhs: Rc<Geometry>) -> Difference {
         Difference { lhs, rhs }
     }
 }

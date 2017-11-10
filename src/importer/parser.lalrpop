@@ -1,4 +1,6 @@
 use std::str::FromStr;
+use std::boxed::Box;
+use std::rc::Rc;
 use math::*;
 use core::*;
 use geometry::*;
@@ -14,11 +16,12 @@ Statement: () = {
     "camera_position" <Point> => builder.camera_position(<>),
     "camera_up" <Vec3> => builder.camera_up(<>),
     "camera_look_at" <Point> => builder.camera_look_at(<>),
+    "image_dimensions" <Tuple2<U32, U32>> => builder.image_dimensions(<>),
     "antialias" <U32> => builder.antialias(<>),
     "depth_limit" <U32> => builder.depth_limit(<>),
     "background_color" <Color> => builder.background_color(<>),
     "material" <name:Identifier> <m:Material> => builder.register_material(name, m),
-    "transform pop" => builder.pop_transform(),
+    "transform" "pop" => builder.pop_transform(),
     "transform" <Transform> => builder.push_transform(<>),
     "object" <o:Object> => builder.add_object(o.0, o.1),
     "light" <Light> => builder.add_light(<>),
@@ -54,7 +57,9 @@ Transform: Mat4 = {
 Object = "{" <KV<"geometry", Geometry>> <KV<"material", Identifier>> "}";
 
 Geometry: Box<Geometry> = {
-    "sphere" "{" <F64> "}" => Box::new(Sphere::new(<>)),
+    "sphere" "{"
+        <F64>
+    "}" => Box::new(Sphere::new(<>)),
     "triangle_mesh" "{"
         <positions:KV<"positions", List<Point>>>
         <normals:KV<"normals", List<Normal>>?>
@@ -66,6 +71,19 @@ Geometry: Box<Geometry> = {
         uvs.unwrap_or(vec![]),
         indices,
     )),
+    "difference" "{"
+        "positive" "{"
+            "geometry" <positive_geometry:Geometry>
+            <positive_transform:("transform" <Transform>)?>
+        "}"
+        "negative" "{"
+            "geometry" <negative_geometry:Geometry>
+            <negative_transform:("transform" <Transform>)?>
+        "}"
+    "}" => Box::new(Difference::new(
+        Rc::new(Shape::new(Rc::from(positive_geometry), positive_transform.map(Transform::new).unwrap_or(transform::IDENTITY))),
+        Rc::new(Shape::new(Rc::from(negative_geometry), negative_transform.map(Transform::new).unwrap_or(transform::IDENTITY))),
+    ))
 };
 
 Light: Light = "{"

@@ -2,6 +2,7 @@ camera_position 0 0 25
 camera_up 0 1 0
 camera_look_at 0 0 0
 
+image_dimensions 512 512
 depth_limit 10
 antialias 1
 background_color .1 .1 .1
@@ -63,6 +64,20 @@ object {
   material cyan_plastic
 }
 
+object {
+  geometry difference {
+    positive {
+      geometry sphere { 3 }
+      transform translate 4 -4 0
+    }
+    negative {
+      geometry sphere { 3 }
+      transform translate 3 -3.5 .5
+    }
+  }
+  material yellow_matte
+}
+
 light {
   position 5 5 10
   color 0.4 0.4 0.4
@@ -72,6 +87,3 @@ light {
   position -15 -15 0
   color 0.4 0.4 0.4
 }
-
-# SceneObject::from_geo(&bite, &yellow_matte),
-# SceneObject::from_geo(&triangle_mesh_geo, &cyan_plastic),
