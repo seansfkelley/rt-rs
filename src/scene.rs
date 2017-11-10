@@ -1,6 +1,7 @@
 use core::*;
 use color::{Color, BLACK};
 use geometry::Geometry;
+use std::rc::Rc;
 
 pub struct Scene {
     objects: Vec<SceneObject>,
@@ -83,10 +84,10 @@ impl Scene {
                     if hit.enter.is_some() {
                         if closest.is_some() {
                             if hit.enter.as_ref().unwrap().distance < closest.as_ref().unwrap().hit.enter.as_ref().unwrap().distance {
-                                closest = Some(MaterialHit { hit, material: o.material });
+                                closest = Some(MaterialHit { hit, material: Rc::clone(&o.material) });
                             }
                         } else {
-                            closest = Some(MaterialHit { hit, material: o.material });
+                            closest = Some(MaterialHit { hit, material: Rc::clone(&o.material) });
                         }
                     }
                 },

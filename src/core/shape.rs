@@ -18,10 +18,10 @@ pub struct Shape {
 }
 
 impl Shape {
-    pub fn new<G: Geometry>(geometry: &Rc<G>, transform: Mat4) -> Shape {
+    pub fn new<G: Geometry + 'static>(geometry: &Rc<G>, transform: Mat4) -> Shape {
         let inverse_transform = transform.invert().unwrap();
         Shape {
-            geometry: Rc::clone(geometry),
+            geometry: Rc::<G>::clone(geometry),
             transform,
             transpose_transform: transform.transpose(),
             inverse_transform,

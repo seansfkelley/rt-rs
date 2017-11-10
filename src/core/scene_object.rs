@@ -15,29 +15,25 @@ pub struct SceneObject {
 }
 
 impl SceneObject {
-    pub fn from_geo<G: Geometry>(geometry: &Rc<G>, material: &Rc<Material>) -> SceneObject {
+    pub fn from_geo<G: Geometry + 'static>(geometry: &Rc<G>, material: &Rc<Material>) -> SceneObject {
         SceneObject {
             shape: Shape::new(geometry, IDENTITY),
             material: Rc::clone(material),
         }
     }
 
-    pub fn from_shape<G: Geometry>(shape: &Shape, material: &Rc<Material>) -> SceneObject {
+    pub fn from_shape<G: Geometry + 'static>(shape: &Shape, material: &Rc<Material>) -> SceneObject {
         SceneObject {
             shape: shape.clone(),
             material: Rc::clone(material),
         }
     }
 
-    pub fn new<G: Geometry>(geometry: &Rc<G>, transform: Mat4, material: &Rc<Material>) -> SceneObject {
+    pub fn new<G: Geometry + 'static>(geometry: &Rc<G>, transform: Mat4, material: &Rc<Material>) -> SceneObject {
         SceneObject {
             shape: Shape::new(geometry, transform),
             material: Rc::clone(material),
         }
-    }
-
-    pub fn material(&self) -> Rc<Material> {
-        self.material
     }
 }
 
