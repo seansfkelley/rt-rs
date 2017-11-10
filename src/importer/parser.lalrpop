@@ -29,18 +29,18 @@ Statement: () = {
 
 Material: Box<Material> = {
     "flat" "{"
-        <color:KV<"color", Color>?>
-        <specular_exponent:KV<"specular_exponent", F64>?>
-        <reflectivity:KV<"reflectivity", F64>?>
+        <color:("color" <Color>)?>
+        <specular_exponent:("specular_exponent" <F64>)?>
+        <reflectivity:("reflectivity" <F64>)?>
     "}" => Box::new(FlatMaterial {
         color: color.unwrap_or(BLACK),
         specular_exponent: specular_exponent.unwrap_or(0f64),
         reflectivity: reflectivity.unwrap_or(0f64),
     }),
     "checkerboard" "{"
-        <checks_per_unit:KV<"checks_per_unit", U32>?>
-        <color_a:KV<"color_a", Color>?>
-        <color_b:KV<"color_b", Color>?>
+        <checks_per_unit:("checks_per_unit" <U32>)?>
+        <color_a:("color_a" <Color>)?>
+        <color_b:("color_b" <Color>)?>
     "}" => Box::new(CheckerboardMaterial {
         checks_per_unit: checks_per_unit.unwrap_or(10u32),
         color_a: color_a.unwrap_or(WHITE),
@@ -54,17 +54,20 @@ Transform: Mat4 = {
     "rotate" <theta_degrees:F64> <axis:Vec3> => Mat4::create_rotation(theta_degrees.to_radians(), axis),
 };
 
-Object = "{" <KV<"geometry", Geometry>> <KV<"material", Identifier>> "}";
+Object = "{"
+    "geometry" <Geometry>
+    "material" <Identifier>
+"}";
 
 Geometry: Box<Geometry> = {
     "sphere" "{"
-        <F64>
+        "radius" <F64>
     "}" => Box::new(Sphere::new(<>)),
     "triangle_mesh" "{"
-        <positions:("positions" <List<Point>>)>
-        <normals:("normals" List<Normal>)?>
-        <uvs:("uvs" List<Tuple2<F64, F64>>)?>
-        <indices:("indices" List<Tuple3<Usize, Usize, Usize>>)>
+        "positions" <positions:List<Point>>
+        <normals:("normals" <List<Normal>>)?>
+        <uvs:("uvs" <List<Tuple2<F64, F64>>>)?>
+        "indices" <indices:List<Tuple3<Usize, Usize, Usize>>>
     "}" => Box::new(TriangleMesh::new(
         positions,
         normals.unwrap_or(vec![]),
@@ -87,11 +90,9 @@ Geometry: Box<Geometry> = {
 };
 
 Light: Light = "{"
-    <position:KV<"position", Point>>
-    <color:KV<"color", Color>>
+    "position" <position:Point>
+    "color" <color:Color>
 "}" => Light { position, color };
-
-KV<K, V>: V = K <V>;
 
 // Handily adapted from the tutorial!
 // https://github.com/nikomatsakis/lalrpop/blob/master/doc/tutorial.md

@@ -31,21 +31,27 @@ material bw_checkerboard checkerboard {
 
 transform translate -4 -4 2
 object {
-  geometry sphere { 1 }
+  geometry sphere {
+    radius 1
+  }
   material cyan_plastic
 }
 transform pop
 
 transform translate 4 4 0
 object {
-  geometry sphere { 5 }
+  geometry sphere {
+    radius 5
+  }
   material mirror
 }
 transform pop
 
 transform translate -5 4 0
 object {
-  geometry sphere { 3 }
+  geometry sphere {
+    radius 3
+  }
   material bw_checkerboard
 }
 transform pop
@@ -67,11 +73,15 @@ object {
 object {
   geometry difference {
     positive {
-      geometry sphere { 3 }
+      geometry sphere {
+        radius 3
+      }
       transform translate 4 -4 0
     }
     negative {
-      geometry sphere { 3 }
+      geometry sphere {
+        radius 3
+      }
       transform translate 3 -3.5 .5
     }
   }

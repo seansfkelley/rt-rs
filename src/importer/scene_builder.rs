@@ -75,11 +75,12 @@ impl SceneBuilder {
         }
     }
 
-    pub fn add_object(&mut self, geometry: Box<Geometry>, material_name: &str) {
+    pub fn add_object(&mut self, partial_object: (Box<Geometry>, &str)) {
         let transform = self.get_current_transform();
+        let material_name = partial_object.1.to_owned();
         self.objects.push(SceneObject {
-            shape: Shape::new(Rc::from(geometry), transform),
-            material: Rc::clone(self.materials.get(&material_name.to_owned()).expect(format!("no material named '{}' defined", material_name).as_str())),
+            shape: Shape::new(Rc::from(partial_object.0), transform),
+            material: Rc::clone(self.materials.get(&material_name).expect(format!("no material named '{}' defined", material_name).as_str())),
         });
     }
 
