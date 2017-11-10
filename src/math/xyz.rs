@@ -121,14 +121,14 @@ macro_rules! xyz_div {
     };
 }
 
-pub trait Dottable {
-    fn dot(&self, other: &Xyz) -> f64;
+pub trait Dottable : Xyz {
+    fn dot(&self, other: &Dottable) -> f64;
 }
 
 macro_rules! xyz_dot {
     ($name:ident) => {
         impl Dottable for $name {
-            fn dot(&self, other: &Xyz) -> f64 {
+            fn dot(&self, other: &Dottable) -> f64 {
                 self.x * other.x() + self.y * other.y() + self.z * other.z()
             }
         }
