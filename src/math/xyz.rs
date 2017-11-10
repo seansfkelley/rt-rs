@@ -1,6 +1,12 @@
 #![allow(dead_code)]
 use std::ops::{Add, Sub, Div, Mul, Neg, Index};
 
+pub trait Xyz {
+    fn x(&self) -> f64;
+    fn y(&self) -> f64;
+    fn z(&self) -> f64;
+}
+
 macro_rules! xyz_base {
     ($name:ident) => {
         #[derive(Debug, Copy, Clone, PartialEq)]
@@ -31,6 +37,12 @@ macro_rules! xyz_base {
                     _ => { panic!("index out of range: {}", index); }
                 }
             }
+        }
+
+        impl Xyz for $name {
+            fn x(&self) -> f64 { self.x }
+            fn y(&self) -> f64 { self.y }
+            fn z(&self) -> f64 { self.z }
         }
     };
 }
@@ -107,11 +119,15 @@ macro_rules! xyz_div {
     };
 }
 
+pub trait Dottable {
+    fn dot(&self, other: &Xyz) -> f64;
+}
+
 macro_rules! xyz_dot {
-    ($name:ident, $othername:ident) => {
-        impl $name {
-            pub fn dot(&self, other: $othername) -> f64 {
-                self.x * other.x + self.y * other.y + self.z * other.z
+    ($name:ident) => {
+        impl Dottable for $name {
+            fn dot(&self, other: &Xyz) -> f64 {
+                self.x * other.x() + self.y * other.y() + self.z * other.z()
             }
         }
     };
@@ -139,7 +155,7 @@ macro_rules! xyz_normalizable {
             }
 
             pub fn magnitude2(&self) -> f64 {
-                self.dot(*self)
+                self.dot(self)
             }
 
             pub fn magnitude(&self) -> f64 {
@@ -170,13 +186,12 @@ xyz_add!(Vec3, Vec3, Vec3);
 xyz_sub!(Vec3, Vec3, Vec3);
 xyz_mul!(Vec3);
 xyz_div!(Vec3);
-xyz_dot!(Vec3, Vec3);
-// TODO: Function overloading!
-// xyz_dot!(Vec3, Normal);
+xyz_dot!(Vec3);
 xyz_cross!(Vec3, Vec3, Vec3);
 // TODO: Function overloading!
 // xyz_cross!(Vec3, Normal, Vec3);
 xyz_normalizable!(Vec3);
+xyz_convertible!(Vec3, Normal, to_normal);
 
 xyz_base!(Point);
 xyz_neg!(Point);
@@ -194,9 +209,7 @@ xyz_add!(Normal, Normal, Normal);
 xyz_sub!(Normal, Normal, Normal);
 xyz_mul!(Normal);
 xyz_div!(Normal);
-// TODO: Function overloading!
-// xyz_dot!(Normal, Vec3);
-xyz_dot!(Normal, Normal);
+xyz_dot!(Normal);
 xyz_cross!(Normal, Vec3, Vec3);
 xyz_normalizable!(Normal);
 xyz_convertible!(Normal, Vec3, to_vector);
@@ -210,6 +223,6 @@ impl Vec3 {
     pub fn reflect(&self, axis: Vec3) -> Vec3 {
         // If we decide to keep this, should do the normalization ourselves.
         self.assert_normalized();
-        *self - axis * (2f64 * self.dot(axis))
+        *self - axis * (2f64 * self.dot(&axis))
     }
 }

@@ -1,4 +1,5 @@
 use core::*;
+use math::*;
 use color::{Color, BLACK};
 
 pub struct Scene {
@@ -45,8 +46,8 @@ impl Scene {
                                 color + (DEBUG_SHADOW_COLOR / (self.lights.len() as f64))
                             } else {
                                 let light_direction = (light.position - intersection.location).as_normalized();
-                                let diffuse_illumination = lighting.diffuse * light.color * intersection.normal.dot(light_direction).max(0f64);
-                                let specular_illumination = lighting.specular.0 * light.color * intersection.normal.dot((light_direction - ray.direction).as_normalized()).max(0f64).powf(lighting.specular.1);
+                                let diffuse_illumination = lighting.diffuse * light.color * intersection.normal.dot(&light_direction).max(0f64);
+                                let specular_illumination = lighting.specular.0 * light.color * intersection.normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(lighting.specular.1);
                                 color + diffuse_illumination + specular_illumination
                             }
                         });
@@ -58,7 +59,7 @@ impl Scene {
 
                         if reflectivity > 0f64 {
                             let new_origin = ray.at(intersection.distance);
-                            let new_direction = ray.direction.reflect(intersection.normal);
+                            let new_direction = ray.direction.reflect(intersection.normal.to_vector());
                             let new_ray = Ray::new(new_origin, new_direction);
                             color = (1f64 - reflectivity) * color + reflectivity * self.raytrace_depth_limited(new_ray, depth + 1)
                         }

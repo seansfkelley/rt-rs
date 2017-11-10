@@ -2,6 +2,7 @@ use std::f64::consts::PI;
 use std::rc::Rc;
 
 use core::*;
+use math::*;
 use material::Material;
 
 #[derive(Debug)]
@@ -34,9 +35,9 @@ impl Sphere {
         let theta = object_location.z.acos();
 
         Intersection {
-            distance: world_location.dot(world_ray.direction),
+            distance: world_location.to_vector().dot(&world_ray.direction),
             location: world_location,
-            normal: object_location.transform(&self.transform).as_normalized(),
+            normal: object_location.transform(&self.transform).to_vector().to_normal().as_normalized(),
             uv: (phi / (2f64 * PI), theta / PI),
         }
     }
@@ -46,8 +47,8 @@ impl SceneObject for Sphere {
     // TODO: Verify this implementation against pbrt.
     fn intersect(&self, world_ray: &Ray) -> Option<Hit> {
         let object_ray = world_ray.transform(&self.transform);
-        let l = -object_ray.origin;
-        let t_center = l.dot(object_ray.direction);
+        let l = -object_ray.origin.to_vector();
+        let t_center = l.dot(&object_ray.direction);
 
         if t_center + self.radius <= 0f64 {
             None

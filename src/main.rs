@@ -23,7 +23,7 @@ use std::path::Path;
 use std::rc::Rc;
 
 fn main() {
-    let camera_position = Vec3::new(0f64, 0f64, 25f64);
+    let camera_position = Point::new(0f64, 0f64, 25f64);
     let camera_up = Vec3::new(0f64, 1f64, 0f64).as_normalized();
     let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_normalized();
     let camera_right = camera_direction.cross(camera_up).as_normalized();
@@ -59,9 +59,9 @@ fn main() {
         Box::new(Difference::new(yellow_sphere, bite)),
         Box::new(TriangleMesh::new(
             vec![
-                Vec3::new(-3f64, -3f64, 0f64),
-                Vec3::new(3f64, -3f64, 0f64),
-                Vec3::new(0f64, 3f64, 0f64),
+                Point::new(-3f64, -3f64, 0f64),
+                Point::new(3f64, -3f64, 0f64),
+                Point::new(0f64, 3f64, 0f64),
             ],
             vec![], vec![], vec![(0, 1, 2)], &cyan_plastic
         ))
