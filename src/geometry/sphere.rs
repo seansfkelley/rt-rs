@@ -60,32 +60,24 @@ impl Geometry for Sphere {
             ray.origin.dot(&ray.origin) - self.radius * self.radius
         );
 
-        let enter = match quadratic(a, b, c) {
+        match quadratic(a, b, c) {
             Some((t0, t1)) => {
                 if t1 < 0f64 {
                     None
                 } else if t0 < 0f64 {
-                    Some(self.get_intersection(t1, &ray))
+                    Some(Hit {
+                        enter: None,
+                        exit: self.get_intersection(t1, &ray),
+                        debug: false
+                    })
                 } else {
-                    Some(self.get_intersection(t0, &ray))
+                    Some(Hit {
+                        enter: Some(self.get_intersection(t0, &ray)),
+                        exit: self.get_intersection(t1, &ray),
+                        debug: false
+                    })
                 }
-            },
-            None => None,
-        };
-
-        match enter {
-            Some(intersection) => {
-                Some(Hit {
-                    enter: Some(intersection),
-                    exit: Intersection {
-                        distance: -100f64,
-                        location: Point::new(0f64, 0f64, 0f64),
-                        normal: Normal::new(0f64, 0f64, 0f64),
-                        uv: (0f64, 0f64),
-                    },
-                    debug: false
-                })
-            },
+            }
             None => None,
         }
     }

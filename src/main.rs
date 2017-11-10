@@ -35,7 +35,7 @@ fn main() {
 
     let width = 512u32;
     let height = 512u32;
-    let antialias = 2u32;
+    let antialias = 4u32;
 
     let x_step = camera_right * pixel_grid_width / width as f64;
     let y_step = -camera_up * pixel_grid_height / height as f64;
@@ -57,9 +57,9 @@ fn main() {
     let bite = Rc::new(Difference::new(bite_positive, bite_negative));
     let triangle_mesh_geo = Rc::new(TriangleMesh::new(
         vec![
-            Point::new(-3f64, -3f64, 0f64),
-            Point::new(3f64, -3f64, 0f64),
-            Point::new(0f64, 3f64, 0f64),
+            Point::new(-3f64, -3f64, -1f64),
+            Point::new(3f64, -3f64, -1f64),
+            Point::new(0f64, 3f64, -1f64),
         ],
         vec![], vec![], vec![(0, 1, 2)],
     ));
@@ -77,7 +77,7 @@ fn main() {
         Box::new(Light::new(Point::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
     ];
 
-    let scene = Scene::new(scene_objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 0);
+    let scene = Scene::new(scene_objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 4);
 
     let mut rng = rand::thread_rng();
     let mut img = RgbImage::new(width, height);
