@@ -1,4 +1,4 @@
-use vector::Vec3;
+use core::Vec3;
 use color::Color;
 
 #[derive(Debug, Clone, Copy)]

@@ -5,9 +5,7 @@ extern crate image;
 extern crate rand;
 
 mod core;
-mod vector;
 mod geometry;
-mod color;
 mod scene;
 mod material;
 mod util;
@@ -18,7 +16,7 @@ use geometry::*;
 use core::*;
 use rand::Rng;
 use color::{ Color, BLACK, WHITE };
-use vector::Vec3;
+use core::Vec3;
 use scene::Scene;
 use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;

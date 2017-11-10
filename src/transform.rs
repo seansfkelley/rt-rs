@@ -1,5 +1,5 @@
 use std::ops::Mul;
-use vector::Vec3;
+use core::Vec3;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Mat4 {

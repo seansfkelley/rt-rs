@@ -1,4 +1,4 @@
-use vector::Vec3;
+use core::Vec3;
 use super::scene_object::SceneObject;
 
 pub type Uv = (f64, f64);
