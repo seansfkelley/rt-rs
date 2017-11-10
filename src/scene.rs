@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 pub struct Scene {
     objects: Vec<SceneObject>,
-    lights: Vec<Box<Light>>,
+    lights: Vec<Light>,
     background_color: Color,
     depth_limit: u32,
 }
@@ -16,7 +16,7 @@ static DEBUG_BASE_COLOR: Color = Color { r: 1f64, g: 0f64, b: 0f64 };
 impl Scene {
     pub fn new(
         objects: Vec<SceneObject>,
-        lights: Vec<Box<Light>>,
+        lights: Vec<Light>,
         background_color: Color,
         depth_limit: u32
     ) -> Scene {

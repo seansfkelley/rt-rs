@@ -1,0 +1,89 @@
+camera_position 0 0 25
+camera_up 0 1 0
+camera_look_at 0 0 0
+
+image_dimensions 512 512
+depth_limit 10
+antialias 1
+background_color .1 .1 .1
+
+material cyan_plastic flat {
+  color 0 .7 .7
+  specular_exponent 1
+  reflectivity .1
+}
+
+material mirror flat {
+  color 0.9 0.9 0.9
+  specular_exponent 7
+  reflectivity 0.95
+}
+
+material yellow_matte flat {
+  color .7 .7 0
+  specular_exponent 0
+  reflectivity 0
+}
+
+material bw_checkerboard checkerboard {
+  checks_per_unit 32
+}
+
+transform translate -4 -4 2
+object {
+  geometry sphere { 1 }
+  material cyan_plastic
+}
+transform pop
+
+transform translate 4 4 0
+object {
+  geometry sphere { 5 }
+  material mirror
+}
+transform pop
+
+transform translate -5 4 0
+object {
+  geometry sphere { 3 }
+  material bw_checkerboard
+}
+transform pop
+
+object {
+  geometry triangle_mesh {
+    positions [
+      -3  -3 -1,
+       3  -3 -1,
+       0   3 -1,
+    ]
+    indices [
+      0 1 2
+    ]
+  }
+  material cyan_plastic
+}
+
+object {
+  geometry difference {
+    positive {
+      geometry sphere { 3 }
+      transform translate 4 -4 0
+    }
+    negative {
+      geometry sphere { 3 }
+      transform translate 3 -3.5 .5
+    }
+  }
+  material yellow_matte
+}
+
+light {
+  position 5 5 10
+  color 0.4 0.4 0.4
+}
+
+light {
+  position -15 -15 0
+  color 0.4 0.4 0.4
+}

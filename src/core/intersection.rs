@@ -23,6 +23,7 @@ pub struct MaterialHit {
 }
 
 impl Hit {
+    #[allow(dead_code)]
     pub fn debug(self, debug: bool) -> Hit {
         Hit {
             enter: self.enter,

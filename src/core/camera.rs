@@ -1,8 +1,7 @@
 use core::*;
-use geometry::*;
 use math::*;
-use core::transform;
 
+#[derive(Debug, Clone, Copy)]
 pub struct Camera {
     pub position: Point,
     pub up: Vec3,
@@ -11,8 +10,8 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn look_at_origin(position: Point, up: Vec3) -> Camera {
-        let direction = (-position).as_vector().as_normalized();
+    pub fn look_at(position: Point, up: Vec3, look_at: Point) -> Camera {
+        let direction = (look_at - position).as_normalized();
         Camera {
             position,
             up,
