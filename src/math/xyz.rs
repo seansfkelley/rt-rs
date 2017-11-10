@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 use std::ops::{Add, Sub, Div, Mul, Neg, Index};
 
+pub const ORIGIN: Point = Point { x: 0f64, y: 0f64, z: 0f64 };
+
 pub trait Xyz {
     fn x(&self) -> f64;
     fn y(&self) -> f64;

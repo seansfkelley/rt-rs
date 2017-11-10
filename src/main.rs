@@ -23,25 +23,6 @@ use std::path::Path;
 use std::rc::Rc;
 
 fn main() {
-    let camera_position = Point::new(0f64, 0f64, 25f64);
-    let camera_up = Vec3::new(0f64, 1f64, 0f64).as_normalized();
-    let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_normalized();
-    let camera_right = camera_direction.cross(camera_up).as_normalized();
-
-    // TODO: Replace with proper FoV calculations.
-    let pixel_grid_distance = 5f64;
-    let pixel_grid_width = 5f64;
-    let pixel_grid_height = 5f64;
-
-    let width = 512u32;
-    let height = 512u32;
-    let antialias = 4u32;
-
-    let x_step = camera_right * pixel_grid_width / width as f64;
-    let y_step = -camera_up * pixel_grid_height / height as f64;
-    let grid_center = camera_position + camera_direction * pixel_grid_distance;
-    let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
-
     let cyan_plastic: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0f64, 0.7f64, 0.7f64), specular_exponent: 1f64, reflectivity: 0.1f64 });
     let bw_checkerboard: Rc<material::Material> = Rc::new(material::CheckerboardMaterial { checks_per_unit: 32, color_a: BLACK, color_b: WHITE });
     let mirror: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });
@@ -79,7 +60,23 @@ fn main() {
 
     let scene = Scene::new(scene_objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 4);
 
+    // TODO: Replace with proper FoV calculations.
+    let pixel_grid_distance = 5f64;
+    let pixel_grid_width = 5f64;
+    let pixel_grid_height = 5f64;
+
+    let width = 512u32;
+    let height = 512u32;
+
+    let camera = Camera::look_at_origin(Point::new(0f64, 0f64, 25f64), Vec3::new(0f64, 1f64, 0f64));
+
+    let x_step = camera.right * pixel_grid_width / width as f64;
+    let y_step = -camera.up * pixel_grid_height / height as f64;
+    let grid_center = camera.position + camera.direction * pixel_grid_distance;
+    let grid_start = grid_center - x_step * (width as f64 / 2f64) - y_step * (height as f64 / 2f64);
+
     let mut rng = rand::thread_rng();
+    let antialias = 4u32;
     let mut img = RgbImage::new(width, height);
 
     for x in 0..width {
@@ -105,7 +102,7 @@ fn main() {
                         };
 
                     let origin = grid_start + x_step * (x as f64 + x_jitter) + y_step * (y as f64 + y_jitter);
-                    let direction = (origin - camera_position).as_normalized();
+                    let direction = (origin - camera.position).as_normalized();
                     let ray = Ray::new(origin, direction);
                     color = color + scene.raytrace(ray);
                 }
