@@ -11,6 +11,7 @@ mod material;
 mod util;
 mod test;
 mod math;
+mod importer;
 
 use core::*;
 use geometry::*;
@@ -24,6 +25,8 @@ use std::rc::Rc;
 use std::f64::consts::PI;
 
 fn main() {
+    println!("{:?}", importer::parse("camera_position 1 2 3"));
+
     let cyan_plastic: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0f64, 0.7f64, 0.7f64), specular_exponent: 1f64, reflectivity: 0.1f64 });
     let bw_checkerboard: Rc<material::Material> = Rc::new(material::CheckerboardMaterial { checks_per_unit: 32, color_a: BLACK, color_b: WHITE });
     let mirror: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });

@@ -2,10 +2,16 @@
 name = "rt-rs"
 version = "0.1.0"
 authors = ["Sean Kelley <seansfkelley@gmail.com>", "Kevin Verdieck <kevinverdieck@gmail.com>"]
+build = "build.rs"
+
+[build-dependencies]
+lalrpop = "0.13.1"
 
 [dependencies]
 image = "0.17.0"
 rand = "0.3.17"
+lalrpop-util = "0.13.1"
+regex = "0.2.1"
 
 [dev-dependencies]
 stainless = "0.1.12"

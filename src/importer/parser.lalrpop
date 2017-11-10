@@ -1,0 +1,28 @@
+use std::str::FromStr;
+use math::*;
+use core::*;
+use importer::scene_builder::SceneBuilder;
+
+grammar(builder: &mut SceneBuilder);
+
+pub SceneFile: () = {
+  "camera_position" <p:Point> => {
+    builder.camera_position(p);
+  },
+  "camera_up" <v:Vec3> => {
+    builder.camera_up(v);
+  },
+  "look_at" <p:Point> => {
+    builder.look_at(p);
+  },
+};
+
+Point: Point = {
+  <f1:Number> <f2:Number> <f3:Number> => Point { x: f1, y: f2, z: f3 },
+};
+
+Vec3: Vec3 = {
+  <f1:Number> <f2:Number> <f3:Number> => Vec3 { x: f1, y: f2, z: f3 },
+};
+
+Number: f64 = <s:r"[0-9]+"> => f64::from_str(s).unwrap();
