@@ -1,4 +1,4 @@
-use math::Vec3;
+use math::*;
 use material::Material;
 use std::rc::Rc;
 
@@ -6,8 +6,8 @@ pub type Uv = (f64, f64);
 
 pub struct Intersection {
     pub distance: f64,
-    pub location: Vec3,
-    pub normal: Vec3,
+    pub location: Point,
+    pub normal: Normal,
     pub uv: Uv,
 }
 

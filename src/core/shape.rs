@@ -5,38 +5,29 @@ use super::intersection::Hit;
 use material::Material;
 use geometry::Geometry;
 use core::*;
-use math::transform::Mat4;
 
 #[derive(Debug, Clone)]
 pub struct Shape {
     geometry: Rc<Geometry>,
-    transform: Mat4,
-    // derivative, but should be cached
-    transpose_transform: Mat4,
-    inverse_transform: Mat4,
-    inverse_transform_without_translation: Mat4,
+    transform: Transform,
 }
 
 impl Shape {
-    pub fn new<G: Geometry + 'static>(geometry: &Rc<G>, transform: Mat4) -> Shape {
-        let inverse_transform = transform.invert().unwrap();
+    pub fn new<G: Geometry + 'static>(geometry: &Rc<G>, transform: Transform) -> Shape {
         Shape {
             geometry: Rc::<G>::clone(geometry),
             transform,
-            transpose_transform: transform.transpose(),
-            inverse_transform,
-            inverse_transform_without_translation: inverse_transform.without_translation(),
         }
     }
 
     fn get_intersection(&self, object_intersection: Intersection, world_ray: &Ray, object_ray: &Ray) -> Intersection {
-        let world_location = self.transform * object_intersection.location;
+        let world_location = object_intersection.location.object_to_world(&self.transform);
 
         Intersection {
-            distance: world_location.dot(world_ray.direction),
+            distance: object_intersection.distance,
             location: world_location,
             // http://www.unknownroad.com/rtfm/graphics/rt_normals.html
-            normal: (self.transpose_transform * object_intersection.normal).as_unit_vector(),
+            normal: object_intersection.normal.object_to_world(&self.transform),
             uv: object_intersection.uv,
         }
     }
@@ -44,7 +35,7 @@ impl Shape {
 
 impl Geometry for Shape {
     fn intersect(&self, world_ray: &Ray) -> Option<Hit> {
-        let ref object_ray = world_ray.transform(self.inverse_transform, self.inverse_transform_without_translation);
+        let ref object_ray = world_ray.world_to_object(&self.transform);
         let object_space_hit_option = self.geometry.intersect(object_ray);
         object_space_hit_option.map(|object_space_hit| {
             Hit {

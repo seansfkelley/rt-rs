@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 use std::ops::Mul;
-use super::Vec3;
+use super::xyz::*;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Mat4 {
-    // Row-major
+    // (row, column)
     pub cells: [[f64; 4]; 4],
 }
 
@@ -43,13 +43,13 @@ impl Mat4 {
         Mat4 { cells }
     }
 
+    // TODO: Might have a bug around row/column major-ness.
     pub fn create_rotation(theta: f64, axis: Vec3) -> Mat4 {
         axis.assert_normalized();
         let mut cells = [[0f64; 4]; 4];
         let cos_theta = theta.cos();
         let sin_theta = theta.sin();
         let one_minus_cos_theta = 1f64 - cos_theta;
-        let one_minus_sin_theta = 1f64 - sin_theta;
 
         cells[0][0] = cos_theta + axis.x * axis.x * one_minus_cos_theta;
         cells[0][1] = axis.x * axis.y * one_minus_cos_theta - axis.z * sin_theta;
@@ -77,15 +77,6 @@ impl Mat4 {
 
     pub fn rotate(&self, theta: f64, axis: Vec3) -> Mat4 {
         *self * Mat4::create_rotation(theta, axis)
-    }
-
-    // TODO: make sure this is real
-    pub fn without_translation(&self) -> Mat4 {
-        let mut cells = self.cells.clone();
-        cells[0][3] = 0f64;
-        cells[1][3] = 0f64;
-        cells[2][3] = 0f64;
-        Mat4 { cells }
     }
 
     pub fn transpose(&self) -> Mat4 {
@@ -251,26 +242,5 @@ impl Mul for Mat4 {
         }
 
         Mat4 { cells }
-    }
-}
-
-impl Mul<Vec3> for Mat4 {
-    type Output = Vec3;
-
-    fn mul(self, other: Vec3) -> Vec3 {
-        let mut vec4 = [0f64; 4];
-
-        for i in 0..4 {
-            vec4[i] = self.get_cell(0, i) * other.x
-                + self.get_cell(1, i) * other.y
-                + self.get_cell(2, i) * other.z
-                + self.get_cell(3, i);
-        }
-
-        Vec3 {
-            x: vec4[0],
-            y: vec4[1],
-            z: vec4[2],
-        }
     }
 }

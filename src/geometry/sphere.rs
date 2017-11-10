@@ -2,11 +2,10 @@ use std::f64::consts::PI;
 use std::rc::Rc;
 
 use core::*;
-use transform::Mat4;
 use material::Material;
 use geometry::Geometry;
 use util::Clamp;
-use math::Vec3;
+use math::*;
 
 #[derive(Debug)]
 pub struct Sphere {
@@ -33,7 +32,7 @@ impl Sphere {
         Intersection {
             distance: t,
             location: intersection_point,
-            normal: intersection_point.as_unit_vector(),
+            normal: intersection_point.to_normal().as_normalized(),
             uv: (phi / (2f64 * PI), theta / PI),
         }
     }
@@ -60,8 +59,8 @@ impl Geometry for Sphere {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
         let (a, b, c) = (
             ray.direction.magnitude2(),
-            2f64 * (ray.direction.dot(ray.origin)),
-            ray.origin.dot(ray.origin) - self.radius * self.radius
+            2f64 * (ray.direction.dot(&ray.origin)),
+            ray.origin.dot(&ray.origin) - self.radius * self.radius
         );
 
         let enter = match quadratic(a, b, c) {
@@ -83,8 +82,8 @@ impl Geometry for Sphere {
                     enter: Some(intersection),
                     exit: Intersection {
                         distance: -100f64,
-                        location: Vec3::new(0f64, 0f64, 0f64),
-                        normal: Vec3::new(0f64, 0f64, 0f64),
+                        location: Point::new(0f64, 0f64, 0f64),
+                        normal: Normal::new(0f64, 0f64, 0f64),
                         uv: (0f64, 0f64),
                     },
                     debug: false

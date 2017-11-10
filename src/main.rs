@@ -23,10 +23,10 @@ use std::path::Path;
 use std::rc::Rc;
 
 fn main() {
-    let camera_position = Vec3::new(0f64, 0f64, 25f64);
-    let camera_up = Vec3::new(0f64, 1f64, 0f64).as_unit_vector();
-    let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_unit_vector();
-    let camera_right = camera_direction.cross(camera_up).as_unit_vector();
+    let camera_position = Point::new(0f64, 0f64, 25f64);
+    let camera_up = Vec3::new(0f64, 1f64, 0f64).as_normalized();
+    let camera_direction = Vec3::new(0f64, 0f64, -1f64).as_normalized();
+    let camera_right = camera_direction.cross(camera_up).as_normalized();
 
     // TODO: Replace with proper FoV calculations.
     let pixel_grid_distance = 5f64;
@@ -47,34 +47,34 @@ fn main() {
     let mirror: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.9f64, 0.9f64, 0.9f64), specular_exponent: 7f64, reflectivity: 0.9f64 });
     let yellow_matte: Rc<material::Material> = Rc::new(material::FlatMaterial { color: Color::new(0.7f64, 0.7f64, 0f64), specular_exponent: 0f64, reflectivity: 0f64 });
 
-    let yellow_sphere_transform = Mat4::create_translation(Vec3::new(4f64, -4f64, 0f64));
+    let yellow_sphere_transform = Transform::new(Mat4::create_translation(Vec3::new(4f64, -4f64, 0f64)));
     let ref unit_sphere = Rc::new(Sphere::new(1f64));
     let ref three_sphere = Rc::new(Sphere::new(3f64));
     let ref five_sphere = Rc::new(Sphere::new(5f64));
-    let bite_transform = Mat4::create_translation(Vec3::new(3f64, -3.5f64, 0.5f64));
+    let bite_transform = Transform::new(Mat4::create_translation(Vec3::new(3f64, -3.5f64, 0.5f64)));
     let bite_positive = Rc::new(Shape::new(three_sphere, yellow_sphere_transform));
     let bite_negative = Rc::new(SceneObject::new(three_sphere, bite_transform, &yellow_matte));
     let bite = Rc::new(Difference::new(bite_positive, bite_negative));
     let triangle_mesh_geo = Rc::new(TriangleMesh::new(
         vec![
-            Vec3::new(-3f64, -3f64, 0f64),
-            Vec3::new(3f64, -3f64, 0f64),
-            Vec3::new(0f64, 3f64, 0f64),
+            Point::new(-3f64, -3f64, 0f64),
+            Point::new(3f64, -3f64, 0f64),
+            Point::new(0f64, 3f64, 0f64),
         ],
         vec![], vec![], vec![(0, 1, 2)],
     ));
 
     let scene_objects: Vec<SceneObject> = vec![
-        SceneObject::new(unit_sphere, Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64)), &cyan_plastic),
-        SceneObject::new(five_sphere, Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64)), &mirror),
-        SceneObject::new(three_sphere, Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64)), &bw_checkerboard),
+        SceneObject::new(unit_sphere, Transform::new(Mat4::create_translation(Vec3::new(-4f64, -4f64, 2f64))), &cyan_plastic),
+        SceneObject::new(five_sphere, Transform::new(Mat4::create_translation(Vec3::new(4f64, 4f64, 0f64))), &mirror),
+        SceneObject::new(three_sphere, Transform::new(Mat4::create_translation(Vec3::new(-5f64, 4f64, 0f64))), &bw_checkerboard),
         SceneObject::from_geo(&bite, &yellow_matte),
         SceneObject::from_geo(&triangle_mesh_geo, &cyan_plastic),
     ];
 
     let scene_lights: Vec<Box<Light>> = vec![
-        Box::new(Light::new(Vec3::new(5f64, 5f64, 10f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
-        Box::new(Light::new(Vec3::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
+        Box::new(Light::new(Point::new(5f64, 5f64, 10f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
+        Box::new(Light::new(Point::new(-15f64, -15f64, 0f64), Color::new(0.4f64, 0.4f64, 0.4f64))),
     ];
 
     let scene = Scene::new(scene_objects, scene_lights, Color::new(0.1f64, 0.1f64, 0.1f64), 0);
@@ -105,7 +105,7 @@ fn main() {
                         };
 
                     let origin = grid_start + x_step * (x as f64 + x_jitter) + y_step * (y as f64 + y_jitter);
-                    let direction = (origin - camera_position).as_unit_vector();
+                    let direction = (origin - camera_position).as_normalized();
                     let ray = Ray::new(origin, direction);
                     color = color + scene.raytrace(ray);
                 }

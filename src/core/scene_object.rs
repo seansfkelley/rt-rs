@@ -5,8 +5,6 @@ use super::intersection::Hit;
 use material::Material;
 use geometry::Geometry;
 use core::*;
-use math::transform::Mat4;
-use math::transform::IDENTITY;
 
 #[derive(Debug)]
 pub struct SceneObject {
@@ -29,7 +27,7 @@ impl SceneObject {
         }
     }
 
-    pub fn new<G: Geometry + 'static>(geometry: &Rc<G>, transform: Mat4, material: &Rc<Material>) -> SceneObject {
+    pub fn new<G: Geometry + 'static>(geometry: &Rc<G>, transform: Transform, material: &Rc<Material>) -> SceneObject {
         SceneObject {
             shape: Shape::new(geometry, transform),
             material: Rc::clone(material),

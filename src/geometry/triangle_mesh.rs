@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use core::*;
-use math::Vec3;
+use math::*;
 use material::Material;
 use geometry::Geometry;
 
@@ -9,8 +9,8 @@ pub type TriangleIndices = (usize, usize, usize);
 
 #[derive(Debug)]
 pub struct TriangleMesh {
-    positions: Vec<Vec3>,
-    normals: Vec<Vec3>,
+    positions: Vec<Point>,
+    normals: Vec<Normal>,
     uvs: Vec<Uv>,
     indices: Vec<TriangleIndices>,
 }
@@ -19,7 +19,7 @@ impl TriangleMesh {
     // FYI, the "front" is when the vertices are in counterclockwise order.
     // > By default, counterclockwise polygons are taken to be front-facing.
     // (https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glFrontFace.xml)
-    pub fn new(positions: Vec<Vec3>, normals: Vec<Vec3>, uvs: Vec<Uv>, indices: Vec<TriangleIndices>) -> TriangleMesh {
+    pub fn new(positions: Vec<Point>, normals: Vec<Normal>, uvs: Vec<Uv>, indices: Vec<TriangleIndices>) -> TriangleMesh {
         // TODO: When we actually do UVs and given normals, do this.
         // assert_eq!(positions.len(), normals.len());
         // assert_eq!(positions.len(), uvs.len());
@@ -34,24 +34,24 @@ impl TriangleMesh {
         let e1 = p2 - p1;
         let e2 = p3 - p1;
         let s1 = ray.direction.cross(e2);
-        let divisor = s1.dot(e1);
+        let divisor = s1.dot(&e1);
         if divisor == 0f64 {
             return None;
         }
 
         let d = ray.origin - p1;
-        let b1 = d.dot(s1) / divisor;
+        let b1 = d.dot(&s1) / divisor;
         if b1 < 0f64 || b1 > 1f64 {
             return None;
         }
 
         let s2 = d.cross(e1);
-        let b2 = ray.direction.dot(s2) / divisor;
+        let b2 = ray.direction.dot(&s2) / divisor;
         if b2 < 0f64 || b1 + b2 > 1f64 {
             return None;
         }
 
-        let t = e2.dot(s2) / divisor;
+        let t = e2.dot(&s2) / divisor;
         if t < 0f64 {
             return None;
         }
@@ -60,13 +60,13 @@ impl TriangleMesh {
             enter: Some(Intersection {
                 distance: t,
                 location: ray.at(t),
-                normal: e1.cross(e2).as_unit_vector(),
+                normal: e1.cross(e2).as_normalized().to_normal(),
                 uv: (0f64, 0f64),
             }),
             exit: Intersection {
                 distance: t,
                 location: ray.at(t),
-                normal: e1.cross(e2).as_unit_vector(),
+                normal: e1.cross(e2).as_normalized().to_normal(),
                 uv: (0f64, 0f64),
             },
             debug: false,
