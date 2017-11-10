@@ -4,7 +4,7 @@ camera_look_at 0 0 0
 
 image_dimensions 512 512
 depth_limit 10
-antialias 1
+antialias 3
 background_color .1 .1 .1
 
 material cyan_plastic flat {
