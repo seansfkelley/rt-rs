@@ -20,10 +20,10 @@ Statement: () = {
     "antialias" <U32> => builder.antialias(<>),
     "depth_limit" <U32> => builder.depth_limit(<>),
     "background_color" <Color> => builder.background_color(<>),
-    "material" <name:Identifier> <m:Material> => builder.register_material(name, m),
+    "material" <Identifier> <Material> => builder.register_material(<>),
     "transform" "pop" => builder.pop_transform(),
     "transform" <Transform> => builder.push_transform(<>),
-    "object" <o:Object> => builder.add_object(o.0, o.1),
+    "object" <Object> => builder.add_object(<>),
     "light" <Light> => builder.add_light(<>),
 };
 
@@ -61,10 +61,10 @@ Geometry: Box<Geometry> = {
         <F64>
     "}" => Box::new(Sphere::new(<>)),
     "triangle_mesh" "{"
-        <positions:KV<"positions", List<Point>>>
-        <normals:KV<"normals", List<Normal>>?>
-        <uvs:KV<"uvs", List<Tuple2<F64, F64>>>?>
-        <indices:KV<"indices", List<Tuple3<Usize, Usize, Usize>>>>
+        <positions:("positions" <List<Point>>)>
+        <normals:("normals" List<Normal>)?>
+        <uvs:("uvs" List<Tuple2<F64, F64>>)?>
+        <indices:("indices" List<Tuple3<Usize, Usize, Usize>>)>
     "}" => Box::new(TriangleMesh::new(
         positions,
         normals.unwrap_or(vec![]),
