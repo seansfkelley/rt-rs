@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use transform::{Mat4, IDENTITY, X_AXIS, Y_AXIS};
-use core::Vec3;
+use math::Vec3;
 use std;
 use std::f64::consts::PI;
 use geometry::*;

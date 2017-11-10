@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::ops::{Add, Sub, Div, Mul, Neg, Index};
 
 macro_rules! xyz_base {

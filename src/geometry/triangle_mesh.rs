@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use core::*;
-use core::Vec3;
+use math::Vec3;
 use material::Material;
 
 pub type TriangleIndices = (usize, usize, usize);

@@ -1,5 +1,6 @@
+#![allow(dead_code)]
 use std::ops::Mul;
-use core::Vec3;
+use super::Vec3;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Mat4 {

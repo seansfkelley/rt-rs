@@ -1,4 +1,4 @@
-use core::Vec3;
+use math::Vec3;
 use transform::Mat4;
 
 #[derive(Debug, Clone, Copy)]

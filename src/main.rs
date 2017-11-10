@@ -10,19 +10,17 @@ mod scene;
 mod material;
 mod util;
 mod test;
-mod transform;
+mod math;
 
-use geometry::*;
 use core::*;
+use geometry::*;
+use math::*;
 use rand::Rng;
-use color::{ Color, BLACK, WHITE };
-use core::Vec3;
 use scene::Scene;
 use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
 use std::rc::Rc;
-use transform::Mat4;
 
 fn main() {
     let camera_position = Vec3::new(0f64, 0f64, 25f64);
