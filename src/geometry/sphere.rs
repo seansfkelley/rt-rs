@@ -32,7 +32,7 @@ impl Sphere {
         Intersection {
             distance: t,
             location: intersection_point,
-            normal: intersection_point.to_normal().as_normalized(),
+            normal: intersection_point.as_normal().as_normalized(),
             uv: (phi / (2f64 * PI), theta / PI),
         }
     }

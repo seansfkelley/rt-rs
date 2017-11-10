@@ -63,7 +63,7 @@ impl Scene {
 
                         if reflectivity > 0f64 {
                             let new_origin = ray.at(intersection.distance);
-                            let new_direction = ray.direction.reflect(intersection.normal.to_vector());
+                            let new_direction = ray.direction.reflect(intersection.normal.as_vector());
                             let new_ray = Ray::new(new_origin, new_direction);
                             color = (1f64 - reflectivity) * color + reflectivity * self.raytrace_depth_limited(new_ray, depth + 1)
                         }

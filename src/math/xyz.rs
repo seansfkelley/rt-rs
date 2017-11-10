@@ -191,7 +191,7 @@ xyz_cross!(Vec3, Vec3, Vec3);
 // TODO: Function overloading!
 // xyz_cross!(Vec3, Normal, Vec3);
 xyz_normalizable!(Vec3);
-xyz_convertible!(Vec3, Normal, to_normal);
+xyz_convertible!(Vec3, Normal, as_normal);
 
 xyz_base!(Point);
 xyz_neg!(Point);
@@ -202,8 +202,8 @@ xyz_sub!(Point, Vec3, Point);
 xyz_mul!(Point);
 xyz_div!(Point);
 xyz_dot!(Point);
-xyz_convertible!(Point, Vec3, to_vector);
-xyz_convertible!(Point, Normal, to_normal);
+xyz_convertible!(Point, Vec3, as_vector);
+xyz_convertible!(Point, Normal, as_normal);
 
 xyz_base!(Normal);
 xyz_neg!(Normal);
@@ -214,7 +214,7 @@ xyz_div!(Normal);
 xyz_dot!(Normal);
 xyz_cross!(Normal, Vec3, Vec3);
 xyz_normalizable!(Normal);
-xyz_convertible!(Normal, Vec3, to_vector);
+xyz_convertible!(Normal, Vec3, as_vector);
 
 impl Vec3 {
     // TODO: Remove this?

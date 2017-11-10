@@ -60,13 +60,13 @@ impl TriangleMesh {
             enter: Some(Intersection {
                 distance: t,
                 location: ray.at(t),
-                normal: e1.cross(e2).as_normalized().to_normal(),
+                normal: e1.cross(e2).as_normalized().as_normal(),
                 uv: (0f64, 0f64),
             }),
             exit: Intersection {
                 distance: t,
                 location: ray.at(t),
-                normal: e1.cross(e2).as_normalized().to_normal(),
+                normal: e1.cross(e2).as_normalized().as_normal(),
                 uv: (0f64, 0f64),
             },
             debug: false,
