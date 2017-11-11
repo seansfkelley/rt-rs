@@ -27,10 +27,21 @@ const INVERTIBLE_TEST_MATRIX: Mat4 = Mat4 {
 };
 
 const TEST_VECTOR: Vec3 = Vec3 { x: 1f64, y: 2f64, z: 3f64 };
+const TEST_POINT: Point = Point { x: 1f64, y: 2f64, z: 3f64 };
+const TEST_NORMAL: Normal = Normal { x: 1f64, y: 2f64, z: 3f64 };
 
 const YELLOW_MATTE: material::FlatMaterial = material::FlatMaterial { color: Color { r: 0.7f64, g: 0.7f64, b: 0f64 }, specular_exponent: 0f64, reflectivity: 0f64 };
-const STRAIGHT_RAY: Ray = Ray { origin: Vec3 { x: 0f64, y: 0f64, z: 5f64 }, direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 } };
-const OFFSET_RAY: Ray = Ray { origin: Vec3 { x: 5f64, y: 0f64, z: 5f64 }, direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 } };
+const STRAIGHT_RAY: Ray = Ray { origin: Point { x: 0f64, y: 0f64, z: 5f64 }, direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 } };
+const OFFSET_RAY: Ray = Ray { origin: Point { x: 5f64, y: 0f64, z: 5f64 }, direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 } };
+
+macro_rules! assert_close_to {
+    ( $ left : expr , $ right : expr ) => {
+        assert!(($left - $right).magnitude() < 1e-10);
+    };
+    ( $ left : expr , $ right : expr , $ ( $ arg : tt ) + ) => {
+        assert!(($left - $right).magnitude() < 1e-10, $arg);
+    };
+}
 
 describe! mat4 {
     it "should start with zeroes" {
@@ -39,29 +50,29 @@ describe! mat4 {
     }
 
     describe! matrix_multiplication {
-        it "should multiply" {
+        it "should multiply matrices" {
             let expected = Mat4 { cells: [[90f64, 100f64, 110f64, 120f64], [202f64, 228f64, 254f64, 280f64], [314f64, 356f64, 398f64, 440f64], [426f64, 484f64, 542f64, 600f64]] };
             assert_eq!(TEST_MATRIX * TEST_MATRIX, expected);
         }
 
-        it "should identity multiply" {
+        it "should do nothing when multiplying by the identity matrix" {
             assert_eq!(TEST_MATRIX * IDENTITY_MATRIX, TEST_MATRIX);
         }
     }
 
-    describe! vector_multiplication {
-        it "should multiply" {
-            let expected = Vec3::new(18f64, 46f64, 74f64);
-            assert_eq!(TEST_MATRIX * TEST_VECTOR, expected);
-        }
+    // describe! vector_multiplication {
+    //     it "should multiply" {
+    //         let expected = Vec3::new(18f64, 46f64, 74f64);
+    //         assert_eq!(TEST_MATRIX * TEST_VECTOR, expected);
+    //     }
 
-        it "should identity multiply" {
-            assert_eq!(IDENTITY_MATRIX * TEST_VECTOR, TEST_VECTOR);
-        }
-    }
+    //     it "should identity multiply" {
+    //         assert_eq!(IDENTITY_MATRIX * TEST_VECTOR, TEST_VECTOR);
+    //     }
+    // }
 
     describe! inverse {
-        it "should be empty for undefined inversions" {
+        it "should be None for undefined inversions" {
             assert_eq!(TEST_MATRIX.invert(), None);
         }
 
@@ -86,7 +97,7 @@ describe! mat4 {
         it "should rotate around x-axis" {
             // #floats
             let expected = Vec3 { x: 1f64, y: -2.0000000000000004f64, z: -2.9999999999999996f64 };
-            assert_eq!(Mat4::create_rotation(PI, X_AXIS) * TEST_VECTOR, expected);
+            assert_close_to!(Mat4::create_rotation(PI, X_AXIS) * TEST_VECTOR, expected);
         }
 
         it "should rotate around x-axis at different angles" {
@@ -175,7 +186,7 @@ describe! ray {
 describe! sphere {
     it "should simply intersect" {
         let yellow_matte: Rc<material::Material> = Rc::new(YELLOW_MATTE);
-        let sphere = Sphere::new(1f64, IDENTITY, &yellow_matte);
+        let sphere = Sphere::new(1f64, IDENTITY_MATRIX, &yellow_matte);
         assert!(sphere.intersect(&STRAIGHT_RAY).is_some());
         assert!(sphere.intersect(&OFFSET_RAY).is_none());
     }
