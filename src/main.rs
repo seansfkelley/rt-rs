@@ -22,9 +22,19 @@ use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
 use std::f64::consts::PI;
+use std::env;
 
 fn main() {
-    let scene_file = importer::parse(Path::new("scenes/basic.scene"));
+    let mut args = env::args();
+    args.next(); // Skip executable name.
+
+    let scene_file_path = args.next().expect("exactly one argument required, but got zero");
+
+    if args.count() > 0 {
+        panic!("more than one argument provided");
+    }
+
+    let scene_file = importer::parse(Path::new(&scene_file_path));
 
     let scene = Scene::new(
         scene_file.objects,
