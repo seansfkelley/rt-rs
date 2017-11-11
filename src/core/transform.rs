@@ -1,11 +1,10 @@
 #![allow(dead_code)]
 use core::Ray;
 use math::*;
-use math;
 
-pub static IDENTITY: Transform = Transform {
-    object_to_world: math::IDENTITY,
-    world_to_object: math::IDENTITY,
+pub static IDENTITY_TRANSFORM: Transform = Transform {
+    object_to_world: IDENTITY_MATRIX,
+    world_to_object: IDENTITY_MATRIX,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]

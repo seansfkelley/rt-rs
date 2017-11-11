@@ -59,7 +59,7 @@ impl SceneBuilder {
     fn get_current_transform(&self) -> Transform {
         match self.transform_stack.last() {
             Some(transform) => *transform,
-            None => transform::IDENTITY,
+            None => IDENTITY_TRANSFORM,
         }
     }
 

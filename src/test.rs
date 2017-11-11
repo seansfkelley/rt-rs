@@ -1,13 +1,10 @@
 #![cfg(test)]
 
-use transform::{Mat4, IDENTITY, X_AXIS, Y_AXIS};
-use math::Vec3;
-use std;
-use std::f64::consts::PI;
-use geometry::*;
 use std::rc::Rc;
-use material;
-use color::Color;
+use std::f64::consts::PI;
+use math::*;
+use core::*;
+use geometry::*;
 
 pub const ORIGIN: Vec3 = Vec3 { x: 0f64, y: 0f64, z: 0f64 };
 
@@ -48,7 +45,7 @@ describe! mat4 {
         }
 
         it "should identity multiply" {
-            assert_eq!(TEST_MATRIX * IDENTITY, TEST_MATRIX);
+            assert_eq!(TEST_MATRIX * IDENTITY_MATRIX, TEST_MATRIX);
         }
     }
 
@@ -59,7 +56,7 @@ describe! mat4 {
         }
 
         it "should identity multiply" {
-            assert_eq!(IDENTITY * TEST_VECTOR, TEST_VECTOR);
+            assert_eq!(IDENTITY_MATRIX * TEST_VECTOR, TEST_VECTOR);
         }
     }
 
@@ -69,7 +66,7 @@ describe! mat4 {
         }
 
         it "should be identity for identity" {
-            assert_eq!(IDENTITY.invert(), Some(IDENTITY));
+            assert_eq!(IDENTITY_MATRIX.invert(), Some(IDENTITY_MATRIX));
         }
 
         it "should invert" {

@@ -8,7 +8,7 @@ pub struct Mat4 {
     pub cells: [[f64; 4]; 4],
 }
 
-pub const IDENTITY: Mat4 = Mat4 {
+pub const IDENTITY_MATRIX: Mat4 = Mat4 {
     cells: [
         [1f64, 0f64, 0f64, 0f64],
         [0f64, 1f64, 0f64, 0f64],
@@ -27,7 +27,7 @@ impl Mat4 {
     }
 
     pub fn create_translation(translation: Vec3) -> Mat4 {
-        let mut cells = IDENTITY.cells.clone();
+        let mut cells = IDENTITY_MATRIX.cells.clone();
         cells[0][3] = translation.x;
         cells[1][3] = translation.y;
         cells[2][3] = translation.z;
