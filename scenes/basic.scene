@@ -56,6 +56,19 @@ object {
 }
 transform pop
 
+transform scale 5 1 1
+transform rotate -20 0 1 1
+transform translate 0 -9 0
+object {
+  geometry sphere {
+    radius 1
+  }
+  material yellow_matte
+}
+transform pop
+transform pop
+transform pop
+
 object {
   geometry triangle_mesh {
     positions [
@@ -90,6 +103,11 @@ object {
 
 light {
   position 5 5 10
+  color 0.4 0.4 0.4
+}
+
+light {
+  position 5 5 -10
   color 0.4 0.4 0.4
 }
 
