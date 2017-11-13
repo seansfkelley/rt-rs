@@ -227,6 +227,7 @@ impl Vec3 {
     pub fn reflect(&self, axis: Vec3) -> Vec3 {
         // If we decide to keep this, should do the normalization ourselves.
         self.assert_normalized();
+        axis.assert_normalized();
         *self - axis * (2f64 * self.dot(&axis))
     }
 }
