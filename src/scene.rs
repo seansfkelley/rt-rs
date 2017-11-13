@@ -50,8 +50,9 @@ impl Scene {
                                 color + (DEBUG_SHADOW_COLOR / (self.lights.len() as f64))
                             } else {
                                 let light_direction = (light.position - intersection.location).as_normalized();
-                                let diffuse_illumination = lighting.diffuse * light.color * intersection.normal.dot(&light_direction).max(0f64);
-                                let specular_illumination = lighting.specular.0 * light.color * intersection.normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(lighting.specular.1);
+                                let normalized_normal = intersection.normal.as_normalized();
+                                let diffuse_illumination = lighting.diffuse * light.color * normalized_normal.dot(&light_direction).max(0f64);
+                                let specular_illumination = lighting.specular.0 * light.color * normalized_normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(lighting.specular.1);
                                 color + diffuse_illumination + specular_illumination
                             }
                         });
