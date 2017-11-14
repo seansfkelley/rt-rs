@@ -5,6 +5,7 @@ extern crate lazy_static;
 extern crate image;
 extern crate rand;
 extern crate regex;
+extern crate lalrpop_util;
 
 mod core;
 mod geometry;
