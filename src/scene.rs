@@ -66,6 +66,7 @@ impl Scene {
                             let new_origin = ray.at(intersection.distance);
                             let new_direction = ray.direction.reflect(intersection.normal.as_vector());
                             let new_ray = Ray::new(new_origin, new_direction);
+                            // TODO: I think we're supposed to multiply the reflectivity by the color of the surface...?
                             color = (1f64 - reflectivity) * color + reflectivity * self.raytrace_depth_limited(new_ray, depth + 1)
                         }
 
