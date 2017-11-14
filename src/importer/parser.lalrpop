@@ -121,7 +121,7 @@ Normal: Normal = <f1:F64> <f2:F64> <f3:F64> => Normal { x: f1, y: f2, z: f3 };
 Color: Color = <f1:F64> <f2:F64> <f3:F64> => Color { r: f1, g: f2, b: f3 };
 
 Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
-Path: Box<Path> = <p:r#""[-a-zA-Z0-9./]+""#> => PathBuf::from(p[1..p.len() - 1].to_owned()).into_boxed_path();
+Path: Box<Path> = r#""[-a-zA-Z0-9./]+""# => PathBuf::from(<>[1..<>.len() - 1].to_owned()).into_boxed_path();
 RawNumber = r"[-+]?[0-9]*\.?[0-9]+"; // Ripped from https://www.regular-expressions.info/floatingpoint.html
 F64: f64 = RawNumber => f64::from_str(<>).unwrap();
 U32: u32 = RawNumber => u32::from_str(<>).unwrap();
