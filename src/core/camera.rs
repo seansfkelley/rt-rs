@@ -1,4 +1,3 @@
-use core::*;
 use math::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -17,15 +16,6 @@ impl Camera {
             up,
             direction,
             right: direction.cross(up).as_normalized(),
-        }
-    }
-
-    pub fn transform(&self, transform: &Transform) -> Camera {
-        Camera {
-            position: self.position.transform(transform),
-            up: self.up.transform(transform),
-            direction: self.direction.transform(transform),
-            right: self.right.transform(transform),
         }
     }
 }

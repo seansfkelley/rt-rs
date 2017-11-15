@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use core::Ray;
+use core::{ Ray, Camera };
 use math::*;
 
 pub static IDENTITY_TRANSFORM: Transform = Transform {
@@ -113,6 +113,26 @@ impl Transformable for Ray {
         Ray {
             origin: self.origin.invert_transform(transform),
             direction: self.direction.invert_transform(transform),
+        }
+    }
+}
+
+impl Transformable for Camera {
+    fn transform(&self, transform: &Transform) -> Camera {
+        Camera {
+            position: self.position.transform(transform),
+            up: self.up.transform(transform),
+            direction: self.direction.transform(transform),
+            right: self.right.transform(transform),
+        }
+    }
+
+    fn invert_transform(&self, transform: &Transform) -> Camera {
+        Camera {
+            position: self.position.invert_transform(transform),
+            up: self.up.invert_transform(transform),
+            direction: self.direction.invert_transform(transform),
+            right: self.right.invert_transform(transform),
         }
     }
 }
