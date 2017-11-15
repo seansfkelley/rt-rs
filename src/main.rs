@@ -5,6 +5,7 @@ extern crate lazy_static;
 extern crate image;
 extern crate rand;
 extern crate regex;
+extern crate lalrpop_util;
 
 mod core;
 mod geometry;
@@ -99,7 +100,7 @@ fn main() {
             }
         }
 
-        let ref mut fout = File::create(&Path::new(&format!("out/{:02}.png", i))).unwrap();
+        let ref mut fout = File::create(&Path::new(&format!("out/{:03}.png", i))).unwrap();
         image::ImageRgb8(img).save(fout, image::PNG).unwrap();
 
         camera = camera.transform(rotation);

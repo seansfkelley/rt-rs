@@ -1,6 +1,7 @@
 use std::str::FromStr;
 use std::boxed::Box;
 use std::rc::Rc;
+use std::path::{ Path, PathBuf };
 use math::*;
 use core::*;
 use geometry::*;
@@ -29,20 +30,24 @@ Statement: () = {
 
 Material: Box<Material> = {
     "flat" "{"
-        <color:("color" <Color>)?>
+        "color" <color:Color>
         <specular_exponent:("specular_exponent" <F64>)?>
         <reflectivity:("reflectivity" <F64>)?>
     "}" => Box::new(FlatMaterial {
-        color: color.unwrap_or(BLACK),
+        color,
         specular_exponent: specular_exponent.unwrap_or(0f64),
         reflectivity: reflectivity.unwrap_or(0f64),
     }),
+    "image" "{"
+        "path" <path:Path>
+        <reflectivity:("reflectivity" <F64>)?>
+    "}" => Box::new(ImageTextureMaterial::from_path(path.as_ref(), reflectivity.unwrap_or(0f64))),
     "checkerboard" "{"
         <checks_per_unit:("checks_per_unit" <U32>)?>
         <color_a:("color_a" <Color>)?>
         <color_b:("color_b" <Color>)?>
     "}" => Box::new(CheckerboardMaterial {
-        checks_per_unit: checks_per_unit.unwrap_or(10u32),
+        checks_per_unit: checks_per_unit.unwrap_or(2u32),
         color_a: color_a.unwrap_or(WHITE),
         color_b: color_b.unwrap_or(BLACK),
     }),
@@ -116,7 +121,8 @@ Normal: Normal = <f1:F64> <f2:F64> <f3:F64> => Normal { x: f1, y: f2, z: f3 };
 Color: Color = <f1:F64> <f2:F64> <f3:F64> => Color { r: f1, g: f2, b: f3 };
 
 Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
-RawNumber = r"[-+]?[0-9]*\.?[0-9]+"; // Ripped from https://www.regular-expressions.info/F64ingpoint.html
+Path: Box<Path> = r#""[-a-zA-Z0-9./]+""# => PathBuf::from(<>[1..<>.len() - 1].to_owned()).into_boxed_path();
+RawNumber = r"[-+]?[0-9]*\.?[0-9]+"; // Ripped from https://www.regular-expressions.info/floatingpoint.html
 F64: f64 = RawNumber => f64::from_str(<>).unwrap();
 U32: u32 = RawNumber => u32::from_str(<>).unwrap();
 Usize: usize = RawNumber => usize::from_str(<>).unwrap();

@@ -46,13 +46,16 @@ pub struct ImageTextureMaterial {
 }
 
 impl ImageTextureMaterial {
-    fn from(p: &Path) -> ImageTextureMaterial {
-        let image = openImage(p).unwrap().to_rgb();
+    pub fn from_path(p: &Path, reflectivity: f64) -> ImageTextureMaterial {
+        let image = match openImage(p) {
+            Ok(img) => { img.to_rgb() },
+            Err(reason) => { panic!("could not open image at {:?}: {:?}", p, reason); },
+        };
         let (width, height) = image.dimensions();
         assert_eq!(width, height);
         ImageTextureMaterial {
             image,
-            reflectivity: 0.1,
+            reflectivity,
         }
     }
 }
