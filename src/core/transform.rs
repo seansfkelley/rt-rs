@@ -136,3 +136,14 @@ impl Transformable for Camera {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod vec3 {
+        use super::*;
+
+
+    }
+}
