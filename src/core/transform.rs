@@ -144,6 +144,38 @@ mod tests {
     mod vec3 {
         use super::*;
 
+        #[test]
+        fn it_should_not_translate_the_vector() {
+            let vec3 = Vec3::new(1f64, 2f64, 3f64);
+            assert_eq!(vec3.transform(Transform::new(Mat4::create_scale())));
+        }
 
+// describe! transform {
+//     describe! vec3_transformation {
+//         it "should not change the vector" {
+//             let transform = Transform::new(IDENTITY_MATRIX);
+//             let expected = Vec3::new(1f64, 2f64, 3f64);
+//             let actual = expected.transform(&transform);
+//             assert_eq!(actual, expected);
+//         }
+
+//         it "should scale the vector" {
+//             let v = Vec3::new(2f64, 3f64, 4f64);
+//             let matrix = Mat4::create_scale(v);
+//             let transform = Transform::new(matrix);
+//             let expected = Vec3::new(2f64, 6f64, 12f64);
+//             let actual = expected.transform(&transform);
+//             assert_eq!(actual, expected);
+//         }
+
+//         // it "should rotate the vector" {
+
+//         // }
+
+//         // it "should not translate the vector" {
+
+//         // }
+//     }
+// }
     }
 }
