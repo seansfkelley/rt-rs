@@ -9,7 +9,6 @@ mod core;
 mod geometry;
 mod scene;
 mod util;
-mod test;
 mod math;
 mod importer;
 

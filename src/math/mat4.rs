@@ -28,7 +28,7 @@ impl Mat4 {
 
     pub fn create_translation(translation: &Xyz) -> Mat4 {
         let mut cells = IDENTITY_MATRIX.cells.clone();
-        cells[0][3] = translation.z();
+        cells[0][3] = translation.x();
         cells[1][3] = translation.y();
         cells[2][3] = translation.z();
         Mat4 { cells }
@@ -371,7 +371,7 @@ mod tests {
                     [0f64, 0f64, 0f64,  1f64],
                 ],
             };
-            assert_eq!(Mat4::create_translation(Vec3::new(10f64, 20f64, 30f64)), expected);
+            assert_eq!(Mat4::create_translation(&(10f64, 20f64, 30f64)), expected);
         }
 
         #[test]
@@ -384,7 +384,7 @@ mod tests {
                     [0f64,   0f64,  0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_scale(Vec3::new(10f64, 20f64, 30f64)), expected);
+            assert_eq!(Mat4::create_scale(&(10f64, 20f64, 30f64)), expected);
         }
 
         #[test]
@@ -398,7 +398,7 @@ mod tests {
                     [0f64,        0f64,         0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_rotation(theta, X_AXIS), expected);
+            assert_eq!(Mat4::create_rotation(theta, &X_AXIS), expected);
         }
 
         #[test]
@@ -412,7 +412,7 @@ mod tests {
                     [        0f64, 0f64,        0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_rotation(theta, Y_AXIS), expected);
+            assert_eq!(Mat4::create_rotation(theta, &Y_AXIS), expected);
         }
 
         #[test]
@@ -426,7 +426,7 @@ mod tests {
                     [       0f64,         0f64, 0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_rotation(theta, Z_AXIS), expected);
+            assert_eq!(Mat4::create_rotation(theta, &Z_AXIS), expected);
         }
     }
 }
