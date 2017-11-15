@@ -22,10 +22,10 @@ impl Camera {
 
     pub fn transform(&self, transform: &Transform) -> Camera {
         Camera {
-            position: self.position.object_to_world(transform),
-            up: self.up.object_to_world(transform),
-            direction: self.direction.object_to_world(transform),
-            right: self.right.object_to_world(transform),
+            position: self.position.transform(transform),
+            up: self.up.transform(transform),
+            direction: self.direction.transform(transform),
+            right: self.right.transform(transform),
         }
     }
 }

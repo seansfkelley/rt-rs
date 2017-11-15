@@ -16,12 +16,12 @@ impl Shape {
     }
 
     fn get_intersection(&self, object_intersection: Intersection) -> Intersection {
-        let world_location = object_intersection.location.object_to_world(&self.transform);
+        let world_location = object_intersection.location.transform(&self.transform);
 
         Intersection {
             distance: object_intersection.distance,
             location: world_location,
-            normal: object_intersection.normal.object_to_world(&self.transform),
+            normal: object_intersection.normal.transform(&self.transform),
             uv: object_intersection.uv,
         }
     }
@@ -29,7 +29,7 @@ impl Shape {
 
 impl Geometry for Shape {
     fn intersect(&self, world_ray: &Ray) -> Option<Hit> {
-        let ref object_ray = world_ray.world_to_object(&self.transform);
+        let ref object_ray = world_ray.invert_transform(&self.transform);
         let object_space_hit_option = self.geometry.intersect(object_ray);
         object_space_hit_option.map(|object_space_hit| {
             Hit {

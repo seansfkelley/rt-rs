@@ -64,7 +64,7 @@ impl SceneBuilder {
     }
 
     pub fn push_transform(&mut self, mat: Mat4) {
-        let new_transform_matrix = mat * self.get_current_transform().object_to_world;
+        let new_transform_matrix = mat * self.get_current_transform().m;
         self.transform_stack.push(Transform::new(new_transform_matrix));
     }
 

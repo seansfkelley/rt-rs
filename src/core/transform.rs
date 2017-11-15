@@ -3,28 +3,42 @@ use core::Ray;
 use math::*;
 
 pub static IDENTITY_TRANSFORM: Transform = Transform {
-    object_to_world: IDENTITY_MATRIX,
-    world_to_object: IDENTITY_MATRIX,
+    m: IDENTITY_MATRIX,
+    m_inverse: IDENTITY_MATRIX,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Transform {
-    pub object_to_world: Mat4,
-    pub world_to_object: Mat4,
+    pub m: Mat4,
+    pub m_inverse: Mat4,
 }
 
 impl Transform {
-    pub fn new(object_to_world: Mat4) -> Transform {
+    pub fn new(m: Mat4) -> Transform {
         Transform {
-            object_to_world,
-            world_to_object: object_to_world.invert().unwrap(),
+            m,
+            m_inverse: m.invert().unwrap(),
         }
     }
 }
 
 pub trait Transformable {
-    fn object_to_world(&self, transform: &Transform) -> Self;
-    fn world_to_object(&self, transform: &Transform) -> Self;
+    fn transform(&self, transform: &Transform) -> Self;
+    fn invert_transform(&self, transform: &Transform) -> Self;
+}
+
+macro_rules! make_transformable {
+    ($struct:ty, $transformer:ident) => {
+        impl Transformable for $struct {
+            fn transform(&self, transform: &Transform) -> $struct {
+                $transformer(self, &transform.m)
+            }
+
+            fn invert_transform(&self, transform: &Transform) -> $struct {
+                $transformer(self, &transform.m_inverse)
+            }
+        }
+    };
 }
 
 // pbrt pg. 86
@@ -42,15 +56,7 @@ fn transform_vec3(in_vector: &Vec3, mat4: &Mat4) -> Vec3 {
     Vec3::new(vec3[0], vec3[1], vec3[2])
 }
 
-impl Transformable for Vec3 {
-    fn object_to_world(&self, transform: &Transform) -> Vec3 {
-        transform_vec3(self, &transform.object_to_world)
-    }
-
-    fn world_to_object(&self, transform: &Transform) -> Vec3 {
-        transform_vec3(self, &transform.world_to_object)
-    }
-}
+make_transformable!(Vec3, transform_vec3);
 
 // pbrt pg. 86
 fn transform_point(point: &Point, mat4: &Mat4) -> Point {
@@ -72,15 +78,7 @@ fn transform_point(point: &Point, mat4: &Mat4) -> Point {
     }
 }
 
-impl Transformable for Point {
-    fn object_to_world(&self, transform: &Transform) -> Point {
-        transform_point(self, &transform.object_to_world)
-    }
-
-    fn world_to_object(&self, transform: &Transform) -> Point {
-        transform_point(self, &transform.world_to_object)
-    }
-}
+make_transformable!(Point, transform_point);
 
 // pbrt pg. 86
 fn transform_normal(normal: &Normal, mat4: &Mat4) -> Normal {
@@ -101,28 +99,20 @@ fn transform_normal(normal: &Normal, mat4: &Mat4) -> Normal {
     }
 }
 
-impl Transformable for Normal {
-    fn object_to_world(&self, transform: &Transform) -> Normal {
-        transform_normal(self, &transform.object_to_world)
-    }
-
-    fn world_to_object(&self, transform: &Transform) -> Normal {
-        transform_normal(self, &transform.world_to_object)
-    }
-}
+make_transformable!(Normal, transform_normal);
 
 impl Transformable for Ray {
-    fn object_to_world(&self, transform: &Transform) -> Ray {
+    fn transform(&self, transform: &Transform) -> Ray {
         Ray {
-            origin: self.origin.object_to_world(transform),
-            direction: self.direction.object_to_world(transform),
+            origin: self.origin.transform(transform),
+            direction: self.direction.transform(transform),
         }
     }
 
-    fn world_to_object(&self, transform: &Transform) -> Ray {
+    fn invert_transform(&self, transform: &Transform) -> Ray {
         Ray {
-            origin: self.origin.world_to_object(transform),
-            direction: self.direction.world_to_object(transform),
+            origin: self.origin.invert_transform(transform),
+            direction: self.direction.invert_transform(transform),
         }
     }
 }
