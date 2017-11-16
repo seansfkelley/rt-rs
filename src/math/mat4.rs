@@ -23,7 +23,7 @@ pub const Z_AXIS: Vec3 = Vec3 { x: 0f64, y: 0f64, z: 1f64 };
 
 impl Mat4 {
     pub fn create() -> Mat4 {
-        Mat4 { cells: [[0f64; 4]; 4] }
+        IDENTITY_MATRIX
     }
 
     pub fn create_translation(translation: &Xyz) -> Mat4 {
@@ -278,13 +278,8 @@ mod tests {
     };
 
     #[test]
-    fn it_should_start_with_zeros() {
-        let empty = Mat4::create();
-        for i in 0..4 {
-            for j in 0..4 {
-                assert_eq!(empty.get_cell(i, j), 0f64);
-            }
-        }
+    fn it_should_start_with_identity() {
+        assert_eq!(Mat4::create(), IDENTITY_MATRIX);
     }
 
     #[test]
