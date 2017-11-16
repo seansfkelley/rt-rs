@@ -68,10 +68,12 @@ impl SceneBuilder {
         self.transform_stack.push(Transform::new(new_transform_matrix));
     }
 
-    pub fn pop_transform(&mut self) {
-        match self.transform_stack.pop() {
-            Some(_) => {},
-            None => { panic!("tried to pop an empty transform stack"); },
+    pub fn pop_transforms(&mut self, count: u32) {
+        for _ in 0..count {
+            match self.transform_stack.pop() {
+                Some(_) => {},
+                None => { panic!("tried to pop an empty transform stack"); },
+            };
         }
     }
 

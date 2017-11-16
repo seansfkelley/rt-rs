@@ -65,9 +65,7 @@ object {
   }
   material yellow_matte
 }
-transform pop
-transform pop
-transform pop
+transform pop 3
 
 object {
   geometry triangle_mesh {
