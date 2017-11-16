@@ -26,7 +26,7 @@ impl Mat4 {
         IDENTITY_MATRIX
     }
 
-    pub fn create_translation(translation: &Xyz) -> Mat4 {
+    pub fn create_translation(translation: Vec3) -> Mat4 {
         let mut cells = IDENTITY_MATRIX.cells.clone();
         cells[0][3] = translation.x();
         cells[1][3] = translation.y();
@@ -34,7 +34,7 @@ impl Mat4 {
         Mat4 { cells }
     }
 
-    pub fn create_scale(scale: &Xyz) -> Mat4 {
+    pub fn create_scale(scale: Vec3) -> Mat4 {
         let mut cells = [[0f64; 4]; 4];
         cells[0][0] = scale.x();
         cells[1][1] = scale.y();
@@ -43,8 +43,8 @@ impl Mat4 {
         Mat4 { cells }
     }
 
-    pub fn create_rotation(theta: f64, axis: &Xyz) -> Mat4 {
-        let a = Vec3::from(axis).as_normalized();
+    pub fn create_rotation(theta: f64, a: Vec3) -> Mat4 {
+        a.assert_normalized();
         let mut cells = [[0f64; 4]; 4];
         let cos_theta = theta.cos();
         let sin_theta = theta.sin();
@@ -66,15 +66,15 @@ impl Mat4 {
         Mat4 { cells }
     }
 
-    pub fn translate(&self, translation: &Xyz) -> Mat4 {
+    pub fn translate(&self, translation: Vec3) -> Mat4 {
         *self * Mat4::create_translation(translation)
     }
 
-    pub fn scale(&self, scale: &Xyz) -> Mat4 {
+    pub fn scale(&self, scale: Vec3) -> Mat4 {
         *self * Mat4::create_scale(scale)
     }
 
-    pub fn rotate(&self, theta: f64, axis: &Xyz) -> Mat4 {
+    pub fn rotate(&self, theta: f64, axis: Vec3) -> Mat4 {
         *self * Mat4::create_rotation(theta, axis)
     }
 
@@ -366,7 +366,7 @@ mod tests {
                     [0f64, 0f64, 0f64,  1f64],
                 ],
             };
-            assert_eq!(Mat4::create_translation(&(10f64, 20f64, 30f64)), expected);
+            assert_eq!(Mat4::create_translation(Vec3::new(10f64, 20f64, 30f64)), expected);
         }
 
         #[test]
@@ -379,7 +379,7 @@ mod tests {
                     [0f64,   0f64,  0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_scale(&(10f64, 20f64, 30f64)), expected);
+            assert_eq!(Mat4::create_scale(Vec3::new(10f64, 20f64, 30f64)), expected);
         }
 
         #[test]
@@ -393,7 +393,7 @@ mod tests {
                     [0f64,        0f64,         0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_rotation(theta, &X_AXIS), expected);
+            assert_eq!(Mat4::create_rotation(theta, X_AXIS), expected);
         }
 
         #[test]
@@ -407,7 +407,7 @@ mod tests {
                     [        0f64, 0f64,        0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_rotation(theta, &Y_AXIS), expected);
+            assert_eq!(Mat4::create_rotation(theta, Y_AXIS), expected);
         }
 
         #[test]
@@ -421,7 +421,7 @@ mod tests {
                     [       0f64,         0f64, 0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_rotation(theta, &Z_AXIS), expected);
+            assert_eq!(Mat4::create_rotation(theta, Z_AXIS), expected);
         }
     }
 }

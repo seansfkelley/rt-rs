@@ -147,13 +147,13 @@ mod tests {
         #[test]
         fn it_should_not_translate_the_vector() {
             let vec3 = Vec3::new(1f64, 2f64, 3f64);
-            assert_eq!(vec3.transform(&Transform::new(Mat4::create_translation(&(10f64, 20f64, 30f64)))), vec3);
+            assert_eq!(vec3.transform(&Transform::new(Mat4::create_translation(Vec3::new(10f64, 20f64, 30f64)))), vec3);
         }
 
         #[test]
         fn it_should_scale_the_vector() {
             assert_eq!(
-                Vec3::new(1f64, 2f64, 3f64).transform(&Transform::new(Mat4::create_scale(&(10f64, 20f64, 30f64)))),
+                Vec3::new(1f64, 2f64, 3f64).transform(&Transform::new(Mat4::create_scale(Vec3::new(10f64, 20f64, 30f64)))),
                 Vec3::new(10f64, 40f64, 90f64)
             );
         }

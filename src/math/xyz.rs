@@ -1,28 +1,10 @@
 #![allow(dead_code)]
 use std::ops::{Add, Sub, Div, Mul, Neg, Index};
 
-pub const ORIGIN: Point = Point { x: 0f64, y: 0f64, z: 0f64 };
-
-pub type Triple = (f64, f64, f64);
-
 pub trait Xyz {
     fn x(&self) -> f64;
     fn y(&self) -> f64;
     fn z(&self) -> f64;
-}
-
-impl Xyz for Triple {
-    fn x(&self) -> f64 {
-        self.0
-    }
-
-    fn y(&self) -> f64 {
-        self.1
-    }
-
-    fn z(&self) -> f64 {
-        self.2
-    }
 }
 
 macro_rules! xyz_base {
@@ -41,16 +23,6 @@ macro_rules! xyz_base {
 
             pub fn uniform(value: f64) -> $name {
                 $name { x: value, y: value, z: value }
-            }
-
-            pub fn into_tuple(self) -> Triple {
-                (self.x, self.y, self.z)
-            }
-        }
-
-        impl<'a> From<&'a Xyz> for $name {
-            fn from(other: &Xyz) -> $name {
-                $name { x: other.x(), y: other.y(), z: other.z() }
             }
         }
 

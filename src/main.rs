@@ -54,7 +54,7 @@ fn main() {
 
     // TODO: Put into the file!
     let frames = 1u32;
-    let ref rotate_camera = Transform::new(Mat4::create_rotation((2f64 * PI) / frames as f64, &Y_AXIS));
+    let ref rotate_camera = Transform::new(Mat4::create_rotation((2f64 * PI) / frames as f64, Y_AXIS));
 
     for i in 0..frames {
         let x_step = camera.right * pixel_grid_width / width as f64;
