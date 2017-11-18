@@ -99,7 +99,7 @@ impl SceneBuilder {
                 Camera::orthographic(position, look_at, up, dimensions)
             }
             PartialCamera::Perspective { position, look_at, up, field_of_view } => {
-                panic!("perspective camera not implemented yet");
+                Camera::perspective(position, look_at, up, field_of_view, dimensions)
             }
         }
     }

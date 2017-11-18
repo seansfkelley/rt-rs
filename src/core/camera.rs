@@ -47,6 +47,10 @@ impl Camera {
         Camera::new(position, look_at, up, dimensions, IDENTITY_MATRIX)
     }
 
+    pub fn perspective(position: Point, look_at: Point, up: Vec3, fov: f64, dimensions: (u32, u32)) -> Camera {
+        panic!("perspective cameras are not implemented yet");
+    }
+
     pub fn get_ray(&self, image_x: u32, image_y: u32) -> Ray {
         Ray {
             origin: Point::new(image_x as f64, image_y as f64, 0f64).transform(&self.raster_to_world),
