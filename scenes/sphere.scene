@@ -1,0 +1,22 @@
+image_dimensions 512 512
+depth_limit 10
+antialias 3
+background_color .1 .1 .1
+
+camera orthographic {
+  position 0 0 25
+  look_at 0 0 0
+  up 0 1 0
+}
+
+material cyan flat {
+  color 0 .7 .7
+  specular_exponent 3
+}
+
+object {
+  geometry sphere {
+    radius 3
+  }
+  material cyan
+}
