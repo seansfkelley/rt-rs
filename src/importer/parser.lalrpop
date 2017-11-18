@@ -15,8 +15,8 @@ pub SceneFile: () = {
 
 Statement: () = {
     "camera_position" <Point> => builder.camera_position(<>),
-    "camera_up" <Vec3> => builder.camera_up(<>),
     "camera_look_at" <Point> => builder.camera_look_at(<>),
+    "camera_up" <Vec3> => builder.camera_up(<>),
     "image_dimensions" <Tuple2<U32, U32>> => builder.image_dimensions(<>),
     "antialias" <U32> => builder.antialias(<>),
     "depth_limit" <U32> => builder.depth_limit(<>),

@@ -66,6 +66,22 @@ impl Mat4 {
         Mat4 { cells }
     }
 
+    // pbrt pg. 84
+    pub fn create_look_at(position: Point, look_at: Point, in_up: Vec3) -> Mat4 {
+        let direction = (position - look_at).as_normalized();
+        let left = in_up.as_normalized().cross(direction).as_normalized();
+        let up = direction.cross(left);
+
+        Mat4 {
+            cells: [
+                [left.x, up.x, direction.x, position.x],
+                [left.y, up.y, direction.y, position.y],
+                [left.z, up.z, direction.z, position.z],
+                [  0f64, 0f64,        0f64,       1f64]
+            ],
+        }
+    }
+
     pub fn translate(&self, translation: Vec3) -> Mat4 {
         *self * Mat4::create_translation(translation)
     }
@@ -76,6 +92,10 @@ impl Mat4 {
 
     pub fn rotate(&self, theta: f64, axis: Vec3) -> Mat4 {
         *self * Mat4::create_rotation(theta, axis)
+    }
+
+    pub fn look_at(&self, position: Point, look_at: Point, in_up: Vec3) -> Mat4 {
+        *self * Mat4::create_look_at(position, look_at, in_up)
     }
 
     pub fn transpose(&self) -> Mat4 {
@@ -422,6 +442,11 @@ mod tests {
                 ],
             };
             assert_eq!(Mat4::create_rotation(theta, Z_AXIS), expected);
+        }
+
+        #[test]
+        fn it_should_create_a_look_at_matrix() {
+            // TODO
         }
     }
 }

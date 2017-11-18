@@ -91,16 +91,17 @@ impl SceneBuilder {
     }
 
     pub fn build_camera(&self) -> Camera {
-        Camera::look_at(
+        Camera::new(
             require_optional!(self, camera_position),
             require_optional!(self, camera_up),
             require_optional!(self, camera_look_at),
+            require_optional!(self, image_dimensions),
         )
     }
 
     pub fn build_render_parameters(&self) -> RenderParamaters {
         RenderParamaters {
-            image_dimensions: self.image_dimensions.unwrap_or((128u32, 128u32)),
+            image_dimensions: require_optional!(self, image_dimensions),
             antialias: self.antialias.unwrap_or(1),
             depth_limit: self.antialias.unwrap_or(3),
             background_color: self.background_color.unwrap_or(BLACK),
