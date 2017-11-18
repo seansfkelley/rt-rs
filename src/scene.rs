@@ -21,8 +21,8 @@ impl Scene {
         Scene { objects, lights, background_color, depth_limit }
     }
 
-    pub fn raytrace(&self, ray: &Ray) -> Color {
-        self.get_color(ray, 0)
+    pub fn raytrace(&self, ray: Ray) -> Color {
+        self.get_color(&ray, 0)
     }
 
     fn cast_ray(&self, ray: &Ray, depth: u32) -> Option<MaterialHit> {
