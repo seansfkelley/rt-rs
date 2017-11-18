@@ -66,7 +66,6 @@ impl TriangleMesh {
                 normal: e1.cross(e2).as_normalized().as_normal(),
                 uv: (0f64, 0f64),
             },
-            debug: false,
         });
     }
 }

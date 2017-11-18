@@ -89,7 +89,7 @@ fn main() {
 
                         let origin = grid_start + x_step * (x as f64 + x_jitter) + y_step * (y as f64 + y_jitter);
                         let direction = (origin - camera.position).as_normalized();
-                        let ray = Ray::new(origin, direction);
+                        let ref ray = Ray::new(origin, direction);
                         color = color + scene.raytrace(ray);
                     }
                 }

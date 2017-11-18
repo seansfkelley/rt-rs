@@ -6,6 +6,7 @@ use math::*;
 use core::*;
 use geometry::*;
 use importer::scene_builder::SceneBuilder;
+use color::{ Color, BLACK, WHITE };
 
 grammar(builder: &mut SceneBuilder);
 
@@ -33,10 +34,11 @@ Material: Box<Material> = {
         "color" <color:Color>
         <specular_exponent:("specular_exponent" <F64>)?>
         <reflectivity:("reflectivity" <F64>)?>
-    "}" => Box::new(FlatMaterial {
-        color,
-        specular_exponent: specular_exponent.unwrap_or(0f64),
-        reflectivity: reflectivity.unwrap_or(0f64),
+    "}" => Box::new(SurfaceMaterial {
+        ambient: color * 0.1f64,
+        diffuse: color,
+        specular: SpecularLighting(color * 0.5f64, specular_exponent.unwrap_or(0f64)),
+        reflective: ReflectiveLighting(WHITE, reflectivity.unwrap_or(0f64)),
     }),
     "image" "{"
         "path" <path:Path>

@@ -68,13 +68,11 @@ impl Geometry for Sphere {
                     Some(Hit {
                         enter: None,
                         exit: self.get_intersection(t1, &ray),
-                        debug: false
                     })
                 } else {
                     Some(Hit {
                         enter: Some(self.get_intersection(t0, &ray)),
                         exit: self.get_intersection(t1, &ray),
-                        debug: false
                     })
                 }
             }

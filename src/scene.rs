@@ -11,8 +11,6 @@ pub struct Scene {
     depth_limit: u32,
 }
 
-static DEBUG_SHADOW_COLOR: Color = Color { r: 0f64, g: 0f64, b: 1f64 };
-static DEBUG_BASE_COLOR: Color = Color { r: 1f64, g: 0f64, b: 0f64 };
 impl Scene {
     pub fn new(
         objects: Vec<SceneObject>,
@@ -23,82 +21,58 @@ impl Scene {
         Scene { objects, lights, background_color, depth_limit }
     }
 
-    pub fn raytrace(&self, ray: Ray) -> Color {
-        self.raytrace_depth_limited(ray, 0)
+    pub fn raytrace(&self, ray: &Ray) -> Color {
+        self.get_color(ray, 0)
     }
 
-    fn raytrace_depth_limited(&self, ray: Ray, depth: u32) -> Color {
+    fn cast_ray(&self, ray: &Ray, depth: u32) -> Option<MaterialHit> {
         if depth > self.depth_limit {
-            self.background_color
+            None
         } else {
-            match self.cast_ray(ray) {
-                Some(material_hit) => {
-                    let hit = material_hit.hit;
-                    let material = material_hit.material;
-                    let intersection = hit.enter.as_ref().unwrap();
-                    let lighting = material.get_lighting(&intersection);
+            let mut closest: Option<MaterialHit> = Option::None;
 
-                    let mut color: Color = self.lights
-                        .iter()
-                        .filter(|light| {
-                            let adjusted_location = intersection.location - (ray.direction * 1e-9f64);
-                            let light_direction = (light.position - adjusted_location).as_normalized();
-                            self.cast_ray(Ray::new(adjusted_location, light_direction)).map(|hit| hit.hit.enter).is_none()
-                        })
-                        .fold(BLACK, |color, light| {
-                            if hit.debug {
-                                color + (DEBUG_SHADOW_COLOR / (self.lights.len() as f64))
+            for o in &self.objects {
+                match o.intersect(&ray) {
+                    Some(hit) => {
+                        if hit.enter.is_some() {
+                            if closest.is_some() {
+                                if hit.enter.as_ref().unwrap().distance < closest.as_ref().unwrap().hit.enter.as_ref().unwrap().distance {
+                                    closest = Some(MaterialHit { hit, material: Rc::clone(&o.material) });
+                                }
                             } else {
-                                let light_direction = (light.position - intersection.location).as_normalized();
-                                let normalized_normal = intersection.normal.as_normalized();
-                                let diffuse_illumination = lighting.diffuse * light.color * normalized_normal.dot(&light_direction).max(0f64);
-                                let specular_illumination = lighting.specular.0 * light.color * normalized_normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(lighting.specular.1);
-                                color + diffuse_illumination + specular_illumination
-                            }
-                        });
-
-                    if hit.debug {
-                        color + DEBUG_BASE_COLOR
-                    } else {
-                        let reflectivity = lighting.reflective.1;
-
-                        if reflectivity > 0f64 {
-                            let new_origin = ray.at(intersection.distance);
-                            let new_direction = ray.direction.reflect(intersection.normal.as_vector());
-                            let new_ray = Ray::new(new_origin, new_direction);
-                            // TODO: I think we're supposed to multiply the reflectivity by the color of the surface...?
-                            color = (1f64 - reflectivity) * color + reflectivity * self.raytrace_depth_limited(new_ray, depth + 1)
-                        }
-
-                        color
-                    }
-                }
-                None => { self.background_color }
-            }
-        }
-    }
-
-    fn cast_ray(&self, ray: Ray) -> Option<MaterialHit> {
-        let mut closest: Option<MaterialHit> = Option::None;
-
-        for o in &self.objects {
-            match o.intersect(&ray) {
-                Some(hit) => {
-                    if hit.enter.is_some() {
-                        if closest.is_some() {
-                            if hit.enter.as_ref().unwrap().distance < closest.as_ref().unwrap().hit.enter.as_ref().unwrap().distance {
                                 closest = Some(MaterialHit { hit, material: Rc::clone(&o.material) });
                             }
-                        } else {
-                            closest = Some(MaterialHit { hit, material: Rc::clone(&o.material) });
                         }
-                    }
-                },
-                None => {},
+                    },
+                    None => {},
+                }
             }
-        }
 
-        closest
+            closest
+        }
+    }
+
+    pub fn get_color(&self, ray: &Ray, depth: u32) -> Color {
+        match self.cast_ray(ray, depth) {
+            Some(material_hit) => {
+                let hit = material_hit.hit;
+                let material = material_hit.material;
+                let intersection = hit.enter.as_ref().unwrap();
+                material.get_color(ray, intersection, self, depth)
+            },
+            None => self.background_color
+        }
+    }
+
+    pub fn get_visible_lights(&self, intersection: &Intersection) -> Vec<&Light> {
+        self.lights
+            .iter()
+            .filter(|light| {
+                let light_direction = (light.position - intersection.location).as_normalized();
+                let ref ray = Ray::new(intersection.location, light_direction);
+                self.cast_ray(ray, 0u32).map(|hit| hit.hit.enter).is_none()
+            })
+            .collect::<Vec<&Light>>()
     }
 }
 
