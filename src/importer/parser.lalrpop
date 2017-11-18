@@ -30,7 +30,20 @@ Statement: () = {
 Camera: PartialCamera = {
     "orthographic" "{"
         <common:CameraCommon>
-    "}" => PartialCamera::Orthographic(common.0, common.1, common.2, )
+    "}" => PartialCamera::Orthographic {
+        position: common.0,
+        look_at: common.1,
+        up: common.2,
+    },
+    "perspective" "{"
+        <common:CameraCommon>
+        <"field_of_view" <fov:F64>>?
+    "}" => PartialCamera::Perspective {
+        position: common.0,
+        look_at: common.1,
+        up: common.2,
+        field_of_view: fov.unwrap_or(90f64),
+    },
 };
 
 CameraCommon: (Point, Point, Vec3) = {
