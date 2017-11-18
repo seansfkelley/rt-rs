@@ -4,3 +4,4 @@ Cargo.lock
 .*.swp
 .idea/
 out/*.png
+.DS_Store

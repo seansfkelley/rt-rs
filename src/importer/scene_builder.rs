@@ -21,8 +21,8 @@ pub struct SceneBuilder {
 
 #[derive(Debug, Clone, Copy)]
 pub enum PartialCamera {
-    Orthographic { position: Point, look_at: Point, up: Vec3, },
-    Perspective { position: Point, look_at: Point, up: Vec3, field_of_view: f64 },
+    Orthographic { position: Point, look_at: Point, up: Vec3, screen_size: (f64, f64), },
+    Perspective { position: Point, look_at: Point, up: Vec3, screen_size: (f64, f64), field_of_view: f64 },
 }
 
 macro_rules! optional_setter {
@@ -95,11 +95,11 @@ impl SceneBuilder {
     pub fn build_camera(&self) -> Camera {
         let dimensions = require_optional!(self, image_dimensions);
         match require_optional!(self, partial_camera) {
-            PartialCamera::Orthographic { position, look_at, up, } => {
-                Camera::orthographic(position, look_at, up, dimensions)
+            PartialCamera::Orthographic { position, look_at, up, screen_size} => {
+                Camera::orthographic(position, look_at, up, screen_size, dimensions)
             }
-            PartialCamera::Perspective { position, look_at, up, field_of_view } => {
-                Camera::perspective(position, look_at, up, field_of_view, dimensions)
+            PartialCamera::Perspective { position, look_at, up, screen_size, field_of_view } => {
+                Camera::perspective(position, look_at, up, screen_size, field_of_view, dimensions)
             }
         }
     }

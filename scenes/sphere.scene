@@ -1,12 +1,13 @@
-image_dimensions 512 512
+image_dimensions 120 90
 depth_limit 10
-antialias 3
+antialias 1
 background_color .1 .1 .1
 
 camera orthographic {
   position 0 0 25
   look_at 0 0 0
   up 0 1 0
+  screen_size 4 3
 }
 
 material cyan flat {
@@ -14,9 +15,10 @@ material cyan flat {
   specular_exponent 3
 }
 
+transform translate 1 1 0
 object {
   geometry sphere {
-    radius 3
+    radius 1
   }
   material cyan
 }

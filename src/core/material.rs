@@ -29,7 +29,7 @@ pub struct FlatMaterial {
 }
 
 impl Material for FlatMaterial {
-    fn get_color(&self, ray: &Ray, intersection: &Intersection, scene: &Scene, current_depth: u32) -> Color {
+    fn get_color(&self, ray: &Ray, intersection: &Intersection, scene: &Scene, _current_depth: u32) -> Color {
         scene.get_visible_lights(&intersection.nudge(-ray.direction))
             .iter()
             .fold(BLACK, |color, light| {

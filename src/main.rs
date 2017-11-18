@@ -67,7 +67,6 @@ fn main() {
                                 rng.next_f64() * (y_max - y_min) + y_min,
                             )
                         };
-
                     color = color + scene.raytrace(camera.get_ray(x, y));
                 }
             }

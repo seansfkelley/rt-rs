@@ -34,6 +34,7 @@ Camera: PartialCamera = {
         position: common.0,
         look_at: common.1,
         up: common.2,
+        screen_size: common.3,
     },
     "perspective" "{"
         <common:CameraCommon>
@@ -42,14 +43,16 @@ Camera: PartialCamera = {
         position: common.0,
         look_at: common.1,
         up: common.2,
+        screen_size: common.3,
         field_of_view: fov.unwrap_or(90f64),
     },
 };
 
-CameraCommon: (Point, Point, Vec3) = {
+CameraCommon: (Point, Point, Vec3, (f64, f64)) = {
     "position" <Point>
     "look_at" <Point>
-    "up" <Vec3>,
+    "up" <Vec3>
+    "screen_size" <Tuple2<F64, F64>>,
 };
 
 Material: Box<Material> = {
