@@ -11,24 +11,24 @@ pub struct Intersection {
     pub uv: Uv,
 }
 
+const NUDGE_FACTOR: f64 = 1e-10f64;
+impl Intersection {
+    pub fn nudge(&self, direction: Vec3) -> Intersection {
+        Intersection {
+            distance: self.distance,
+            location: self.location + (direction.as_normalized() * NUDGE_FACTOR),
+            normal: self.normal,
+            uv: self.uv,
+        }
+    }
+}
+
 pub struct Hit {
     pub enter: Option<Intersection>,
     pub exit: Intersection,
-    pub debug: bool,
 }
 
 pub struct MaterialHit {
     pub hit: Hit,
     pub material: Rc<Material>,
-}
-
-impl Hit {
-    #[allow(dead_code)]
-    pub fn debug(self, debug: bool) -> Hit {
-        Hit {
-            enter: self.enter,
-            exit: self.exit,
-            debug,
-        }
-    }
 }

@@ -42,7 +42,6 @@ impl Geometry for Difference {
                                         uv: rhs_hit.exit.uv,
                                     }),
                                     exit: lhs_hit.exit,
-                                    debug: false,
                                 })
                             } else {
                                 None

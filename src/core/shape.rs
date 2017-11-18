@@ -35,7 +35,6 @@ impl Geometry for Shape {
             Hit {
                 enter: object_space_hit.enter.map(|enter| self.get_intersection(enter)),
                 exit: self.get_intersection(object_space_hit.exit),
-                debug: object_space_hit.debug,
             }
         })
     }
