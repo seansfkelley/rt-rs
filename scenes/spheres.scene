@@ -15,10 +15,29 @@ material cyan flat {
   specular_exponent 3
 }
 
+material magenta flat {
+  color .7 0 .7
+  specular_exponent 3
+}
+
+light {
+  position -1 -1 -10
+  color .5 .5 .5
+}
+
 transform translate 1 1 0
 object {
   geometry sphere {
     radius 1
   }
   material cyan
+}
+transform pop
+
+transform translate -1 -1 5
+object {
+  geometry sphere {
+    radius 1
+  }
+  material magenta
 }
