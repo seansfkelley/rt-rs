@@ -22,16 +22,15 @@ pub trait Material: Debug {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct SurfaceMaterial {
+pub struct FlatMaterial {
     pub ambient: Color,
     pub diffuse: Color,
     pub specular: SpecularLighting,
-    pub reflective: ReflectiveLighting,
 }
 
-impl Material for SurfaceMaterial {
+impl Material for FlatMaterial {
     fn get_color(&self, ray: &Ray, intersection: &Intersection, scene: &Scene, current_depth: u32) -> Color {
-        let mut color: Color = scene.get_visible_lights(&intersection.nudge(-ray.direction))
+        scene.get_visible_lights(&intersection.nudge(-ray.direction))
             .iter()
             .fold(BLACK, |color, light| {
                 let light_direction = (light.position - intersection.location).as_normalized();
@@ -39,7 +38,29 @@ impl Material for SurfaceMaterial {
                 let diffuse_illumination = self.diffuse * light.color * normalized_normal.dot(&light_direction).max(0f64);
                 let specular_illumination = self.specular.0 * light.color * normalized_normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(self.specular.1);
                 color + diffuse_illumination + specular_illumination
-            });
+            })
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ReflectiveMaterial {
+    pub flat_material: FlatMaterial,
+    pub reflective: ReflectiveLighting,
+}
+
+impl ReflectiveMaterial {
+    pub fn new(ambient: Color, diffuse: Color, specular: SpecularLighting, reflective: ReflectiveLighting) -> ReflectiveMaterial {
+        ReflectiveMaterial {
+            flat_material: FlatMaterial { ambient, diffuse, specular },
+            reflective,
+        }
+    }
+
+}
+
+impl Material for ReflectiveMaterial {
+    fn get_color(&self, ray: &Ray, intersection: &Intersection, scene: &Scene, current_depth: u32) -> Color {
+        let mut color = self.flat_material.get_color(ray, intersection, scene, current_depth);
 
         let reflectivity = self.reflective.1;
 
@@ -84,12 +105,12 @@ impl Material for ImageTextureMaterial {
         let color = Color::new(rgb[0] as f64 / 255f64, rgb[1] as f64 / 255f64, rgb[2] as f64 / 255f64);
 
         // TODO: How to do more properly??
-        SurfaceMaterial {
-            ambient: color * 0.1f64,
-            diffuse: color,
-            specular: SpecularLighting(BLACK, 0f64),
-            reflective: ReflectiveLighting(color, self.reflectivity),
-        }.get_color(ray, intersection, scene, current_depth)
+        ReflectiveMaterial::new(
+            color * 0.1f64,
+            color,
+            SpecularLighting(BLACK, 0f64),
+            ReflectiveLighting(color, self.reflectivity),
+        ).get_color(ray, intersection, scene, current_depth)
     }
 }
 
@@ -110,11 +131,11 @@ impl Material for CheckerboardMaterial {
                 self.color_b
             };
         // TODO: How to do more properly??
-        SurfaceMaterial {
-            ambient: color * 0.1f64,
-            diffuse: color,
-            specular: SpecularLighting(BLACK, 0f64),
-            reflective: ReflectiveLighting(BLACK, 0f64),
-        }.get_color(ray, intersection, scene, current_depth)
+        ReflectiveMaterial::new(
+            color * 0.1f64,
+            color,
+            SpecularLighting(BLACK, 0f64),
+            ReflectiveLighting(BLACK, 0f64),
+        ).get_color(ray, intersection, scene, current_depth)
     }
 }
