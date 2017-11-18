@@ -19,7 +19,7 @@ pub struct SceneBuilder {
     pub lights: Vec<Light>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum PartialCamera {
     Orthographic { position: Point, look_at: Point, up: Vec3, },
     Perspective { position: Point, look_at: Point, up: Vec3, field_of_view: f64 },

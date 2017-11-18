@@ -15,7 +15,7 @@ pub SceneFile: () = {
 };
 
 Statement: () = {
-    "camera" <Camera> => builder.set_partial_camera(<>),
+    "camera" <Camera> => builder.partial_camera(<>),
     "image_dimensions" <Tuple2<U32, U32>> => builder.image_dimensions(<>),
     "antialias" <U32> => builder.antialias(<>),
     "depth_limit" <U32> => builder.depth_limit(<>),
@@ -37,7 +37,7 @@ Camera: PartialCamera = {
     },
     "perspective" "{"
         <common:CameraCommon>
-        <"field_of_view" <fov:F64>>?
+        <fov:("field_of_view" <F64>)?>
     "}" => PartialCamera::Perspective {
         position: common.0,
         look_at: common.1,
@@ -50,7 +50,7 @@ CameraCommon: (Point, Point, Vec3) = {
     "position" <Point>
     "look_at" <Point>
     "up" <Vec3>,
-}
+};
 
 Material: Box<Material> = {
     "flat" "{"
