@@ -7,9 +7,6 @@ use geometry::*;
 
 #[derive(Debug, Default)]
 pub struct SceneBuilder {
-    camera_position: Option<Point>,
-    camera_up: Option<Vec3>,
-    camera_look_at: Option<Point>,
     image_dimensions: Option<(u32, u32)>,
     antialias: Option<u32>,
     depth_limit: Option<u32>,
@@ -17,6 +14,7 @@ pub struct SceneBuilder {
     materials: HashMap<String, Rc<Material>>,
     // TODO: Should transform be an Rc instead? Feels like this can get expensive.
     transform_stack: Vec<Transform>,
+    camera: Option<Camera>,
     pub objects: Vec<SceneObject>,
     pub lights: Vec<Light>,
 }
@@ -44,9 +42,7 @@ impl SceneBuilder {
         Default::default()
     }
 
-    optional_setter!(camera_position, Point);
-    optional_setter!(camera_up, Vec3);
-    optional_setter!(camera_look_at, Point);
+    optional_setter!(camera, Camera);
     optional_setter!(image_dimensions, (u32, u32));
     optional_setter!(antialias, u32);
     optional_setter!(depth_limit, u32);
@@ -91,11 +87,7 @@ impl SceneBuilder {
     }
 
     pub fn build_camera(&self) -> Camera {
-        Camera::look_at(
-            require_optional!(self, camera_position),
-            require_optional!(self, camera_up),
-            require_optional!(self, camera_look_at),
-        )
+        require_optional!(self, camera)
     }
 
     pub fn build_render_parameters(&self) -> RenderParamaters {

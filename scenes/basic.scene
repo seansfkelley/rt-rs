@@ -1,6 +1,8 @@
-camera_position 0 0 25
-camera_up 0 1 0
-camera_look_at 0 0 0
+camera {
+  position 0 0 25
+  up 0 1 0
+  look_at 0 0 0
+}
 
 image_dimensions 512 512
 depth_limit 10
