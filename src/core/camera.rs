@@ -24,15 +24,17 @@ pub struct OrthographicCamera {
 #[derive(Debug, Clone, Copy)]
 pub struct PerspectiveCamera {
     base: BaseCamera,
-    raster_to_world: Transform,
+    raster_to_camera: Transform,
+    camera_to_world: Transform,
 }
 
 impl OrthographicCamera {
     pub fn new(base: BaseCamera, dimensions: (u32, u32)) -> OrthographicCamera {
-        // for orthographic, the projection is nop because the rays will already be perpendicular to the image plane on creation
+        let camera_to_world = Mat4::create_look_at(base.position, base.look_at, base.up).invert().unwrap();
         OrthographicCamera {
             base,
-            raster_to_world: Transform::new(compute_raster_to_world(base, dimensions, IDENTITY_MATRIX))
+            // for orthographic, the projection is nop because the rays will already be perpendicular to the image plane on creation
+            raster_to_world: Transform::new(camera_to_world * compute_raster_to_camera(base, dimensions, IDENTITY_MATRIX))
         }
     }
 }
@@ -62,9 +64,11 @@ impl PerspectiveCamera {
             ],
         };
 
+        let camera_to_world = Mat4::create_look_at(base.position, base.look_at, base.up).invert().unwrap();
         PerspectiveCamera {
             base,
-            raster_to_world: Transform::new(compute_raster_to_world(base, dimensions, projection))
+            raster_to_camera: Transform::new(compute_raster_to_camera(base, dimensions, projection)),
+            camera_to_world: Transform::new(camera_to_world),
         }
     }
 }
@@ -72,18 +76,18 @@ impl PerspectiveCamera {
 impl Camera for PerspectiveCamera {
     fn get_ray(&self, image_x: u32, image_y: u32) -> Ray {
         Ray {
-            // TODO: Want to be able to access camera -> world because we should be transforming 0, 0, 0 (origin) in _camera space_, not raster space, to world space.
-            origin: Point::uniform(0f64).transform(&self.raster_to_world),
-            // TODO: Didn't actually change this one from orthographic.
-            direction: Vec3::new(0f64, 0f64, 1f64).transform(&self.raster_to_world).as_normalized(),
+            origin: Point::uniform(0f64)
+                .transform(&self.camera_to_world),
+            direction: Vec3::new(image_x as f64, image_y as f64, 0f64)
+                .transform(&self.raster_to_camera)
+                .transform(&self.camera_to_world)
+                .as_normalized(),
         }
     }
 }
 
 // pbrt ch. 6
-fn compute_raster_to_world(base: BaseCamera, dimensions: (u32, u32), camera_to_screen: Mat4) -> Mat4 {
-    let world_to_camera = Mat4::create_look_at(base.position, base.look_at, base.up);
-
+fn compute_raster_to_camera(base: BaseCamera, dimensions: (u32, u32), camera_to_screen: Mat4) -> Mat4 {
     // raster space: 0, 0 -> image_x, image_y
     // ndc space: 0, 0, -> 1, 1 ("normalized device coordinates")
     // screen space: -x, -y -> +x, +y (image plane)
@@ -102,5 +106,5 @@ fn compute_raster_to_world(base: BaseCamera, dimensions: (u32, u32), camera_to_s
         Mat4::create_translation(Vec3::new(screen_x / 2f64, -screen_y / 2f64, 0f64));
 
 
-    world_to_camera.invert().unwrap() * camera_to_screen.invert().unwrap() * screen_to_raster.invert().unwrap()
+    camera_to_screen.invert().unwrap() * screen_to_raster.invert().unwrap()
 }
