@@ -24,7 +24,6 @@ material mirror flat {
 material yellow_matte flat {
   color .7 .7 0
   specular_exponent 0
-  reflectivity 0
 }
 
 material bw_checkerboard checkerboard {
