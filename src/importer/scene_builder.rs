@@ -7,7 +7,7 @@ use geometry::*;
 
 #[derive(Debug, Default)]
 pub struct SceneBuilder {
-    partial_camera: Option<PartialCamera>,
+    camera: Option<CameraBuilder>,
     image_dimensions: Option<(u32, u32)>,
     antialias: Option<u32>,
     depth_limit: Option<u32>,
@@ -20,9 +20,9 @@ pub struct SceneBuilder {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum PartialCamera {
-    Orthographic { position: Point, look_at: Point, up: Vec3, screen_size: (f64, f64), },
-    Perspective { position: Point, look_at: Point, up: Vec3, screen_size: (f64, f64), field_of_view: f64 },
+pub enum CameraBuilder {
+    Orthographic(BaseCamera),
+    Perspective(BaseCamera, f64)
 }
 
 macro_rules! optional_setter {
@@ -48,7 +48,7 @@ impl SceneBuilder {
         Default::default()
     }
 
-    optional_setter!(partial_camera, PartialCamera);
+    optional_setter!(camera, CameraBuilder);
     optional_setter!(image_dimensions, (u32, u32));
     optional_setter!(antialias, u32);
     optional_setter!(depth_limit, u32);
@@ -92,14 +92,14 @@ impl SceneBuilder {
         self.lights.push(light);
     }
 
-    pub fn build_camera(&self) -> Camera {
+    pub fn build_camera(&self) -> Box<Camera> {
         let dimensions = require_optional!(self, image_dimensions);
-        match require_optional!(self, partial_camera) {
-            PartialCamera::Orthographic { position, look_at, up, screen_size} => {
-                Camera::orthographic(position, look_at, up, screen_size, dimensions)
+        match require_optional!(self, camera) {
+            CameraBuilder::Orthographic(base) => {
+                Box::new(OrthographicCamera::new(base, dimensions))
             }
-            PartialCamera::Perspective { position, look_at, up, screen_size, field_of_view } => {
-                Camera::perspective(position, look_at, up, screen_size, field_of_view, dimensions)
+            CameraBuilder::Perspective(base, fov) => {
+                Box::new(PerspectiveCamera::new(base, dimensions, fov))
             }
         }
     }

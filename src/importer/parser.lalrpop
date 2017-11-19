@@ -5,7 +5,7 @@ use std::path::{ Path, PathBuf };
 use math::*;
 use core::*;
 use geometry::*;
-use importer::scene_builder::{ SceneBuilder, PartialCamera };
+use importer::scene_builder::*;
 use color::{ Color, BLACK, WHITE };
 
 grammar(builder: &mut SceneBuilder);
@@ -15,7 +15,7 @@ pub SceneFile: () = {
 };
 
 Statement: () = {
-    "camera" <Camera> => builder.partial_camera(<>),
+    "camera" <CameraBuilder> => builder.camera(<>),
     "image_dimensions" <Tuple2<U32, U32>> => builder.image_dimensions(<>),
     "antialias" <U32> => builder.antialias(<>),
     "depth_limit" <U32> => builder.depth_limit(<>),
@@ -27,32 +27,21 @@ Statement: () = {
     "light" <Light> => builder.add_light(<>),
 };
 
-Camera: PartialCamera = {
+CameraBuilder: CameraBuilder = {
     "orthographic" "{"
-        <common:CameraCommon>
-    "}" => PartialCamera::Orthographic {
-        position: common.0,
-        look_at: common.1,
-        up: common.2,
-        screen_size: common.3,
-    },
+        <base:BaseCamera>
+    "}" => CameraBuilder::Orthographic(base),
     "perspective" "{"
-        <common:CameraCommon>
+        <base:BaseCamera>
         <fov:("field_of_view" <F64>)?>
-    "}" => PartialCamera::Perspective {
-        position: common.0,
-        look_at: common.1,
-        up: common.2,
-        screen_size: common.3,
-        field_of_view: fov.unwrap_or(90f64),
-    },
+    "}" => CameraBuilder::Perspective(base, fov.unwrap_or(90f64)),
 };
 
-CameraCommon: (Point, Point, Vec3, (f64, f64)) = {
-    "position" <Point>
-    "look_at" <Point>
-    "up" <Vec3>
-    "screen_size" <Tuple2<F64, F64>>,
+BaseCamera: BaseCamera = {
+    "position" <position:Point>
+    "look_at" <look_at:Point>
+    "up" <up:Vec3>
+    "screen_size" <screen_size:Tuple2<F64, F64>> => BaseCamera { position, look_at, up, screen_size }
 };
 
 Material: Box<Material> = {
