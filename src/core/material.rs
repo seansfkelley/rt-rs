@@ -6,6 +6,7 @@ use intersection::Intersection;
 use scene::Scene;
 use core::*;
 use math::*;
+use std::rc::Rc;
 
 type SpecularExponent = f64;
 
@@ -13,9 +14,6 @@ type SpecularExponent = f64;
 pub struct SpecularLighting(pub Color, pub SpecularExponent);
 
 type Reflectivity = f64;
-
-#[derive(Debug, Clone, Copy)]
-pub struct ReflectiveLighting(pub Color, pub Reflectivity);
 
 pub trait Material: Debug {
     fn get_color(&self, ray: &Ray, intersection: &Intersection, scene: &Scene, current_depth: u32) -> Color;
@@ -43,36 +41,24 @@ impl Material for FlatMaterial {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct ReflectiveMaterial {
-    pub flat_material: FlatMaterial,
-    pub reflective: ReflectiveLighting,
-}
+pub struct ReflectiveMaterial { }
 
 impl ReflectiveMaterial {
-    pub fn new(ambient: Color, diffuse: Color, specular: SpecularLighting, reflective: ReflectiveLighting) -> ReflectiveMaterial {
-        ReflectiveMaterial {
-            flat_material: FlatMaterial { ambient, diffuse, specular },
-            reflective,
-        }
+    pub fn new(ambient: Color, diffuse: Color, specular: SpecularLighting, reflectivity: Reflectivity) -> MaterialComposition {
+        MaterialComposition::new()
+            .compose(&Rc::new(FlatMaterial { ambient, diffuse, specular }), 1f64 - reflectivity)
+            .compose(&Rc::new(ReflectiveMaterial { }), reflectivity)
     }
 
 }
 
 impl Material for ReflectiveMaterial {
     fn get_color(&self, ray: &Ray, intersection: &Intersection, scene: &Scene, current_depth: u32) -> Color {
-        let mut color = self.flat_material.get_color(ray, intersection, scene, current_depth);
-
-        let reflectivity = self.reflective.1;
-
-        if reflectivity > 0f64 {
-            let new_origin = ray.at(intersection.distance);
-            let new_direction = ray.direction.reflect(intersection.normal.as_vector());
-            let new_ray = Ray::new(new_origin, new_direction);
-            // TODO: I think we're supposed to multiply the reflectivity by the color of the surface...?
-            color = (1f64 - reflectivity) * color + reflectivity * scene.get_color(&new_ray, current_depth + 1)
-        }
-
-        color
+        let new_origin = ray.at(intersection.distance);
+        let new_direction = ray.direction.reflect(intersection.normal.as_vector());
+        let new_ray = Ray::new(new_origin, new_direction);
+        // TODO: I think we're supposed to multiply the reflectivity by the color of the surface...?
+        scene.get_color(&new_ray, current_depth + 1)
     }
 }
 
@@ -109,7 +95,7 @@ impl Material for ImageTextureMaterial {
             color * 0.1f64,
             color,
             SpecularLighting(BLACK, 0f64),
-            ReflectiveLighting(color, self.reflectivity),
+            self.reflectivity,
         ).get_color(ray, intersection, scene, current_depth)
     }
 }
@@ -131,11 +117,53 @@ impl Material for CheckerboardMaterial {
                 self.color_b
             };
         // TODO: How to do more properly??
-        ReflectiveMaterial::new(
-            color * 0.1f64,
-            color,
-            SpecularLighting(BLACK, 0f64),
-            ReflectiveLighting(BLACK, 0f64),
-        ).get_color(ray, intersection, scene, current_depth)
+        FlatMaterial {
+            ambient: color * 0.1f64,
+            diffuse: color,
+            specular: SpecularLighting(BLACK, 0f64),
+        }.get_color(ray, intersection, scene, current_depth)
+    }
+}
+
+#[derive(Debug)]
+struct WeightedMaterial {
+    weight: f64,
+    material: Rc<Material>,
+}
+// Assumption: Material color calculations are independent and so can just be combined fractionally
+#[derive(Debug)]
+pub struct MaterialComposition {
+    materials: Vec<WeightedMaterial>,
+}
+
+impl MaterialComposition {
+    pub fn new() -> MaterialComposition {
+        MaterialComposition { materials: vec![] }
+    }
+
+    pub fn compose<M: Material + 'static>(mut self, material: &Rc<M>, weight: f64) -> MaterialComposition {
+        if weight > 0f64 {
+            self.materials.push(WeightedMaterial {
+                material: Rc::<M>::clone(material),
+                weight,
+            });
+        }
+        self
+    }
+}
+
+impl Material for MaterialComposition {
+    fn get_color(&self, ray: &Ray, intersection: &Intersection, scene: &Scene, current_depth: u32) -> Color {
+        let total_weight: f64 = (&self.materials)
+            .iter()
+            .map(|weighted_material| weighted_material.weight)
+            .sum();
+        let mut color = BLACK;
+        for weighted_material in &self.materials {
+            let contribution = weighted_material.weight / total_weight;
+            color += weighted_material.material.get_color(ray, intersection, scene, current_depth) * contribution;
+        }
+
+        color
     }
 }

@@ -32,20 +32,12 @@ Material: Box<Material> = {
         "color" <color:Color>
         <specular_exponent:("specular_exponent" <F64>)?>
         <reflectivity_option:("reflectivity" <F64>)?>
-    "}" => {
-        let flat_material = FlatMaterial {
-            ambient: color * 0.1f64,
-            diffuse: color,
-            specular: SpecularLighting(color * 0.5f64, specular_exponent.unwrap_or(0f64)),
-        };
-        match reflectivity_option {
-            Some(reflectivity) => Box::new(ReflectiveMaterial {
-                flat_material,
-                reflective: ReflectiveLighting(WHITE, reflectivity),
-            }),
-            None => Box::new(flat_material),
-        }
-    },
+    "}" => Box::new(ReflectiveMaterial::new(
+        color * 0.1f64,
+        color,
+        SpecularLighting(color * 0.5f64, specular_exponent.unwrap_or(0f64)),
+        reflectivity_option.unwrap_or(0f64),
+    )),
     "image" "{"
         "path" <path:Path>
         <reflectivity:("reflectivity" <F64>)?>
