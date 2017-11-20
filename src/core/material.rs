@@ -28,7 +28,7 @@ pub struct FlatMaterial {
 
 impl Material for FlatMaterial {
     fn get_color(&self, ray: &Ray, intersection: &Intersection, scene: &Scene, current_depth: u32) -> Color {
-        scene.get_visible_lights(&intersection.nudge(-ray.direction))
+        scene.get_visible_lights(&intersection.nudge(intersection.normal))
             .iter()
             .fold(BLACK, |color, light| {
                 let light_direction = (light.position - intersection.location).as_normalized();
@@ -131,6 +131,7 @@ struct WeightedMaterial {
     material: Rc<Material>,
 }
 // Assumption: Material color calculations are independent and so can just be combined fractionally
+// Shit, bad assumption: https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
 #[derive(Debug)]
 pub struct MaterialComposition {
     materials: Vec<WeightedMaterial>,
