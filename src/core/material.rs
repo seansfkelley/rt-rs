@@ -1,12 +1,8 @@
 use std::path::Path;
 use std::fmt::Debug;
 use image::{RgbImage, Pixel, open as openImage};
-use color::{Color, BLACK, WHITE};
-use scene::Scene;
+use color::{Color, BLACK};
 use core::*;
-use math::*;
-use util::Clamp;
-use std::rc::Rc;
 
 type SpecularExponent = f64;
 
@@ -40,7 +36,7 @@ pub struct ConstantTexture {
 }
 
 impl Texture for ConstantTexture {
-    fn get_material(&self, intersection: &Intersection) -> Material {
+    fn get_material(&self, _intersection: &Intersection) -> Material {
         self.material
     }
 }

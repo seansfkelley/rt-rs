@@ -1,6 +1,5 @@
 use math::*;
 use core::*;
-use scene::Scene;
 
 pub type Uv = (f64, f64);
 

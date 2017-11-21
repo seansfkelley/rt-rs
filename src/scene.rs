@@ -128,9 +128,9 @@ impl Scene {
         } else {
             let cos_t = (1f64 - sin_t * sin_t).max(0f64).sqrt();
             let cos_i = cos_t.abs();
-            let Rs = ((eta_t * cos_i) - (eta_i * cos_t)) / ((eta_t * cos_i) + (eta_i * cos_t));
-            let Rp = ((eta_i * cos_i) - (eta_t * cos_t)) / ((eta_i * cos_i) + (eta_t * cos_t));
-            (Rs * Rs + Rp * Rp) / 2f64
+            let r_s = ((eta_t * cos_i) - (eta_i * cos_t)) / ((eta_t * cos_i) + (eta_i * cos_t));
+            let r_p = ((eta_i * cos_i) - (eta_t * cos_t)) / ((eta_i * cos_i) + (eta_t * cos_t));
+            (r_s * r_s + r_p * r_p) / 2f64
         }
     }
 

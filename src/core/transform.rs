@@ -1,5 +1,4 @@
-#![allow(dead_code)]
-use core::{ Ray, Camera };
+use core::Ray;
 use math::*;
 
 pub static IDENTITY_TRANSFORM: Transform = Transform {

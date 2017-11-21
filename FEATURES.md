@@ -21,6 +21,3 @@
 - Hex colors
 - Animations in scenes
 - More scenes
-
-### known issues
-- rustc recompiles every time a scene file is changed (maybe lalrpop is confusedly regenerating parser.rs every time?)
