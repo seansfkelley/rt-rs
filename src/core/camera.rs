@@ -8,17 +8,23 @@ pub struct BaseCamera {
     pub position: Point,
     pub look_at: Point,
     pub up: Vec3,
-    pub screen_size: (f64, f64),
+    // The image plane that pixels live on is infinitely large. This tuple defines what bounds, +/- from
+    // the origin, should be used as the screen. Increasing this while keeping the output image size constant
+    // will increase the "field of view", i.e., a larger physical area will be visible. With orthographic
+    // cameras, this is the only way to increase the "field of view". With perspective cameras, you should
+    // probably use the actual field_of_view value first, though you can also use this to tweak it.
+    pub screen_size: Option<(f64, f64)>,
 }
 
 pub trait Camera : Debug {
-    fn get_ray(&self, image_x: u32, image_y: u32) -> Ray;
+    fn get_ray(&self, image_x: f64, image_y: f64) -> Ray;
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct OrthographicCamera {
     base: BaseCamera,
-    raster_to_world: Transform,
+    raster_to_camera: Transform,
+    camera_to_world: Transform,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -34,17 +40,18 @@ impl OrthographicCamera {
         OrthographicCamera {
             base,
             // for orthographic, the projection is nop because the rays will already be perpendicular to the image plane on creation
-            raster_to_world: Transform::new(camera_to_world * compute_raster_to_camera(base, dimensions, IDENTITY_MATRIX))
+            raster_to_camera: Transform::new(compute_raster_to_camera(base, dimensions, IDENTITY_MATRIX)),
+            camera_to_world: Transform::new(camera_to_world),
         }
     }
 }
 
 impl Camera for OrthographicCamera {
-    fn get_ray(&self, image_x: u32, image_y: u32) -> Ray {
+    fn get_ray(&self, image_x: f64, image_y: f64) -> Ray {
         Ray {
-            origin: Point::new(image_x as f64, image_y as f64, 0f64).transform(&self.raster_to_world),
-            direction: Vec3::new(0f64, 0f64, 1f64).transform(&self.raster_to_world).as_normalized(),
-        }
+            origin: Point::new(image_x, image_y, 0f64).transform(&self.raster_to_camera),
+            direction: Vec3::new(0f64, 0f64, 1f64),
+        }.transform(&self.camera_to_world)
     }
 }
 
@@ -74,15 +81,11 @@ impl PerspectiveCamera {
 }
 
 impl Camera for PerspectiveCamera {
-    fn get_ray(&self, image_x: u32, image_y: u32) -> Ray {
+    fn get_ray(&self, image_x: f64, image_y: f64) -> Ray {
         Ray {
-            origin: Point::uniform(0f64)
-                .transform(&self.camera_to_world),
-            direction: Vec3::new(image_x as f64, image_y as f64, 0f64)
-                .transform(&self.raster_to_camera)
-                .transform(&self.camera_to_world)
-                .as_normalized(),
-        }
+            origin: Point::uniform(0f64),
+            direction: Point::new(image_x, image_y, 0f64).transform(&self.raster_to_camera).as_vector().as_normalized(),
+        }.transform(&self.camera_to_world)
     }
 }
 
@@ -91,20 +94,28 @@ fn compute_raster_to_camera(base: BaseCamera, dimensions: (u32, u32), camera_to_
     // raster space: 0, 0 -> image_x, image_y
     // ndc space: 0, 0, -> 1, 1 ("normalized device coordinates")
     // screen space: -x, -y -> +x, +y (image plane)
-    let (image_x, image_y) = dimensions;
-    let (screen_x, screen_y) = base.screen_size;
+    let image_x = dimensions.0 as f64;
+    let image_y = dimensions.1 as f64;
+    let (screen_x, screen_y) = match base.screen_size {
+        Some(screen_size) => screen_size,
+        // Following pbrt, we default keep the narrower side +/- 1 and proportionally increase the wider side.
+        None => if image_x > image_y {
+            (image_x / image_y * 2f64, 2f64)
+        } else {
+            (2f64, image_y / image_x * 2f64)
+        },
+    };
 
     // following pbrt, let's break out the interesting steps because we might want to slip other things
     // in between later (e.g. depth of field)
     let screen_to_raster =
         // ndc to raster scaling
-        Mat4::create_scale(Vec3::new(image_x as f64, image_y as f64, 1f64)) *
+        Mat4::create_scale(Vec3::new(image_x, image_y, 1f64)) *
         // screen to ndc scaling
         // -y -> flip top-to-bottom because graphics
         Mat4::create_scale(Vec3::new(1f64 / screen_x, -1f64 / screen_y, 1f64)) *
         // screen to ndc translation (origin at top-left corner)
         Mat4::create_translation(Vec3::new(screen_x / 2f64, -screen_y / 2f64, 0f64));
-
 
     camera_to_screen.invert().unwrap() * screen_to_raster.invert().unwrap()
 }

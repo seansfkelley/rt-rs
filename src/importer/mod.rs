@@ -70,7 +70,6 @@ pub fn parse(path: &Path) -> SceneFile {
                 ParseError::UnrecognizedToken { token, expected } => {
                     match token {
                         Some(t) => {
-                            println!("{:?}", t);
                             let (line, column) = get_line_and_column(t.0);
                             panic!("unexpected token {:?} at {}:{}; expected one of {:?}", (t.1).1, line, column, expected);
                         },

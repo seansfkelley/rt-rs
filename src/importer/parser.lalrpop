@@ -41,7 +41,7 @@ BaseCamera: BaseCamera = {
     "position" <position:Point>
     "look_at" <look_at:Point>
     "up" <up:Vec3>
-    "screen_size" <screen_size:Tuple2<F64, F64>> => BaseCamera { position, look_at, up, screen_size }
+    <screen_size:("screen_size" <Tuple2<F64, F64>>)?> => BaseCamera { position, look_at, up, screen_size }
 };
 
 Material: Box<Material> = {

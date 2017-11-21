@@ -1,8 +1,10 @@
 #![allow(dead_code)]
 use std::ops::Mul;
+use std::result::Result;
+use std::fmt::{ Debug, Formatter, Error };
 use super::xyz::*;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct Mat4 {
     // (row, column)
     pub cells: [[f64; 4]; 4],
@@ -68,7 +70,7 @@ impl Mat4 {
 
     // pbrt pg. 84
     pub fn create_look_at(position: Point, look_at: Point, in_up: Vec3) -> Mat4 {
-        let direction = (position - look_at).as_normalized();
+        let direction = (look_at - position).as_normalized();
         let left = in_up.as_normalized().cross(direction).as_normalized();
         let up = direction.cross(left);
 
@@ -79,7 +81,7 @@ impl Mat4 {
                 [left.z, up.z, direction.z, position.z],
                 [  0f64, 0f64,        0f64,       1f64]
             ],
-        }
+        }.invert().unwrap()
     }
 
     pub fn translate(&self, translation: Vec3) -> Mat4 {
@@ -281,6 +283,33 @@ impl Mul for Mat4 {
         }
 
         Mat4 { cells }
+    }
+}
+
+macro_rules! maybe_early_abort {
+    ($e:expr) => {
+        match $e {
+            Result::Err(e) => { return Result::Err(e); },
+            Result::Ok(_) => {},
+        }
+    };
+}
+
+impl Debug for Mat4 {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        maybe_early_abort!(write!(f, "[ \n"));
+        for i in 0..4 {
+            maybe_early_abort!(write!(f, "  [ "));
+            for j in 0..4 {
+                maybe_early_abort!(write!(f, "{}", self.cells[i][j]));
+                if j != 3 {
+                    maybe_early_abort!(write!(f, ", "));
+                }
+            }
+            maybe_early_abort!(write!(f, " ]\n"));
+        }
+        maybe_early_abort!(write!(f, "]"));
+        Result::Ok(())
     }
 }
 
