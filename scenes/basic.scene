@@ -9,29 +9,33 @@ depth_limit 10
 antialias 3
 background_color .1 .1 .1
 
-material cyan_plastic flat {
+texture cyan_plastic constant flat {
   color 0 .7 .7
   specular_exponent 1
   reflectivity .1
 }
 
-material mirror flat {
+texture mirror constant flat {
   color 0.9 0.9 0.9
   specular_exponent 7
   reflectivity 0.95
 }
 
-material yellow_matte flat {
+texture yellow_matte constant flat {
   color .7 .7 0
   specular_exponent 0
 }
 
-material bw_checkerboard checkerboard {
+texture bw_checkerboard checkerboard {
   checks_per_unit 32
 }
 
-material glass transmissive {
+texture glass constant transmissive {
+  color 0.9 0.9 0.9
+  specular_exponent 7
   index_of_refraction 1.5
+  transmissivity 0.95
+  reflectivity 0.95
 }
 
 transform translate -4 -4 2
@@ -39,7 +43,7 @@ object {
   geometry sphere {
     radius 1
   }
-  material cyan_plastic
+  texture cyan_plastic
 }
 transform pop
 
@@ -48,7 +52,7 @@ object {
   geometry sphere {
     radius 1
   }
-  material glass
+  texture glass
 }
 transform pop
 
@@ -57,7 +61,7 @@ object {
   geometry sphere {
     radius 5
   }
-  material mirror
+  texture mirror
 }
 transform pop
 
@@ -66,7 +70,7 @@ object {
   geometry sphere {
     radius 3
   }
-  material bw_checkerboard
+  texture bw_checkerboard
 }
 transform pop
 
@@ -77,7 +81,7 @@ object {
   geometry sphere {
     radius 1
   }
-  material yellow_matte
+  texture yellow_matte
 }
 transform pop 3
 
@@ -92,7 +96,7 @@ object {
       0 1 2
     ]
   }
-  material cyan_plastic
+  texture cyan_plastic
 }
 
 object {
@@ -110,7 +114,7 @@ object {
       transform translate 3 -3.5 .5
     }
   }
-  material yellow_matte
+  texture yellow_matte
 }
 
 light {

@@ -48,9 +48,3 @@ pub struct SceneObjectHit<'a> {
     pub hit: Hit,
     pub scene_object: &'a SceneObject,
 }
-
-impl<'a> SceneObjectHit<'a> {
-    pub fn get_color(&self, ray: &Ray, scene: &Scene, current_depth: u32) -> Color {
-        self.scene_object.material.get_color(ray, self, scene, current_depth)
-    }
-}
