@@ -81,7 +81,7 @@ impl Scene {
             eta = eta_i / eta_t;
             let fresnel_reflection_fraction = self.get_fresnel_reflection_percentage(ray, intersection, eta_i, eta_t);
             reflection_fraction *= fresnel_reflection_fraction;
-            transmission_fraction *= 1f64 - reflection_fraction;
+            transmission_fraction *= 1f64 - fresnel_reflection_fraction;
         }
 
         let phong_fraction = 1f64 - reflection_fraction - transmission_fraction;
