@@ -1,14 +1,14 @@
 use std::rc::Rc;
 use super::ray::Ray;
 use super::intersection::Hit;
-use material::Material;
+use material::Texture;
 use geometry::Geometry;
 use core::*;
 
 #[derive(Debug)]
 pub struct SceneObject {
     pub shape: Shape,
-    pub material: Rc<Material>,
+    pub texture: Rc<Texture>,
 }
 
 impl Geometry for SceneObject {

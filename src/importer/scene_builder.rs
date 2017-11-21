@@ -12,7 +12,7 @@ pub struct SceneBuilder {
     antialias: Option<u32>,
     depth_limit: Option<u32>,
     background_color: Option<Color>,
-    materials: HashMap<String, Rc<Material>>,
+    textures: HashMap<String, Rc<Texture>>,
     // TODO: Should transform be an Rc instead? Feels like this can get expensive.
     transform_stack: Vec<Transform>,
     pub objects: Vec<SceneObject>,
@@ -54,8 +54,8 @@ impl SceneBuilder {
     optional_setter!(depth_limit, u32);
     optional_setter!(background_color, Color);
 
-    pub fn register_material(&mut self, name: &str, material: Box<Material>) {
-        self.materials.insert(name.to_owned(), Rc::from(material));
+    pub fn register_texture(&mut self, name: &str, texture: Box<Texture>) {
+        self.textures.insert(name.to_owned(), Rc::from(texture));
     }
 
     fn get_current_transform(&self) -> Transform {
@@ -81,10 +81,10 @@ impl SceneBuilder {
 
     pub fn add_object(&mut self, partial_object: (Box<Geometry>, &str)) {
         let transform = self.get_current_transform();
-        let material_name = partial_object.1.to_owned();
+        let texture_name = partial_object.1.to_owned();
         self.objects.push(SceneObject {
             shape: Shape::new(Rc::from(partial_object.0), transform),
-            material: Rc::clone(self.materials.get(&material_name).expect(format!("no material named '{}' defined", material_name).as_str())),
+            texture: Rc::clone(self.textures.get(&texture_name).expect(format!("no texture named '{}' defined", texture_name).as_str())),
         });
     }
 

@@ -20,7 +20,7 @@ Statement: () = {
     "antialias" <U32> => builder.antialias(<>),
     "depth_limit" <U32> => builder.depth_limit(<>),
     "background_color" <Color> => builder.background_color(<>),
-    "material" <Identifier> <Material> => builder.register_material(<>),
+    "texture" <Identifier> <Texture> => builder.register_texture(<>),
     "transform" "pop" <U32?> => builder.pop_transforms(<>.unwrap_or(1u32)),
     "transform" <Transform> => builder.push_transform(<>),
     "object" <Object> => builder.add_object(<>),
@@ -44,31 +44,50 @@ BaseCamera: BaseCamera = {
     <screen_size:("screen_size" <Tuple2<F64, F64>>)?> => BaseCamera { position, look_at, up, screen_size }
 };
 
-Material: Box<Material> = {
+Material: Material = {
     "flat" "{"
         "color" <color:Color>
         <specular_exponent:("specular_exponent" <F64>)?>
-        <reflectivity:("reflectivity" <F64>)?>
-    "}" => Box::new(ReflectiveMaterial::new(
-        color * 0.1f64,
-        color,
-        SpecularLighting(color * 0.5f64, specular_exponent.unwrap_or(0f64)),
-        ReflectiveLighting(WHITE, reflectivity.unwrap_or(0f64)),
-    )),
+        <reflectivity_option:("reflectivity" <F64>)?>
+    "}" => Material {
+        ambient: color * 0.1f64,
+        diffuse: color,
+        specular: SpecularLighting(color * 0.5f64, specular_exponent.unwrap_or(0f64)),
+        transmission: None,
+        reflectivity: reflectivity_option.unwrap_or(0f64),
+    },
+    "transmissive" "{"
+        "color" <color:Color>
+        "specular_exponent" <specular_exponent:F64>
+        "index_of_refraction" <index_of_refraction:F64>
+        "transmissivity" <transmissivity:F64>
+        "reflectivity" <reflectivity:F64>
+    "}" => Material {
+        ambient: color * 0.1f64,
+        diffuse: color,
+        specular: SpecularLighting(color * 0.5f64, specular_exponent),
+        transmission: Some(Transmission { transmissivity, index_of_refraction }),
+        reflectivity,
+    },
+};
+
+Texture: Box<Texture> = {
+    "constant" <Material> => Box::new(ConstantTexture { material: <> }),
     "image" "{"
         "path" <path:Path>
         <reflectivity:("reflectivity" <F64>)?>
-    "}" => Box::new(ImageTextureMaterial::from_path(path.as_ref(), reflectivity.unwrap_or(0f64))),
+    "}" => Box::new(ImageTexture::from_path(path.as_ref(), reflectivity.unwrap_or(0f64))),
     "checkerboard" "{"
         <checks_per_unit:("checks_per_unit" <U32>)?>
         <color_a:("color_a" <Color>)?>
         <color_b:("color_b" <Color>)?>
-    "}" => Box::new(CheckerboardMaterial {
+    "}" => Box::new(CheckerboardTexture {
         checks_per_unit: checks_per_unit.unwrap_or(2u32),
         color_a: color_a.unwrap_or(WHITE),
         color_b: color_b.unwrap_or(BLACK),
     }),
 };
+
 
 Transform: Mat4 = {
     "scale" <Vec3> => Mat4::create_scale(<>),
@@ -78,7 +97,7 @@ Transform: Mat4 = {
 
 Object = "{"
     "geometry" <Geometry>
-    "material" <Identifier>
+    "texture" <Identifier>
 "}";
 
 Geometry: Box<Geometry> = {
@@ -138,7 +157,7 @@ Normal: Normal = <f1:F64> <f2:F64> <f3:F64> => Normal { x: f1, y: f2, z: f3 };
 Color: Color = <f1:F64> <f2:F64> <f3:F64> => Color { r: f1, g: f2, b: f3 };
 
 Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
-Path: Box<Path> = r#""[-a-zA-Z0-9./]+""# => PathBuf::from(<>[1..<>.len() - 1].to_owned()).into_boxed_path();
+Path: Box<Path> = r#""[-a-zA-Z0-9./_]+""# => PathBuf::from(<>[1..<>.len() - 1].to_owned()).into_boxed_path();
 RawNumber = r"[-+]?[0-9]*\.?[0-9]+"; // Ripped from https://www.regular-expressions.info/floatingpoint.html
 F64: f64 = RawNumber => f64::from_str(<>).unwrap();
 U32: u32 = RawNumber => u32::from_str(<>).unwrap();

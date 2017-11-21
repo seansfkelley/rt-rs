@@ -199,6 +199,8 @@ xyz_add!(Point, Point, Point);
 xyz_add!(Point, Vec3, Point);
 xyz_sub!(Point, Point, Vec3);
 xyz_sub!(Point, Vec3, Point);
+xyz_add!(Point, Normal, Point);
+xyz_sub!(Point, Normal, Point);
 xyz_mul!(Point);
 xyz_div!(Point);
 xyz_dot!(Point);
