@@ -24,3 +24,4 @@
 
 ### known issues
 - handedness of the camera coordinate system seems reversed
+- rustc recompiles every time a scene file is changed (maybe lalrpop is confusedly regenerating parser.rs every time?)
