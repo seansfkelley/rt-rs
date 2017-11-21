@@ -10,12 +10,12 @@ camera orthographic {
   screen_size 4 3
 }
 
-material cyan flat {
+texture cyan constant flat {
   color 0 .7 .7
   specular_exponent 3
 }
 
-material magenta flat {
+texture magenta constant flat {
   color .7 0 .7
   specular_exponent 3
 }
@@ -30,7 +30,7 @@ object {
   geometry sphere {
     radius 1
   }
-  material cyan
+  texture cyan
 }
 transform pop
 
@@ -39,5 +39,5 @@ object {
   geometry sphere {
     radius 1
   }
-  material magenta
+  texture magenta
 }

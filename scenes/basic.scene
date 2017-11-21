@@ -1,4 +1,4 @@
-image_dimensions 512 512
+image_dimensions 1024 1024
 depth_limit 10
 antialias 3
 background_color .1 .1 .1
