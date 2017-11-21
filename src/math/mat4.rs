@@ -71,24 +71,14 @@ impl Mat4 {
     // pbrt pg. 84
     pub fn create_look_at(position: Point, look_at: Point, in_up: Vec3) -> Mat4 {
         let direction = (look_at - position).as_normalized();
-
-        let right = direction.cross(in_up.as_normalized()).as_normalized();
-        let up = right.cross(direction);
-
-        // TODO: I changed this to a right-handed transformation and now things look correct.
-        // Why does pbrt work properly with a left-handed transformation and we don't?
-        // https://groups.google.com/forum/#!searchin/pbrt/lookat%7Csort:date/pbrt/Np_Q3YUezCg/ztobGRkHCwAJ
-        // The pbrtLookAt function mentions fixing a bug using 'scale -1 1 1' which implies a handedness
-        // issue, but could also be the ss/ns/ts call mentioned in that link.
-
-        // let left = in_up.as_normalized().cross(direction).as_normalized();
-        // let up = direction.cross(left);
+        let left = in_up.as_normalized().cross(direction).as_normalized();
+        let up = direction.cross(left);
 
         Mat4 {
             cells: [
-                [right.x, up.x, direction.x, position.x],
-                [right.y, up.y, direction.y, position.y],
-                [right.z, up.z, direction.z, position.z],
+                [left.x, up.x, direction.x, position.x],
+                [left.y, up.y, direction.y, position.y],
+                [left.z, up.z, direction.z, position.z],
                 [  0f64, 0f64,        0f64,       1f64]
             ],
         }.invert().unwrap()
