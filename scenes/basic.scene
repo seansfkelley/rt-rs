@@ -4,7 +4,7 @@ camera {
   look_at 0 0 0
 }
 
-image_dimensions 512 512
+image_dimensions 1024 1024
 depth_limit 10
 antialias 3
 background_color .1 .1 .1
@@ -30,12 +30,25 @@ material bw_checkerboard checkerboard {
   checks_per_unit 32
 }
 
+material glass transmissive {
+  index_of_refraction 1.5
+}
+
 transform translate -4 -4 2
 object {
   geometry sphere {
     radius 1
   }
   material cyan_plastic
+}
+transform pop
+
+transform translate -3 -3 15
+object {
+  geometry sphere {
+    radius 1
+  }
+  material glass
 }
 transform pop
 

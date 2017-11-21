@@ -28,6 +28,9 @@ Statement: () = {
 };
 
 Material: Box<Material> = {
+    "transmissive" "{"
+        "index_of_refraction" <F64>
+    "}" => Box::new(TransmissiveMaterial { index_of_refraction: <> }),
     "flat" "{"
         "color" <color:Color>
         <specular_exponent:("specular_exponent" <F64>)?>

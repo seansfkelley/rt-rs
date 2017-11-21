@@ -8,7 +8,7 @@ pub struct Scene {
     objects: Vec<SceneObject>,
     lights: Vec<Light>,
     background_color: Color,
-    depth_limit: u32,
+    pub depth_limit: u32,
 }
 
 impl Scene {
@@ -35,17 +35,17 @@ impl Scene {
                 match o.intersect(&ray) {
                     Some(hit) => {
                         if hit.enter.is_some() {
-                            let complete_hit = hit.unwrap();
+                            let intersection = hit.get_first_intersection();
                             if closest.is_some() {
-                                if complete_hit.enter.distance < closest.as_ref().unwrap().hit.enter.distance {
+                                if intersection.distance < closest.as_ref().unwrap().hit.get_first_intersection().distance {
                                     closest = Some(SceneObjectHit {
-                                        hit: complete_hit,
+                                        hit,
                                         scene_object: &o,
                                     });
                                 }
                             } else {
                                 closest = Some(SceneObjectHit {
-                                    hit: complete_hit,
+                                    hit,
                                     scene_object: &o,
                                 });
                             }

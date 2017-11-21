@@ -5,6 +5,7 @@ use color::{Color, BLACK, WHITE};
 use scene::Scene;
 use core::*;
 use math::*;
+use util::Clamp;
 use std::rc::Rc;
 
 type SpecularExponent = f64;
@@ -27,7 +28,7 @@ pub struct FlatMaterial {
 
 impl Material for FlatMaterial {
     fn get_color(&self, ray: &Ray, hit: &SceneObjectHit, scene: &Scene, current_depth: u32) -> Color {
-        let ref intersection = hit.hit.enter;
+        let ref intersection = hit.hit.get_first_intersection();
         scene.get_visible_lights(intersection.nudge().location)
             .iter()
             .fold(BLACK, |color, light| {
@@ -54,7 +55,7 @@ impl ReflectiveMaterial {
 
 impl Material for ReflectiveMaterial {
     fn get_color(&self, ray: &Ray, hit: &SceneObjectHit, scene: &Scene, current_depth: u32) -> Color {
-        let ref intersection = hit.hit.enter;
+        let ref intersection = hit.hit.get_first_intersection();
         let new_origin = ray.at(intersection.distance);
         let new_direction = ray.direction.reflect(intersection.normal.as_vector());
         let new_ray = Ray::new(new_origin, new_direction);
@@ -68,24 +69,29 @@ pub struct TransmissiveMaterial {
     // TODO: occlusion
 }
 
-impl Material for TransmissiveMaterial {
-    /*
-    Vec3f refract(const Vec3f &I, const Vec3f &N, const float &ior)
-{
-    float cosi = clamp(-1, 1, dotProduct(I, N));
-    float etai = 1, etat = ior;
-    Vec3f n = N;
-    if (cosi < 0) { cosi = -cosi; } else { std::swap(etai, etat); n= -N; }
-    float eta = etai / etat;
-    float k = 1 - eta * eta * (1 - cosi * cosi);
-    return k < 0 ? 0 : eta * I + (eta * cosi - sqrtf(k)) * n;
+impl TransmissiveMaterial {
+    fn refract(&self, ray: &Ray, intersection: &Intersection, eta: f64) -> Ray {
+        let cosi = ray.direction.dot(&intersection.normal).clamp(-1f64, 1f64);
+        let k = 1f64 - eta * eta * (1f64 - cosi * cosi);
+        if k < 0f64 {
+            // TOTAL INTERNAL REFLECTION (」゜ロ゜)」
+            // TODO: make sure it good
+            Ray::new(intersection.location, ray.direction.reflect(intersection.normal.as_vector()))
+        } else {
+            let direction = ray.direction * eta + (intersection.normal * (eta * cosi - k.sqrt())).as_vector();
+            let origin = intersection.nega_nudge().location;
+            Ray::new(origin, direction.as_normalized())
+        }
+    }
 }
-    */
+
+impl Material for TransmissiveMaterial {
     fn get_color(&self, ray: &Ray, hit: &SceneObjectHit, scene: &Scene, current_depth: u32) -> Color {
-//        let intersection = hit.hit.enter;
-//        let cosi = ray.direction.dot(intersection.normal).clamp(-1, 1);
-//        let
-        BLACK
+        let ref intersection = hit.hit.get_first_intersection();
+        let inside = hit.hit.enter.is_none();
+        let eta = if inside { self.index_of_refraction } else { 1f64 / self.index_of_refraction };
+        let refracted_ray = self.refract(ray, intersection, eta);
+        scene.get_color(&refracted_ray, current_depth + 1)
     }
 }
 
@@ -112,7 +118,7 @@ impl ImageTextureMaterial {
 
 impl Material for ImageTextureMaterial {
     fn get_color(&self, ray: &Ray, hit: &SceneObjectHit, scene: &Scene, current_depth: u32) -> Color {
-        let ref intersection = hit.hit.enter;
+        let ref intersection = hit.hit.get_first_intersection();
         let (width, height) = self.image.dimensions();
         let pixel = self.image.get_pixel((width as f64 * intersection.uv.0) as u32, (height as f64 * intersection.uv.1) as u32);
         let rgb = pixel.channels();
@@ -137,7 +143,7 @@ pub struct CheckerboardMaterial {
 
 impl Material for CheckerboardMaterial {
     fn get_color(&self, ray: &Ray, hit: &SceneObjectHit, scene: &Scene, current_depth: u32) -> Color {
-        let ref intersection = hit.hit.enter;
+        let ref intersection = hit.hit.get_first_intersection();
         let check_size = 1f64 / self.checks_per_unit as f64;
         let color =
             if (intersection.uv.0 / check_size) as u32 % 2 == (intersection.uv.1 / check_size) as u32 % 2 {
@@ -160,9 +166,6 @@ struct WeightedMaterial {
     material: Rc<Material>,
 }
 
-// Assumption: Material color calculations are independent and so can just be combined fractionally
-// Shit, bad assumption, weights can vary by angle
-// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
 #[derive(Debug)]
 pub struct MaterialComposition {
     materials: Vec<WeightedMaterial>,
@@ -186,7 +189,7 @@ impl MaterialComposition {
 
 impl Material for MaterialComposition {
     fn get_color(&self, ray: &Ray, hit: &SceneObjectHit, scene: &Scene, current_depth: u32) -> Color {
-        let ref intersection = hit.hit.enter;
+        let ref intersection = hit.hit.get_first_intersection();
         let total_weight: f64 = (&self.materials)
             .iter()
             .map(|weighted_material| weighted_material.weight)
