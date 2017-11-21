@@ -1,6 +1,5 @@
 use core::*;
-use math::*;
-use color::{Color, BLACK};
+use color::Color;
 use geometry::Geometry;
 use std::rc::Rc;
 
@@ -68,6 +67,7 @@ impl Scene {
         self.lights
             .iter()
             .filter(|light| {
+
                 let light_direction = (light.position - intersection.location).as_normalized();
                 let ref ray = Ray::new(intersection.location, light_direction);
                 self.cast_ray(ray, 0u32).map(|hit| hit.hit.enter).is_none()
