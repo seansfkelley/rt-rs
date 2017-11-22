@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use core::*;
+use math::*;
 use geometry::Geometry;
 
 #[derive(Debug)]
@@ -15,43 +16,44 @@ impl Difference {
     }
 }
 
-impl Geometry for Difference {
-    fn intersect(&self, ray: &Ray) -> Option<Hit> {
-        let lhs_hit_option = self.lhs.intersect(ray);
+fn flip_normal(i: Intersection) -> Intersection {
+    Intersection {
+        distance: i.distance,
+        location: i.location,
+        normal: -i.normal,
+        uv: i.uv,
+    }
+}
 
-        match lhs_hit_option {
-            Some(lhs_hit) => {
-                let rhs_hit_option = self.rhs.intersect(ray);
-                match rhs_hit_option {
-                    Some(rhs_hit) => {
-                        let lhs_enter = lhs_hit.enter.as_ref().map(|enter| enter.distance).unwrap_or(0f64);
-                        let rhs_enter = rhs_hit.enter.map(|enter| enter.distance).unwrap_or(0f64);
-                        let lhs_exit = lhs_hit.exit.distance;
-                        let rhs_exit = rhs_hit.exit.distance;
-                        if lhs_enter < rhs_enter || lhs_enter > rhs_exit {
-                            Some(lhs_hit)
-                        } else {
-                            // lhs_enter is inside rhs
-                            if rhs_exit < lhs_exit {
-                                // Exists from rhs first
-                                Some(Hit {
-                                    enter: Some(Intersection {
-                                        distance: rhs_hit.exit.distance,
-                                        location: rhs_hit.exit.location,
-                                        normal: -rhs_hit.exit.normal,
-                                        uv: rhs_hit.exit.uv,
-                                    }),
-                                    exit: lhs_hit.exit,
-                                })
+impl Geometry for Difference {
+    fn intersect(&self, ray: &Ray) -> Option<Intersection> {
+        match self.lhs.intersect(ray) {
+            Some(lhs_intersection) => {
+                match self.rhs.intersect(ray) {
+                    Some(rhs_intersection) => {
+                        let entering_lhs = lhs_intersection.normal.dot(&-ray.direction) > 0f64;
+                        let entering_rhs = rhs_intersection.normal.dot(&-ray.direction) > 0f64;
+                        if entering_lhs && entering_rhs {
+                            if lhs_intersection.distance < rhs_intersection.distance {
+                                Some(lhs_intersection)
                             } else {
-                                None
+                                self.intersect(&Ray {
+                                    origin: ray.at(lhs_intersection),
+                                    direction: ray.direction,
+                                })
                             }
+                        } else if entering_lhs {
+
+                        } else if entering_rhs {
+
+                        } else {
+                            Some(flip_normal(rhs_intersection))
                         }
-                    },
-                    None => Some(lhs_hit),
+                    }
+                    None => Some(lhs_intersection)
                 }
-            },
-            None => None,
+            }
+            None => None
         }
     }
 }

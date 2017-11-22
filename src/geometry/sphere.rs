@@ -53,7 +53,7 @@ fn quadratic(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
 }
 
 impl Geometry for Sphere {
-    fn intersect(&self, ray: &Ray) -> Option<Hit> {
+    fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         let (a, b, c) = (
             ray.direction.magnitude2(),
             2f64 * (ray.direction.dot(&ray.origin)),
@@ -65,15 +65,9 @@ impl Geometry for Sphere {
                 if t1 < 0f64 {
                     None
                 } else if t0 < 0f64 {
-                    Some(Hit {
-                        enter: None,
-                        exit: self.get_intersection(t1, &ray),
-                    })
+                    Some(self.get_intersection(t1, &ray))
                 } else {
-                    Some(Hit {
-                        enter: Some(self.get_intersection(t0, &ray)),
-                        exit: self.get_intersection(t1, &ray),
-                    })
+                    Some(self.get_intersection(t0, &ray))
                 }
             }
             None => None,

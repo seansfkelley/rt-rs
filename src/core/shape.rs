@@ -16,11 +16,9 @@ impl Shape {
     }
 
     fn get_intersection(&self, object_intersection: Intersection) -> Intersection {
-        let world_location = object_intersection.location.transform(&self.object_to_world);
-
         Intersection {
             distance: object_intersection.distance,
-            location: world_location,
+            location: object_intersection.location.transform(&self.object_to_world),
             normal: object_intersection.normal.transform(&self.object_to_world),
             uv: object_intersection.uv,
         }

@@ -18,18 +18,7 @@ impl Intersection {
     }
 }
 
-pub struct Hit {
-    pub enter: Option<Intersection>,
-    pub exit: Intersection,
-}
-
-impl Hit {
-    pub fn get_first_intersection(&self) -> Intersection {
-        *self.enter.as_ref().unwrap_or(&self.exit)
-    }
-}
-
-pub struct SceneObjectHit<'a> {
-    pub hit: Hit,
-    pub scene_object: &'a SceneObject,
+pub struct TexturedIntersection {
+    pub intersection: Intersection,
+    pub texture: Rc<Texture>,
 }

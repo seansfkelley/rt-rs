@@ -23,7 +23,7 @@ impl TriangleMesh {
         TriangleMesh { positions, normals, uvs, indices }
     }
 
-    fn intersect_triplet(&self, triplet: &TriangleIndices, ray: &Ray) -> Option<Hit> {
+    fn intersect_triplet(&self, triplet: &TriangleIndices, ray: &Ray) -> Option<Intersection> {
         // pbrt pg. 141
         let &(i1, i2, i3) = triplet;
         let (p1, p2, p3) = (self.positions[i1], self.positions[i2], self.positions[i3]);
@@ -52,25 +52,17 @@ impl TriangleMesh {
             return None;
         }
 
-        return Some(Hit {
-            enter: Some(Intersection {
-                distance: t,
-                location: ray.at(t),
-                normal: e1.cross(e2).as_normalized().as_normal(),
-                uv: (0f64, 0f64),
-            }),
-            exit: Intersection {
-                distance: t,
-                location: ray.at(t),
-                normal: e1.cross(e2).as_normalized().as_normal(),
-                uv: (0f64, 0f64),
-            },
-        });
+        Some(Intersection {
+            distance: t,
+            location: ray.at(t),
+            normal: e1.cross(e2).as_normalized().as_normal(),
+            uv: (0f64, 0f64),
+        })
     }
 }
 
 impl Geometry for TriangleMesh {
-    fn intersect(&self, ray: &Ray) -> Option<Hit> {
+    fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         let mut closest: Option<Hit> = None;
 
         for triplet in &self.indices {

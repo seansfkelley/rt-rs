@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use math::*;
 use core::*;
 use color::Color;
@@ -25,37 +26,31 @@ impl Scene {
         self.cast_ray(ray, 0)
     }
 
-    fn get_closest_hit(&self, ray: &Ray, depth: u32) -> Option<SceneObjectHit> {
+    fn get_closest_hit(&self, ray: &Ray, depth: u32) -> Option<TexturedIntersection> {
         if depth > self.depth_limit {
             None
         } else {
-            let mut closest: Option<SceneObjectHit> = Option::None;
+            let mut closest: Option<TexturedIntersection> = None;
 
             for o in &self.objects {
                 match o.intersect(&ray) {
-                    Some(hit) => {
-                        match hit.enter {
-                            Some(_) => {
-                                let intersection = hit.get_first_intersection();
-                                closest = match closest {
-                                    Some(closest_hit) => {
-                                        if intersection.distance < closest_hit.hit.get_first_intersection().distance {
-                                            Some(SceneObjectHit {
-                                                hit,
-                                                scene_object: &o,
-                                            })
-                                        } else {
-                                            Some(closest_hit)
-                                        }
-                                    }
-                                    None => Some(SceneObjectHit {
-                                        hit,
-                                        scene_object: &o,
-                                    }),
-                                };
+                    Some(intersection) => {
+                        closest = match closest {
+                            Some(closest_intersection) => {
+                                if intersection.distance < closest_intersection.intersection.distance {
+                                    Some(TexturedIntersection {
+                                        intersection,
+                                        texture: Rc::clone(&o.texture),
+                                    })
+                                } else {
+                                    Some(closest_intersection)
+                                }
                             }
-                            None => {}
-                        }
+                            None => Some(TexturedIntersection {
+                                intersection,
+                                texture: Rc::clone(&o.texture),
+                            })
+                        };
                     }
                     None => {}
                 }
@@ -72,18 +67,19 @@ impl Scene {
         }
     }
 
-    fn get_color(&self, ray: &Ray, object_hit: &SceneObjectHit, depth: u32) -> Color {
-        let ref intersection = object_hit.hit.get_first_intersection();
-        let material = object_hit.scene_object.texture.get_material(intersection);
+    fn get_color(&self, ray: &Ray, i: &TexturedIntersection, depth: u32) -> Color {
+        let material = i.texture.get_material(i);
+        let intersection = i.intersection;
         let mut reflection_fraction = material.reflectivity;
         let mut transmission_fraction = material.transmission.as_ref().map(|transmission| transmission.transmissivity).unwrap_or(0f64);
-        let inside = object_hit.hit.enter.is_none();
-        let normal = if inside { -intersection.normal } else { intersection.normal };
+
+        let is_inside = intersection.normal.dot(&-ray.direction) < 0f64;
+        let normal = if is_inside { -intersection.normal } else { intersection.normal };
         let mut eta = 0f64;
 
         if material.transmission.is_some() && reflection_fraction > 0f64 {
             let transmission = material.transmission.unwrap();
-            let (eta_i, eta_t) = if inside {
+            let (eta_i, eta_t) = if is_inside {
                 (transmission.index_of_refraction, 1f64)
             } else {
                 (1f64, transmission.index_of_refraction)
@@ -99,7 +95,7 @@ impl Scene {
         let mut color = BLACK;
 
         // TODO: increase other fractions if inside
-        if !inside && phong_fraction > 0f64 {
+        if !is_inside && phong_fraction > 0f64 {
             color += phong_fraction * self.get_visible_lights(intersection.nudged_location(normal))
                 .iter()
                 .fold(BLACK, |color, light| {
