@@ -43,7 +43,6 @@ fn main() {
     let antialias = scene_file.parameters.antialias;
     let camera = scene_file.camera;
 
-
     let mut rng = rand::thread_rng();
     let mut img = RgbImage::new(width, height);
 

@@ -32,7 +32,7 @@ fn strip_comments(s: String) -> String {
 
 #[derive(Debug)]
 pub struct SceneFile {
-    pub camera: Box<Camera>,
+    pub camera: Camera,
     pub animation: (u32, Transform),
     pub parameters: RenderParamaters,
     pub objects: Vec<SceneObject>,

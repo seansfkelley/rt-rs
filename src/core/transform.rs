@@ -1,4 +1,3 @@
-use core::Ray;
 use math::*;
 
 pub static IDENTITY_TRANSFORM: Transform = Transform {
@@ -99,22 +98,6 @@ fn transform_normal(normal: &Normal, mat4: &Mat4) -> Normal {
 }
 
 make_transformable!(Normal, transform_normal);
-
-impl Transformable for Ray {
-    fn transform(&self, transform: &Transform) -> Ray {
-        Ray {
-            origin: self.origin.transform(transform),
-            direction: self.direction.transform(transform),
-        }
-    }
-
-    fn invert_transform(&self, transform: &Transform) -> Ray {
-        Ray {
-            origin: self.origin.invert_transform(transform),
-            direction: self.direction.invert_transform(transform),
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {

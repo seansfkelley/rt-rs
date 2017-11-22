@@ -30,19 +30,19 @@ Statement: () = {
 
 CameraBuilder: CameraBuilder = {
     "orthographic" "{"
-        <base:BaseCamera>
-    "}" => CameraBuilder::Orthographic(base),
+        <common:CameraCommon>
+    "}" => CameraBuilder::Orthographic(common),
     "perspective" "{"
-        <base:BaseCamera>
+        <common:CameraCommon>
         <fov:("field_of_view" <F64>)?>
-    "}" => CameraBuilder::Perspective(base, fov.unwrap_or(90f64)),
+    "}" => CameraBuilder::Perspective(common, fov.unwrap_or(90f64)),
 };
 
-BaseCamera: BaseCamera = {
-    "position" <position:Point>
-    "look_at" <look_at:Point>
-    "up" <up:Vec3>
-    <screen_size:("screen_size" <Tuple2<F64, F64>>)?> => BaseCamera { position, look_at, up, screen_size }
+CameraCommon: CameraCommon = {
+    "position" <Point>
+    "look_at" <Point>
+    "up" <Vec3>
+    <("screen_size" <Tuple2<F64, F64>>)?>
 };
 
 Animation: (u32, Vec<Mat4>) = "{"

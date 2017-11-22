@@ -20,10 +20,16 @@ pub struct SceneBuilder {
     pub lights: Vec<Light>,
 }
 
+pub type CameraCommon = (Point, Point, Vec3, Option<ScreenSize>);
+
 #[derive(Debug, Clone, Copy)]
 pub enum CameraBuilder {
-    Orthographic(BaseCamera),
-    Perspective(BaseCamera, f64)
+    Orthographic(CameraCommon),
+    Perspective(CameraCommon, f64)
+}
+
+fn camera_to_world(common: CameraCommon) -> Mat4 {
+    Mat4::create_look_at(common.0, common.1, common.2).invert().unwrap()
 }
 
 macro_rules! optional_setter {
@@ -94,14 +100,14 @@ impl SceneBuilder {
         self.lights.push(light);
     }
 
-    pub fn build_camera(&self) -> Box<Camera> {
+    pub fn build_camera(&self) -> Camera {
         let dimensions = require_optional!(self, image_dimensions);
         match require_optional!(self, camera) {
-            CameraBuilder::Orthographic(base) => {
-                Box::new(OrthographicCamera::new(base, dimensions))
+            CameraBuilder::Orthographic(common) => {
+                Camera::orthographic(camera_to_world(common), common.3, dimensions)
             }
-            CameraBuilder::Perspective(base, fov) => {
-                Box::new(PerspectiveCamera::new(base, dimensions, fov))
+            CameraBuilder::Perspective(common, fov) => {
+                Camera::perspective(camera_to_world(common), common.3, dimensions, fov)
             }
         }
     }
