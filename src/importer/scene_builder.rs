@@ -8,6 +8,7 @@ use geometry::*;
 #[derive(Debug, Default)]
 pub struct SceneBuilder {
     camera: Option<CameraBuilder>,
+    animation: Option<(u32, Vec<Mat4>)>,
     image_dimensions: Option<(u32, u32)>,
     antialias: Option<u32>,
     depth_limit: Option<u32>,
@@ -49,6 +50,7 @@ impl SceneBuilder {
     }
 
     optional_setter!(camera, CameraBuilder);
+    optional_setter!(animation, (u32, Vec<Mat4>));
     optional_setter!(image_dimensions, (u32, u32));
     optional_setter!(antialias, u32);
     optional_setter!(depth_limit, u32);
@@ -110,6 +112,16 @@ impl SceneBuilder {
             antialias: self.antialias.unwrap_or(1),
             depth_limit: self.antialias.unwrap_or(3),
             background_color: self.background_color.unwrap_or(BLACK),
+        }
+    }
+
+    pub fn build_animation(&self) -> (u32, Transform) {
+        match self.animation {
+            Some((ref frames, ref matrices)) => (
+                *frames,
+                Transform::new(matrices.into_iter().rev().fold(IDENTITY_MATRIX, |a, b| a * (*b))),
+            ),
+            None => (1, Transform::new(IDENTITY_MATRIX)),
         }
     }
 }

@@ -16,6 +16,7 @@ pub SceneFile: () = {
 
 Statement: () = {
     "camera" <CameraBuilder> => builder.camera(<>),
+    "animation" <Animation> => builder.animation(<>),
     "image_dimensions" <Tuple2<U32, U32>> => builder.image_dimensions(<>),
     "antialias" <U32> => builder.antialias(<>),
     "depth_limit" <U32> => builder.depth_limit(<>),
@@ -43,6 +44,11 @@ BaseCamera: BaseCamera = {
     "up" <up:Vec3>
     <screen_size:("screen_size" <Tuple2<F64, F64>>)?> => BaseCamera { position, look_at, up, screen_size }
 };
+
+Animation: (u32, Vec<Mat4>) = "{"
+    "frames" <U32>
+    "camera_transforms" <List<Transform>>
+"}";
 
 Material: Material = {
     "flat" "{"

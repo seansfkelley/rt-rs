@@ -33,6 +33,7 @@ fn strip_comments(s: String) -> String {
 #[derive(Debug)]
 pub struct SceneFile {
     pub camera: Box<Camera>,
+    pub animation: (u32, Transform),
     pub parameters: RenderParamaters,
     pub objects: Vec<SceneObject>,
     pub lights: Vec<Light>,
@@ -84,6 +85,7 @@ pub fn parse(path: &Path) -> SceneFile {
     };
     SceneFile {
         camera: builder.build_camera(),
+        animation: builder.build_animation(),
         parameters: builder.build_render_parameters(),
         objects: builder.objects,
         lights: builder.lights,
