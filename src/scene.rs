@@ -92,8 +92,9 @@ impl Scene {
         let phong_fraction = 1f64 - reflection_fraction - transmission_fraction;
         let mut color = BLACK;
 
-        if phong_fraction > 0f64 {
-            color += phong_fraction * self.get_visible_lights(intersection.nudge().location)
+        // TODO: increase other fractions if inside
+        if !inside && phong_fraction > 0f64 {
+            color += phong_fraction * self.get_visible_lights(intersection.nudged_location(normal))
                 .iter()
                 .fold(BLACK, |color, light| {
                     let light_direction = (light.position - intersection.location).as_normalized();
@@ -107,7 +108,7 @@ impl Scene {
 
         if reflection_fraction > 0f64 {
             let new_direction = ray.direction.reflect(normal.as_vector());
-            let ref new_ray = Ray::new(intersection.nudge().location, new_direction);
+            let ref new_ray = Ray::new(intersection.nudged_location(normal), new_direction);
             color += reflection_fraction * self.cast_ray(new_ray, depth + 1)
         }
 
@@ -116,7 +117,7 @@ impl Scene {
             let k = 1f64 - eta * eta * (1f64 - cos_i * cos_i);
             if k >= 0f64 {
                 let direction = ray.direction * eta + (normal * (eta * cos_i - k.sqrt())).as_vector();
-                let origin = intersection.nega_nudge().location;
+                let origin = intersection.nudged_location(-normal);
                 let ref new_ray = Ray::new(origin, direction.as_normalized());
                 color += transmission_fraction * self.cast_ray(new_ray, depth + 1)
             }

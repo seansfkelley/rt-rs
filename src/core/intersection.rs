@@ -13,22 +13,8 @@ pub struct Intersection {
 
 const NUDGE_FACTOR: f64 = 1e-10f64;
 impl Intersection {
-    pub fn nudge(&self) -> Intersection {
-        Intersection {
-            distance: self.distance,
-            location: self.location + (self.normal * NUDGE_FACTOR).as_vector(),
-            normal: self.normal,
-            uv: self.uv,
-        }
-    }
-
-    pub fn nega_nudge(&self) -> Intersection {
-        Intersection {
-            distance: self.distance,
-            location: self.location - (self.normal * NUDGE_FACTOR).as_vector(),
-            normal: self.normal,
-            uv: self.uv,
-        }
+    pub fn nudged_location(&self, normal: Normal) -> Point {
+        self.location + (normal * NUDGE_FACTOR).as_vector()
     }
 }
 
