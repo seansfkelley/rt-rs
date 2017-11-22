@@ -10,6 +10,13 @@ camera perspective {
   field_of_view 60
 }
 
+# animation {
+#   frames 3
+#   camera_transforms [
+#     translate 0 0 -3
+#   ]
+# }
+
 texture cyan_plastic constant flat {
   color 0 .7 .7
   specular_exponent 1

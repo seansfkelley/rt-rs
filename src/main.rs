@@ -41,40 +41,43 @@ fn main() {
 
     let (width, height) = scene_file.parameters.image_dimensions;
     let antialias = scene_file.parameters.antialias;
-    let camera = scene_file.camera;
+    let mut camera = scene_file.camera;
 
     let mut rng = rand::thread_rng();
-    let mut img = RgbImage::new(width, height);
+    for frame_number in 0..scene_file.animation.0 {
+        let mut img = RgbImage::new(width, height);
 
-    for x in 0..width {
-        for y in 0..height {
-            let mut color = color::BLACK;
-            for sample_x in 0..antialias {
-                for sample_y in 0..antialias {
-                    let (x_jitter, y_jitter) =
-                        if antialias == 1 {
-                            (0.5f64, 0.5f64)
-                        } else {
-                            let (x_min, x_max, y_min, y_max) = (
-                                sample_x as f64 / antialias as f64,
-                                (1f64 + sample_x as f64) / antialias as f64,
-                                sample_y as f64 / antialias as f64,
-                                (1f64 + sample_y as f64) / antialias as f64
-                            );
+        for x in 0..width {
+            for y in 0..height {
+                let mut color = color::BLACK;
+                for sample_x in 0..antialias {
+                    for sample_y in 0..antialias {
+                        let (x_jitter, y_jitter) =
+                            if antialias == 1 {
+                                (0.5f64, 0.5f64)
+                            } else {
+                                let (x_min, x_max, y_min, y_max) = (
+                                    sample_x as f64 / antialias as f64,
+                                    (1f64 + sample_x as f64) / antialias as f64,
+                                    sample_y as f64 / antialias as f64,
+                                    (1f64 + sample_y as f64) / antialias as f64
+                                );
 
-                            (
-                                rng.next_f64() * (x_max - x_min) + x_min,
-                                rng.next_f64() * (y_max - y_min) + y_min,
-                            )
-                        };
-                    color = color + scene.raytrace(&camera.get_ray(x as f64 + x_jitter, y as f64 + y_jitter));
+                                (
+                                    rng.next_f64() * (x_max - x_min) + x_min,
+                                    rng.next_f64() * (y_max - y_min) + y_min,
+                                )
+                            };
+                        color = color + scene.raytrace(&camera.get_ray(x as f64 + x_jitter, y as f64 + y_jitter));
+                    }
                 }
+                img.put_pixel(x, y, *Rgb::from_slice(&(color / (antialias * antialias) as f64).as_bytes()));
             }
-            img.put_pixel(x, y, *Rgb::from_slice(&(color / (antialias * antialias) as f64).as_bytes()));
         }
+
+        let ref mut fout = File::create(&Path::new(&format!("out/{:03}.png", frame_number))).unwrap();
+        image::ImageRgb8(img).save(fout, image::PNG).unwrap();
+
+        camera = camera.transform(&scene_file.animation.1);
     }
-
-    let ref mut fout = File::create(&Path::new("out/out.png")).unwrap();
-    image::ImageRgb8(img).save(fout, image::PNG).unwrap();
-
 }
