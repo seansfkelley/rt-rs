@@ -121,7 +121,7 @@ impl SceneBuilder {
         RenderParamaters {
             image_dimensions: require_optional!(self, image_dimensions),
             antialias: self.antialias.unwrap_or(1),
-            depth_limit: self.antialias.unwrap_or(3),
+            depth_limit: self.depth_limit.unwrap_or(3),
             background_color: self.background_color.unwrap_or(BLACK),
         }
     }
