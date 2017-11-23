@@ -68,8 +68,8 @@ impl Scene {
     }
 
     fn get_color(&self, ray: &Ray, i: &TexturedIntersection, depth: u32) -> Color {
-        let material = i.texture.get_material(i);
         let intersection = i.intersection;
+        let material = i.texture.get_material(&intersection);
         let mut reflection_fraction = material.reflectivity;
         let mut transmission_fraction = material.transmission.as_ref().map(|transmission| transmission.transmissivity).unwrap_or(0f64);
 

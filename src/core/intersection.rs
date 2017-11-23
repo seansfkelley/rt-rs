@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use math::*;
 use core::*;
 

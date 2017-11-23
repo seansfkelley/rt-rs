@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use super::ray::Ray;
-use super::intersection::Hit;
+use super::intersection::Intersection;
 use geometry::Geometry;
 use core::*;
 
@@ -14,27 +14,20 @@ impl Shape {
     pub fn new(geometry: Rc<Geometry>, object_to_world: Transform) -> Shape {
         Shape { geometry, object_to_world }
     }
-
-    fn get_intersection(&self, object_intersection: Intersection) -> Intersection {
-        Intersection {
-            distance: object_intersection.distance,
-            location: object_intersection.location.transform(&self.object_to_world),
-            normal: object_intersection.normal.transform(&self.object_to_world),
-            uv: object_intersection.uv,
-        }
-    }
 }
 
 impl Geometry for Shape {
-    fn intersect(&self, world_ray: &Ray) -> Option<Hit> {
+    fn intersect(&self, world_ray: &Ray) -> Option<Intersection> {
         let ref object_ray = world_ray.invert_transform(&self.object_to_world);
-        let object_space_hit_option = self.geometry.intersect(object_ray);
-        object_space_hit_option.map(|object_space_hit| {
-            Hit {
-                enter: object_space_hit.enter.map(|enter| self.get_intersection(enter)),
-                exit: self.get_intersection(object_space_hit.exit),
-            }
-        })
+        match self.geometry.intersect(object_ray) {
+            Some(object_space_intersection) => Some(Intersection {
+                distance: object_space_intersection.distance,
+                location: object_space_intersection.location.transform(&self.object_to_world),
+                normal: object_space_intersection.normal.transform(&self.object_to_world),
+                uv: object_space_intersection.uv,
+            }),
+            None => None,
+        }
     }
 }
 
