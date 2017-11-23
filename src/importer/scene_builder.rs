@@ -78,13 +78,18 @@ impl SceneBuilder {
         self.transform_stack.push(Transform::new(new_transform_matrix));
     }
 
-    pub fn pop_transforms(&mut self, count: u32) {
+    pub fn pop_n_transforms(&mut self, count: u32) {
         for _ in 0..count {
             match self.transform_stack.pop() {
                 Some(_) => {},
                 None => { panic!("tried to pop an empty transform stack"); },
             };
         }
+    }
+
+    pub fn pop_all_transforms(&mut self) {
+        let count = self.transform_stack.len() as u32;
+        self.pop_n_transforms(count);
     }
 
     pub fn add_object(&mut self, partial_object: (Box<Geometry>, &str)) {
