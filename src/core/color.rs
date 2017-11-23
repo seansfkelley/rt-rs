@@ -1,7 +1,8 @@
 use std::ops::{ Add, Sub, Div, Mul, AddAssign, SubAssign, DivAssign, MulAssign };
 use util::Clamp;
+use std::fmt::{ Debug, Formatter, Result };
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Color {
     pub r: f64,
     pub g: f64,
@@ -139,5 +140,11 @@ impl MulAssign for Color {
         self.r *= other.r;
         self.g *= other.g;
         self.b *= other.b;
+    }
+}
+
+impl Debug for Color {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f, "Color<{}, {}, {}>", self.r, self.g, self.b)
     }
 }
