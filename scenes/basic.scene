@@ -17,6 +17,18 @@ camera perspective {
 #   ]
 # }
 
+texture red constant flat {
+  color 1 0 0
+}
+
+texture green constant flat {
+  color 0 1 0
+}
+
+texture blue constant flat {
+  color 0 0 1
+}
+
 texture cyan_plastic constant flat {
   color 0 .7 .7
   specular_exponent 1
@@ -106,6 +118,33 @@ object {
   }
   texture cyan_plastic
 }
+
+transform translate -3  -3 1
+object {
+  geometry sphere {
+    radius 0.5
+  }
+  texture red
+}
+transform pop
+
+transform translate  3  -3 1
+object {
+  geometry sphere {
+    radius 0.5
+  }
+  texture green
+}
+transform pop
+
+transform translate  0   3 1
+object {
+  geometry sphere {
+    radius 0.5
+  }
+  texture blue
+}
+transform pop
 
 object {
   geometry difference {
