@@ -1,6 +1,4 @@
-image_dimensions 1024 1024
 depth_limit 10
-antialias 3
 background_color .1 .1 .1
 
 camera perspective {
@@ -10,10 +8,20 @@ camera perspective {
   field_of_view 60
 }
 
+### for pretty
+
+image_dimensions 1024 1024
+antialias 3
+
+### for animation
+
+# image_dimensions 512 512
+# antialias 1
+#
 # animation {
-#   frames 3
+#   frames 18
 #   camera_transforms [
-#     translate 0 0 -3
+#     rotate 10 0 1 0
 #   ]
 # }
 
