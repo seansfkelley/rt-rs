@@ -13,9 +13,8 @@ pub struct TriangleMesh {
 }
 
 impl TriangleMesh {
-    // FYI, the "front" is when the vertices are in counterclockwise order.
-    // > By default, counterclockwise polygons are taken to be front-facing.
-    // (https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glFrontFace.xml)
+    // FYI, the "front" is when the vertices are in clockwise order. This is because we use a right-handed
+    // coordinate system for objects and the method by which we compute the normal follows the winding order.
     pub fn new(positions: Vec<Point>, normals: Vec<Normal>, uvs: Vec<Uv>, indices: Vec<TriangleIndices>) -> TriangleMesh {
         // TODO: When we actually do UVs and given normals, do this.
         // assert_eq!(positions.len(), normals.len());
