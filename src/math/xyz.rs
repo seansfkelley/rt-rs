@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use std::fmt::{ Debug, Formatter, Result };
 use std::ops::{Add, Sub, Div, Mul, Neg, Index};
 
 pub trait Xyz {
@@ -9,7 +10,7 @@ pub trait Xyz {
 
 macro_rules! xyz_base {
     ($name:ident) => {
-        #[derive(Debug, Copy, Clone, PartialEq)]
+        #[derive(Copy, Clone, PartialEq)]
         pub struct $name {
             pub x: f64,
             pub y: f64,
@@ -36,6 +37,12 @@ macro_rules! xyz_base {
                     2 => &self.z,
                     _ => { panic!("index out of range: {}", index); }
                 }
+            }
+        }
+
+        impl Debug for $name {
+            fn fmt(&self, f: &mut Formatter) -> Result {
+                write!(f, "{}<{}, {}, {}>", stringify!($name), self.x, self.y, self.z)
             }
         }
 
