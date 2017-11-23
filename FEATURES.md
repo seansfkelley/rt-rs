@@ -18,7 +18,6 @@
 - add "include" directive for scene files for copy-pasting purposes
 
 ### Small
-- Hex colors
 - Animations in scenes
 - More scenes
 

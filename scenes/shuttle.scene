@@ -20,14 +20,14 @@ texture white constant flat {
 }
 
 transform rotate -60 1 0 0
-# transform rotate 45 0 1 0
+// transform rotate 45 0 1 0
 object {
   geometry triangle_mesh {
     positions [
-      # bullshit non-position because I don't feel like shifting all the indices by 1
-      # damned .obj files count from 1, not zero >_>
+      // bullshit non-position because I don't feel like shifting all the indices by 1
+      // damned .obj files count from 1, not zero >_>
       0 0 0,
-      # end bullshit
+      // end bullshit
       3.070224 -0.119728 0.996443,
       5.942016 -0.012019 4.157199,
       6.614015 -0.063428 4.157199,
@@ -340,9 +340,9 @@ object {
       -4.999492 -0.681710 0.569242,
     ]
     indices [
-      # g windows
-      # usemtl glass
-      # s 1
+      // g windows
+      // usemtl glass
+      // s 1
       310 32 294,
       76 308 306,
       294 88 33,
@@ -353,9 +353,9 @@ object {
       87 78 298,
       298 76 306,
       298 78 76,
-      # g tail
-      # usemtl bone
-      # s 4
+      // g tail
+      // usemtl bone
+      // s 4
       4 95 3,
       4 3 96,
       95 4 287,
@@ -373,8 +373,8 @@ object {
       94 42 93,
       94 93 2,
       96 93 1,
-      # g rearbody
-      # s 6
+      // g rearbody
+      // s 6
       275 98 54,
       287 96 223,
       287 223 286,
@@ -420,8 +420,8 @@ object {
       279 280 281,
       287 288 48,
       287 48 45,
-      # g body
-      # s 7
+      // g body
+      // s 7
       309 31 310,
       294 33 295,
       108 118 39,
@@ -607,8 +607,8 @@ object {
       92 90 91,
       52 50 51,
       102 35 36,
-      # g wings
-      # s 5
+      // g wings
+      // s 5
       16 15 17,
       304 15 16,
       300 57 60,
@@ -633,9 +633,9 @@ object {
       302 55 56,
       17 301 18,
       299 59 61,
-      # g tiles
-      # usemtl flblack
-      # s 3
+      // g tiles
+      // usemtl flblack
+      // s 3
       302 56 54,
       18 103 40,
       16 17 99,
@@ -665,9 +665,9 @@ object {
       86 103 61,
       102 299 61,
       102 61 103,
-      # g enginside
-      # usemtl redbrick
-      # s 9
+      // g enginside
+      // usemtl redbrick
+      // s 9
       238 255 246,
       193 194 202,
       193 202 201,
@@ -758,8 +758,8 @@ object {
       219 187 185,
       262 263 272,
       262 272 271,
-      # g engout
-      # usemtl black
+      // g engout
+      // usemtl black
       250 251 260,
       250 260 259,
       208 209 217,
@@ -868,9 +868,9 @@ object {
       176 191 190,
       224 226 227,
       224 227 225,
-      # g engmount
-      # usemtl brass
-      # s 11
+      // g engmount
+      // usemtl brass
+      // s 11
       222 225 240,
       222 240 239,
       165 164 120,
@@ -943,9 +943,9 @@ object {
       196 206 205,
       265 267 224,
       265 224 221,
-      # g engrim
-      # usemtl dkdkgrey
-      # s off
+      // g engrim
+      // usemtl dkdkgrey
+      // s off
       231 233 244,
       231 244 243,
       125 124 133,

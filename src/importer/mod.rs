@@ -11,7 +11,7 @@ use lalrpop_util::ParseError;
 use self::scene_builder::SceneBuilder;
 
 lazy_static! {
-    static ref COMMENT_REGEX: Regex = Regex::new(r"#[^\n]*(\n|$)").unwrap();
+    static ref COMMENT_REGEX: Regex = Regex::new(r"//[^\n]*(\n|$)").unwrap();
     static ref NEWLINE_REGEX: Regex = Regex::new(r"\n").unwrap();
 }
 

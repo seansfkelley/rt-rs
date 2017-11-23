@@ -8,33 +8,33 @@ camera perspective {
   field_of_view 60
 }
 
-### for pretty
+// for pretty
 
 image_dimensions 1024 1024
 antialias 3
 
-### for animation
+// for animation
 
-# image_dimensions 512 512
-# antialias 1
-#
-# animation {
-#   frames 18
-#   camera_transforms [
-#     rotate 10 0 1 0
-#   ]
-# }
+// image_dimensions 512 512
+// antialias 1
+//
+// animation {
+//   frames 18
+//   camera_transforms [
+//     rotate 10 0 1 0
+//   ]
+// }
 
 texture red constant flat {
-  color 1 0 0
+  color #f00
 }
 
 texture green constant flat {
-  color 0 1 0
+  color #0f0
 }
 
 texture blue constant flat {
-  color 0 0 1
+  color #00f
 }
 
 texture cyan_plastic constant flat {
