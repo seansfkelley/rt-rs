@@ -72,13 +72,26 @@ impl TriangleMesh {
 
 impl Geometry for TriangleMesh {
     fn intersect(&self, ray: &Ray) -> Option<Hit> {
+        let mut closest: Option<Hit> = None;
+
         for triplet in &self.indices {
             match self.intersect_triplet(&triplet, ray) {
-                Some(hit) => { return Some(hit); }
+                Some(hit) => {
+                    closest = match closest {
+                        Some(close_hit) => {
+                            if hit.exit.distance < close_hit.exit.distance {
+                                Some(hit)
+                            } else {
+                                Some(close_hit)
+                            }
+                        },
+                        None => Some(hit),
+                    };
+                }
                 None => {}
             }
         }
 
-        return None;
+        closest
     }
 }

@@ -34,21 +34,27 @@ impl Scene {
             for o in &self.objects {
                 match o.intersect(&ray) {
                     Some(hit) => {
-                        if hit.enter.is_some() {
-                            let intersection = hit.get_first_intersection();
-                            if closest.is_some() {
-                                if intersection.distance < closest.as_ref().unwrap().hit.get_first_intersection().distance {
-                                    closest = Some(SceneObjectHit {
+                        match hit.enter {
+                            Some(_) => {
+                                let intersection = hit.get_first_intersection();
+                                closest = match closest {
+                                    Some(closest_hit) => {
+                                        if intersection.distance < closest_hit.hit.get_first_intersection().distance {
+                                            Some(SceneObjectHit {
+                                                hit,
+                                                scene_object: &o,
+                                            })
+                                        } else {
+                                            Some(closest_hit)
+                                        }
+                                    }
+                                    None => Some(SceneObjectHit {
                                         hit,
                                         scene_object: &o,
-                                    });
-                                }
-                            } else {
-                                closest = Some(SceneObjectHit {
-                                    hit,
-                                    scene_object: &o,
-                                });
+                                    }),
+                                };
                             }
+                            None => {}
                         }
                     }
                     None => {}
