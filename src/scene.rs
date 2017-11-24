@@ -139,9 +139,9 @@ impl Scene {
             1f64
         } else {
             let cos_t = (1f64 - sin2_t).sqrt();
-            let r_orthagonal = (eta_i * cos_i - eta_t * cos_t) / (eta_i * cos_i + eta_t * cos_t);
+            let r_orthogonal = (eta_i * cos_i - eta_t * cos_t) / (eta_i * cos_i + eta_t * cos_t);
             let r_parallel = (eta_t * cos_i - eta_i * cos_t) / (eta_t * cos_i + eta_i * cos_t);
-            (r_orthagonal * r_orthagonal + r_parallel * r_parallel) / 2f64
+            (r_orthogonal * r_orthogonal + r_parallel * r_parallel) / 2f64
         }
     }
 
