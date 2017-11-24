@@ -26,45 +26,45 @@ impl Scene {
         self.cast_ray(ray, 0)
     }
 
-    fn get_closest_hit(&self, ray: &Ray, depth: u32) -> Option<TexturedIntersection> {
+    fn cast_ray(&self, ray: &Ray, depth: u32) -> Color {
         if depth > self.depth_limit {
-            None
+            self.background_color
         } else {
-            let mut closest: Option<TexturedIntersection> = None;
-
-            for o in &self.objects {
-                match o.intersect(&ray) {
-                    Some(intersection) => {
-                        closest = match closest {
-                            Some(closest_intersection) => {
-                                if intersection.distance < closest_intersection.intersection.distance {
-                                    Some(TexturedIntersection {
-                                        intersection,
-                                        texture: Rc::clone(&o.texture),
-                                    })
-                                } else {
-                                    Some(closest_intersection)
-                                }
-                            }
-                            None => Some(TexturedIntersection {
-                                intersection,
-                                texture: Rc::clone(&o.texture),
-                            })
-                        };
-                    }
-                    None => {}
-                }
+            match self.get_closest_hit(ray) {
+                Some(ref object_hit) => self.get_color(ray, object_hit, depth),
+                None => self.background_color,
             }
-
-            closest
         }
     }
 
-    fn cast_ray(&self, ray: &Ray, depth: u32) -> Color {
-        match self.get_closest_hit(ray, depth) {
-            Some(ref object_hit) => self.get_color(ray, object_hit, depth),
-            None => self.background_color,
+    fn get_closest_hit(&self, ray: &Ray) -> Option<TexturedIntersection> {
+        let mut closest: Option<TexturedIntersection> = None;
+
+        for o in &self.objects {
+            match o.intersect(&ray) {
+                Some(intersection) => {
+                    closest = match closest {
+                        Some(closest_intersection) => {
+                            if intersection.distance < closest_intersection.intersection.distance {
+                                Some(TexturedIntersection {
+                                    intersection,
+                                    texture: Rc::clone(&o.texture),
+                                })
+                            } else {
+                                Some(closest_intersection)
+                            }
+                        }
+                        None => Some(TexturedIntersection {
+                            intersection,
+                            texture: Rc::clone(&o.texture),
+                        })
+                    };
+                }
+                None => {}
+            }
         }
+
+        closest
     }
 
     fn get_color(&self, ray: &Ray, i: &TexturedIntersection, depth: u32) -> Color {
@@ -96,7 +96,7 @@ impl Scene {
 
         // TODO: increase other fractions if inside
         if !is_inside && phong_fraction > 0f64 {
-            color += phong_fraction * self.get_visible_lights(intersection.nudged_location(normal))
+            color += phong_fraction * (material.ambient + self.get_visible_lights(intersection.nudged_location(normal))
                 .iter()
                 .fold(BLACK, |color, light| {
                     let light_direction = (light.position - intersection.location).as_normalized();
@@ -105,7 +105,7 @@ impl Scene {
                     let specular_illumination = material.specular.0 * light.color
                         * normalized_normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(material.specular.1);
                     color + diffuse_illumination + specular_illumination
-                });
+                }));
         }
 
         if reflection_fraction > 0f64 {
@@ -151,7 +151,7 @@ impl Scene {
             .filter(|light| {
                 let light_direction = (light.position - point).as_normalized();
                 let ref ray = Ray::new(point, light_direction);
-                self.get_closest_hit(ray, 0u32).is_none()
+                self.get_closest_hit(ray).is_none()
             })
             .collect::<Vec<&Light>>()
     }
