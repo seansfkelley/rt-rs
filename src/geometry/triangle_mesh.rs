@@ -13,8 +13,7 @@ pub struct TriangleMesh {
 }
 
 impl TriangleMesh {
-    // FYI, the "front" is when the vertices are in clockwise order. This is because we use a right-handed
-    // coordinate system for objects and the method by which we compute the normal follows the winding order.
+    // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
     pub fn new(positions: Vec<Point>, normals: Vec<Normal>, uvs: Vec<Uv>, indices: Vec<TriangleIndices>) -> TriangleMesh {
         // TODO: When we actually do UVs and given normals, do this.
         // assert_eq!(positions.len(), normals.len());
@@ -55,7 +54,10 @@ impl TriangleMesh {
         Some(Intersection {
             distance: t,
             location: ray.at(t),
-            normal: e1.cross(e2).as_normalized().as_normal(),
+            // prbt pg. 143
+            // pbrt uses a different method to compute the normal, but it does use e2 x e1 in a special case
+            // and refers to it as the normal, so we use that here.
+            normal: e2.cross(e1).as_normalized().as_normal(),
             uv: (0f64, 0f64),
         })
     }
