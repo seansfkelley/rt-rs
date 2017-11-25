@@ -1,4 +1,4 @@
-image_dimensions 512 512
+image_dimensions 250 250
 depth_limit 10
 antialias 1
 background_color .1 .1 .1
@@ -7,6 +7,13 @@ camera perspective {
   position 0 0 -10
   look_at 0 0 0
   up 0 1 0
+}
+
+animation {
+  frames 30
+  camera_transforms [
+    rotate 15 0 1 0
+  ]
 }
 
 light {
