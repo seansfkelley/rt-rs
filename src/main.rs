@@ -5,6 +5,7 @@ extern crate rand;
 extern crate regex;
 extern crate lalrpop_util;
 extern crate ordered_float;
+extern crate terminal_size;
 
 mod core;
 mod geometry;
@@ -50,12 +51,8 @@ fn main() {
     let mut camera = scene_file.camera;
     let frame_count = scene_file.animation.0;
 
-    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * antialias * antialias * frame_count)));
+    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * antialias * antialias * frame_count, frame_count)));
     let progress_render = progress_main.clone();
-
-    progress_main.lock().unwrap().mark_start();
-    progress_main.lock().unwrap().set_title(format!("rendering frame 1 / {}...", frame_count));
-
     thread::spawn(move || {
         loop {
             let is_complete = {
@@ -65,14 +62,18 @@ fn main() {
             };
 
             if !is_complete {
-                thread::sleep(Duration::from_millis(1000));
+                thread::sleep(Duration::from_millis(500));
+            } else {
+                progress_render.lock().unwrap().render();
+                println!();
+                break;
             }
         }
     });
 
     let mut rng = rand::thread_rng();
     for frame_number in 0..frame_count {
-        progress_main.lock().unwrap().set_title(format!("rendering frame {} of {}...", frame_number + 1, frame_count));
+        progress_main.lock().unwrap().increment_frame();
 
         let mut img = RgbImage::new(width, height);
 
@@ -100,7 +101,7 @@ fn main() {
                         color = color + scene.raytrace(&camera.get_ray(x as f64 + x_jitter, y as f64 + y_jitter));
                     }
                 }
-                progress_main.lock().unwrap().increment(antialias * antialias);
+                progress_main.lock().unwrap().increment_operations(antialias * antialias);
                 img.put_pixel(x, y, *Rgb::from_slice(&(color / (antialias * antialias) as f64).as_bytes()));
             }
         }

@@ -1,61 +1,63 @@
+use std::io::{ stdout, Write };
 use std::cmp::min;
 use std::time::SystemTime;
+use terminal_size::{ terminal_size, Width };
 
 pub struct ProgressBar {
-    total: u32,
-    current: u32,
-    title: String,
-    start_timestamp: Option<SystemTime>,
+    operations_total: u32,
+    operations_current: u32,
+    frame_total: u32,
+    frame_current: u32,
+    start_timestamp: SystemTime,
 }
 
 impl ProgressBar {
-    pub fn new(total: u32) -> ProgressBar {
+    pub fn new(operations_total: u32, frame_total: u32) -> ProgressBar {
         ProgressBar {
-            total,
-            current: 0,
-            title: "".to_owned(),
-            start_timestamp: None,
+            operations_total,
+            operations_current: 0,
+            frame_total,
+            frame_current: 0,
+            start_timestamp: SystemTime::now(),
         }
     }
 
-    pub fn mark_start(&mut self) {
-        match self.start_timestamp {
-            Some(_) => { panic!() },
-            None => { self.start_timestamp = Some(SystemTime::now()) },
-        }
+    pub fn increment_operations(&mut self, count: u32) {
+        self.operations_current = min(self.operations_current + count, self.operations_total)
     }
 
-    pub fn increment(&mut self, count: u32) {
-        self.current = min(self.current + count, self.total)
+    pub fn increment_frame(&mut self) {
+        self.frame_current = min(self.frame_current + 1, self.frame_total)
     }
 
     pub fn is_complete(&self) -> bool {
-        self.current == self.total
-    }
-
-    pub fn set_title(&mut self, title: String) {
-        self.title = title
+        self.operations_current == self.operations_total && self.frame_current == self.frame_total
     }
 
     pub fn render(&self) {
-        // TODO: Actual progress bar and overwrite current line.
-        let fraction_complete = self.current as f64 / self.total as f64;
-        let eta_string: String = self.start_timestamp
-            .map(|start| {
-                let duration = start.elapsed().unwrap();
-                let elapsed_time = (duration.as_secs() as f64 * 1e9f64 + duration.subsec_nanos() as f64) / 1e9f64;
-                let eta = elapsed_time / fraction_complete - elapsed_time;
-                if eta.is_finite() {
-                    format!(", eta: {:3.1}s", eta)
-                } else {
-                    "".to_owned()
-                }
-            })
-            .unwrap_or("".to_owned());
-        println!("{} ({:3.1}%{})",
-            self.title,
-            100f64 * self.current as f64 / self.total as f64,
-            eta_string,
+        let fraction_complete = self.operations_current as f64 / self.operations_total as f64;
+        let duration = self.start_timestamp.elapsed().unwrap();
+        let elapsed_time = (duration.as_secs() as f64 * 1e9f64 + duration.subsec_nanos() as f64) / 1e9f64;
+        let eta = {
+            let eta = elapsed_time / fraction_complete - elapsed_time;
+            if eta.is_finite() { eta } else { 0f64 }
+        };
+
+        let prefix = format!("frame {}/{} {:3.1}% [",
+            self.frame_current,
+            self.frame_total,
+            100f64 * fraction_complete,
         );
+        let suffix = format!("] {:.1}s", eta);
+        match terminal_size() {
+            Some((Width(width), _)) => {
+                let total_bar_width = (width as usize) - prefix.len() - suffix.len();
+                let fill_width = (total_bar_width as f64 * fraction_complete).floor() as usize;
+                let empty_width = total_bar_width - fill_width;
+                print!("\r{}{}{}{}", prefix, "=".repeat(fill_width), " ".repeat(empty_width), suffix);
+                stdout().flush().ok().unwrap();
+            },
+            None => {},
+        }
     }
 }
