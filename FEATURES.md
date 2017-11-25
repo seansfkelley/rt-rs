@@ -22,5 +22,4 @@
 - More scenes
 
 ## known issues
-- shuttle triangle mesh is buggy
 - Difference only sort of works (need better test case)
