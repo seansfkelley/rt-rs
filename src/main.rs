@@ -12,6 +12,7 @@ mod scene;
 mod util;
 mod math;
 mod importer;
+mod progress_bar;
 
 use core::*;
 use rand::Rng;
@@ -20,6 +21,10 @@ use image::{RgbImage, Rgb, Pixel};
 use std::fs::File;
 use std::path::Path;
 use std::env;
+use std::thread;
+use std::time::Duration;
+use std::sync::{ Arc, Mutex };
+use progress_bar::ProgressBar;
 
 fn main() {
     let mut args = env::args();
@@ -43,9 +48,32 @@ fn main() {
     let (width, height) = scene_file.parameters.image_dimensions;
     let antialias = scene_file.parameters.antialias;
     let mut camera = scene_file.camera;
+    let frame_count = scene_file.animation.0;
+
+    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * antialias * antialias * frame_count)));
+    let progress_render = progress_main.clone();
+
+    progress_main.lock().unwrap().mark_start();
+    progress_main.lock().unwrap().set_title(format!("rendering frame 1 / {}...", frame_count));
+
+    thread::spawn(move || {
+        loop {
+            let is_complete = {
+                let p = progress_render.lock().unwrap();
+                p.render();
+                p.is_complete()
+            };
+
+            if !is_complete {
+                thread::sleep(Duration::from_millis(1000));
+            }
+        }
+    });
 
     let mut rng = rand::thread_rng();
-    for frame_number in 0..scene_file.animation.0 {
+    for frame_number in 0..frame_count {
+        progress_main.lock().unwrap().set_title(format!("rendering frame {} of {}...", frame_number + 1, frame_count));
+
         let mut img = RgbImage::new(width, height);
 
         for x in 0..width {
@@ -72,6 +100,7 @@ fn main() {
                         color = color + scene.raytrace(&camera.get_ray(x as f64 + x_jitter, y as f64 + y_jitter));
                     }
                 }
+                progress_main.lock().unwrap().increment(antialias * antialias);
                 img.put_pixel(x, y, *Rgb::from_slice(&(color / (antialias * antialias) as f64).as_bytes()));
             }
         }
