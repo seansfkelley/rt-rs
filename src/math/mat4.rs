@@ -110,10 +110,6 @@ impl Mat4 {
         Mat4 { cells }
     }
 
-    pub fn get_cell(&self, x: usize, y: usize) -> f64 {
-        self.cells[y][x]
-    }
-
     // https://stackoverflow.com/questions/1148309/inverting-a-4x4-matrix
     pub fn invert(&self) -> Option<Mat4> {
         let mut inverse = [[0f64; 4]; 4];
@@ -274,10 +270,10 @@ impl Mul for Mat4 {
 
     fn mul(self, other: Mat4) -> Mat4 {
         let mut cells = [[0f64; 4]; 4];
-        for x in 0..4 {
-            for y in 0..4 {
+        for row in 0..4 {
+            for col in 0..4 {
                 for i in 0..4 {
-                    cells[y][x] += self.get_cell(i, y) * other.get_cell(x, i);
+                    cells[row][col] += self.cells[row][i] * other.cells[i][col];
                 }
             }
         }

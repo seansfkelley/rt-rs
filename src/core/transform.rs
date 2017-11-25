@@ -39,22 +39,19 @@ macro_rules! make_transformable {
     };
 }
 
-// pbrt pg. 86
-fn transform_vec3(in_vector: &Vec3, mat4: &Mat4) -> Vec3 {
-    // The homogenous coordinate is implicitly zero, i.e., vectors are not translatable.
-    let mut vec3 = [0f64; 3];
+macro_rules! make_transformable_inverted {
+    ($struct:ty, $transformer:ident) => {
+        impl Transformable for $struct {
+            fn transform(&self, transform: &Transform) -> $struct {
+                $transformer(self, &transform.m_inverse)
+            }
 
-    for i in 0..3 {
-        vec3[i] =
-            mat4.get_cell(0, i) * in_vector.x +
-            mat4.get_cell(1, i) * in_vector.y +
-            mat4.get_cell(2, i) * in_vector.z;
-    }
-
-    Vec3::new(vec3[0], vec3[1], vec3[2])
+            fn invert_transform(&self, transform: &Transform) -> $struct {
+                $transformer(self, &transform.m)
+            }
+        }
+    };
 }
-
-make_transformable!(Vec3, transform_vec3);
 
 // pbrt pg. 86
 fn transform_point(point: &Point, mat4: &Mat4) -> Point {
@@ -62,10 +59,10 @@ fn transform_point(point: &Point, mat4: &Mat4) -> Point {
 
     for i in 0..4 {
         vec4[i] =
-            mat4.get_cell(0, i) * point.x +
-            mat4.get_cell(1, i) * point.y +
-            mat4.get_cell(2, i) * point.z +
-            mat4.get_cell(3, i);
+            mat4.cells[i][0] * point.x +
+            mat4.cells[i][1] * point.y +
+            mat4.cells[i][2] * point.z +
+            mat4.cells[i][3];
     }
 
     // TODO: Worth optimizing away the division when it's == 1, per pbrt?
@@ -79,15 +76,32 @@ fn transform_point(point: &Point, mat4: &Mat4) -> Point {
 make_transformable!(Point, transform_point);
 
 // pbrt pg. 86
+fn transform_vec3(in_vector: &Vec3, mat4: &Mat4) -> Vec3 {
+    // The homogenous coordinate is implicitly zero, i.e., vectors are not translatable.
+    let mut vec3 = [0f64; 3];
+
+    for i in 0..3 {
+        vec3[i] =
+            mat4.cells[i][0] * in_vector.x +
+            mat4.cells[i][1] * in_vector.y +
+            mat4.cells[i][2] * in_vector.z;
+    }
+
+    Vec3::new(vec3[0], vec3[1], vec3[2])
+}
+
+make_transformable!(Vec3, transform_vec3);
+
+// pbrt pg. 86
 fn transform_normal(normal: &Normal, mat4: &Mat4) -> Normal {
     let mut vec3 = [0f64; 3];
 
     for i in 0..3 {
         // Note, per pbrt, that we don't compute the transpose but just swap i/j indices.
         vec3[i] =
-            mat4.get_cell(i, 0) * normal.x +
-            mat4.get_cell(i, 1) * normal.y +
-            mat4.get_cell(i, 2) * normal.z;
+            mat4.cells[0][i] * normal.x +
+            mat4.cells[1][i] * normal.y +
+            mat4.cells[2][i] * normal.z;
     }
 
     Normal {
@@ -97,7 +111,7 @@ fn transform_normal(normal: &Normal, mat4: &Mat4) -> Normal {
     }
 }
 
-make_transformable!(Normal, transform_normal);
+make_transformable_inverted!(Normal, transform_normal);
 
 #[cfg(test)]
 mod tests {
