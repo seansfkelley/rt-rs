@@ -3,12 +3,23 @@ use math::*;
 pub static IDENTITY_TRANSFORM: Transform = Transform {
     m: IDENTITY_MATRIX,
     m_inverse: IDENTITY_MATRIX,
+    swaps_handedness: false,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Transform {
     pub m: Mat4,
     pub m_inverse: Mat4,
+    pub swaps_handedness: bool,
+}
+
+fn determinant_3x3(m: &Mat4) -> f64 {
+    (m.cells[0][0] *
+        (m.cells[1][1] * m.cells[2][2] - m.cells[1][2] * m.cells[2][1])) -
+    (m.cells[0][1] *
+        (m.cells[1][0] * m.cells[2][2] - m.cells[1][2] * m.cells[2][0])) +
+    (m.cells[0][2] *
+        (m.cells[1][0] * m.cells[2][1] - m.cells[1][1] * m.cells[2][0]))
 }
 
 impl Transform {
@@ -16,6 +27,7 @@ impl Transform {
         Transform {
             m,
             m_inverse: m.invert().unwrap(),
+            swaps_handedness: determinant_3x3(&m) < 0f64,
         }
     }
 }

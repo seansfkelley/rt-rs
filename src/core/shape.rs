@@ -23,7 +23,8 @@ impl Geometry for Shape {
             Some(object_space_intersection) => Some(Intersection {
                 distance: object_space_intersection.distance,
                 location: object_space_intersection.location.transform(&self.object_to_world),
-                normal: object_space_intersection.normal.transform(&self.object_to_world),
+                normal: object_space_intersection.normal.transform(&self.object_to_world)
+                    * (if self.object_to_world.swaps_handedness { -1f64 } else { 1f64 }),
                 uv: object_space_intersection.uv,
             }),
             None => None,
