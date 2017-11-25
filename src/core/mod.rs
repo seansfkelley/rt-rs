@@ -1,3 +1,4 @@
+pub mod bounding_box;
 pub mod camera;
 pub mod color;
 pub mod ray;
@@ -9,6 +10,7 @@ pub mod shape;
 pub mod transform;
 pub mod render_parameters;
 
+pub use self::bounding_box::*;
 pub use self::camera::*;
 pub use self::color::*;
 pub use self::ray::*;

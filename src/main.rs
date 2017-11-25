@@ -4,6 +4,7 @@ extern crate image;
 extern crate rand;
 extern crate regex;
 extern crate lalrpop_util;
+extern crate ordered_float;
 
 mod core;
 mod geometry;

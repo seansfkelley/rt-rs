@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 use std::fmt::{ Debug, Formatter, Result };
 use std::ops::{Add, Sub, Div, Mul, Neg, Index};
+use ordered_float::NotNaN;
 
 pub trait Xyz {
     fn x(&self) -> f64;
@@ -24,6 +25,10 @@ macro_rules! xyz_base {
 
             pub fn uniform(value: f64) -> $name {
                 $name { x: value, y: value, z: value }
+            }
+
+            pub fn as_notnan(&self) -> (NotNaN<f64>, NotNaN<f64>, NotNaN<f64>) {
+                (NotNaN::new(self.x).unwrap(), NotNaN::new(self.y).unwrap(), NotNaN::new(self.z).unwrap())
             }
         }
 
