@@ -231,6 +231,10 @@ xyz_normalizable!(Normal);
 xyz_convertible!(Normal, Vec3, as_vector);
 
 impl Vec3 {
+    pub const X_AXIS: Vec3 = Vec3 { x: 1f64, y: 0f64, z: 0f64 };
+    pub const Y_AXIS: Vec3 = Vec3 { x: 0f64, y: 1f64, z: 0f64 };
+    pub const Z_AXIS: Vec3 = Vec3 { x: 0f64, y: 0f64, z: 1f64 };
+
     // TODO: Remove this?
     pub fn assert_normalized(&self) {
         debug_assert!((self.magnitude() - 1f64).abs() < 1e-10);

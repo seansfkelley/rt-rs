@@ -58,7 +58,7 @@ impl Camera {
         let ray = match self.kind {
             CameraKind::Orthographic => Ray {
                 origin: Point::new(image_x, image_y, 0f64).transform(&self.raster_to_camera),
-                direction: Vec3::new(0f64, 0f64, 1f64),
+                direction: Vec3::Z_AXIS,
             },
             CameraKind::Perspective => Ray {
                 origin: Point::uniform(0f64),

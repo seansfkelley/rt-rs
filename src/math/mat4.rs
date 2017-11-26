@@ -19,10 +19,6 @@ pub const IDENTITY_MATRIX: Mat4 = Mat4 {
     ],
 };
 
-pub const X_AXIS: Vec3 = Vec3 { x: 1f64, y: 0f64, z: 0f64 };
-pub const Y_AXIS: Vec3 = Vec3 { x: 0f64, y: 1f64, z: 0f64 };
-pub const Z_AXIS: Vec3 = Vec3 { x: 0f64, y: 0f64, z: 1f64 };
-
 impl Mat4 {
     pub fn create() -> Mat4 {
         IDENTITY_MATRIX
@@ -438,7 +434,7 @@ mod tests {
                     [0f64,        0f64,         0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_rotation(theta, X_AXIS), expected);
+            assert_eq!(Mat4::create_rotation(theta, Vec3::X_AXIS), expected);
         }
 
         #[test]
@@ -452,7 +448,7 @@ mod tests {
                     [        0f64, 0f64,        0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_rotation(theta, Y_AXIS), expected);
+            assert_eq!(Mat4::create_rotation(theta, Vec3::Y_AXIS), expected);
         }
 
         #[test]
@@ -466,7 +462,7 @@ mod tests {
                     [       0f64,         0f64, 0f64, 1f64],
                 ],
             };
-            assert_eq!(Mat4::create_rotation(theta, Z_AXIS), expected);
+            assert_eq!(Mat4::create_rotation(theta, Vec3::Z_AXIS), expected);
         }
 
         #[test]
