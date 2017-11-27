@@ -282,29 +282,20 @@ impl Mul for Mat4 {
     }
 }
 
-macro_rules! maybe_early_abort {
-    ($e:expr) => {
-        match $e {
-            Result::Err(e) => { return Result::Err(e); },
-            Result::Ok(_) => {},
-        }
-    };
-}
-
 impl Debug for Mat4 {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        maybe_early_abort!(write!(f, "[ \n"));
+        write!(f, "[ \n")?;
         for i in 0..4 {
-            maybe_early_abort!(write!(f, "  [ "));
+            write!(f, "  [ ")?;
             for j in 0..4 {
-                maybe_early_abort!(write!(f, "{}", self.cells[i][j]));
+                write!(f, "{}", self.cells[i][j])?;
                 if j != 3 {
-                    maybe_early_abort!(write!(f, ", "));
+                    write!(f, ", ")?;
                 }
             }
-            maybe_early_abort!(write!(f, " ]\n"));
+            write!(f, " ]\n")?;
         }
-        maybe_early_abort!(write!(f, "]"));
+        write!(f, "]")?;
         Result::Ok(())
     }
 }
