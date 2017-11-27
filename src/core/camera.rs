@@ -38,14 +38,12 @@ impl Camera {
         let far = 1000f64;
         let near = 0.01f64;
         let inverse_tan = 1f64 / (fov.to_radians() / 2f64).tan();
-        let projection = Mat4::create_scale(Vec3::new(inverse_tan, inverse_tan, 1f64)) * Mat4 {
-            cells: [
-                [1f64, 0f64,               0f64,                       0f64],
-                [0f64, 1f64,               0f64,                       0f64],
-                [0f64, 0f64, far / (far - near), -far * near / (far - near)],
-                [0f64, 0f64,               1f64,                       0f64],
-            ],
-        };
+        let projection = Mat4::create_scale(Vec3::new(inverse_tan, inverse_tan, 1f64)) * Mat4([
+            [1f64, 0f64,               0f64,                       0f64],
+            [0f64, 1f64,               0f64,                       0f64],
+            [0f64, 0f64, far / (far - near), -far * near / (far - near)],
+            [0f64, 0f64,               1f64,                       0f64],
+        ]);
 
         Camera {
             raster_to_camera: Transform::new(compute_raster_to_camera(screen_size, image_dimensions, projection)),
