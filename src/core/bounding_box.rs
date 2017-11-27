@@ -1,4 +1,5 @@
 use std::cmp::{ min, max };
+use std::f64;
 use math::*;
 use super::transform::{ Transform, Transformable };
 
@@ -45,16 +46,50 @@ impl BoundingBox {
     }
 }
 
-// Note that we use `new`, which maintains axis-alignedness, so multiple transforms
-// may bloat the size of the box.
-// Uses Arvo 1990 "Transforming Axis-Aligned Bounding Boxes", per pbrt's suggestion.
+macro_rules! compare_and_set {
+    ($candidate:expr, $min:ident, $max:ident, $component:ident) => {
+        if $candidate.$component < $min.$component {
+            $min.$component = $candidate.$component;
+        }
+        if $candidate.$component > $max.$component {
+            $max.$component = $candidate.$component;
+        }
+    };
+}
+
+macro_rules! apply_transform {
+    ($self:ident, $fnname:ident, $transform:ident) => {
+        {
+            let candidates = [
+                Point::new($self.min.x, $self.min.y, $self.min.z).$fnname($transform),
+                Point::new($self.min.x, $self.min.y, $self.max.z).$fnname($transform),
+                Point::new($self.min.x, $self.max.y, $self.min.z).$fnname($transform),
+                Point::new($self.min.x, $self.max.y, $self.max.z).$fnname($transform),
+                Point::new($self.max.x, $self.min.y, $self.min.z).$fnname($transform),
+                Point::new($self.max.x, $self.min.y, $self.max.z).$fnname($transform),
+                Point::new($self.max.x, $self.max.y, $self.min.z).$fnname($transform),
+                Point::new($self.max.x, $self.max.y, $self.max.z).$fnname($transform),
+            ];
+            let mut min = Point::uniform(f64::INFINITY);
+            let mut max = Point::uniform(f64::NEG_INFINITY);
+            for i in 0..8 {
+                compare_and_set!(candidates[i], min, max, x);
+                compare_and_set!(candidates[i], min, max, y);
+                compare_and_set!(candidates[i], min, max, z);
+            }
+            BoundingBox { min, max }
+        }
+    };
+}
+
+// TODO: Use Arvo 1990 "Transforming Axis-Aligned Bounding Boxes", per pbrt's suggestion.
 impl Transformable for BoundingBox {
     fn transform(&self, transform: &Transform) -> BoundingBox {
-        panic!();
+        apply_transform!(self, transform, transform)
     }
 
     fn invert_transform(&self, transform: &Transform) -> BoundingBox {
-        panic!();
+        apply_transform!(self, invert_transform, transform)
     }
 }
 
@@ -126,9 +161,7 @@ mod tests {
         ).transform(
             &Transform::new(Mat4::create_rotation(45f64.to_radians(), Vec3::Z_AXIS))
         );
-        eprintln!("{:?} {:?}", bb.min, bb.max);
-        assert_eq!(bb.min, Point::uniform(0f64));
-        assert_near!(bb.min, Point::new(-1f64, -1f64, -2f64.sqrt()));
-        assert_near!(bb.max, Point::new(1f64, 1f64, 2f64.sqrt()));
+        assert_near!(bb.min, Point::new(-2f64.sqrt(), -2f64.sqrt(), -1f64));
+        assert_near!(bb.max, Point::new( 2f64.sqrt(),  2f64.sqrt(),  1f64));
     }
 }
