@@ -1,4 +1,5 @@
 ## features
+- triangle mesh normals and texture mapping
 - animate objects in scenes
 - procedural textures - K
 - procedural shapes - K
