@@ -15,7 +15,7 @@ impl Transform {
     pub fn new(m: Mat4) -> Transform {
         Transform {
             m,
-            m_inverse: m.invert().unwrap(),
+            m_inverse: m.invert().expect("transforms should always be invertible"),
         }
     }
 }

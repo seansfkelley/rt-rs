@@ -111,6 +111,10 @@ Geometry: Box<Geometry> = {
     "sphere" "{"
         "radius" <F64>
     "}" => Box::new(Sphere::new(<>)),
+    "rect_prism" "{"
+        "min" <min:Point>
+        "max" <max:Point>
+    "}" => Box::new(RectPrism::new(min, max)),
     "triangle_mesh" "{"
         "positions" <positions:List<Point>>
         <normals:("normals" <List<Normal>>)?>
