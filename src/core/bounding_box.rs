@@ -51,7 +51,25 @@ impl BoundingBox {
     pub fn intersect(&self, ray: &Ray) -> bool {
         let mut t0 = 0f64;
         let mut t1 = f64::INFINITY;
-        false
+
+        for i in 0..3 {
+            let mut (t_near, t_far) = (
+                (self.min[i] - ray.origin[i]) / ray.direction[i],
+                (self.max[i] - ray.origin[i]) / ray.direction[i],
+            );
+            if t_near > t_far {
+                (t_near, t_far) = (t_far, t_near)
+            }
+            (t0, t1) = (
+                non_nan_max(t0, t_near)
+                non_nan_min(t1, t_far)
+            );
+            if t0 > t1 {
+                return false;
+            }
+        }
+
+        true
     }
 }
 
