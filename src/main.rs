@@ -17,9 +17,9 @@ mod progress_bar;
 use core::*;
 use rand::Rng;
 use scene::Scene;
-use image::{RgbImage, Rgb, Pixel};
-use std::fs::File;
-use std::path::Path;
+use image::{ RgbImage, Rgb, Pixel };
+use std::fs::{ File, create_dir_all };
+use std::path::{ Path, PathBuf };
 use std::env;
 use std::thread;
 use std::time::Duration;
@@ -38,6 +38,17 @@ fn main() {
     }
 
     let scene_file = importer::parse(Path::new(&scene_file_path));
+    let output_directory: PathBuf = vec![
+        "out",
+        Path::new(&scene_file_path).file_stem().expect("no file stem").to_str().expect("cannot convert path to string"),
+    ].iter().collect();
+    create_dir_all(&output_directory).expect("could not create output directory");
+
+    let get_output_filename = move |i: u32| -> Box<Path> {
+        let mut p = output_directory.clone();
+        p.push(Path::new(&format!("{:03}.png", i)));
+        p.into_boxed_path()
+    };
 
     let scene = Scene::new(
         scene_file.objects,
@@ -108,8 +119,10 @@ fn main() {
             }
         }
 
-        let ref mut fout = File::create(&Path::new(&format!("out/{:03}.png", frame_number))).unwrap();
-        image::ImageRgb8(img).save(fout, image::PNG).unwrap();
+
+
+        let ref mut output_file = File::create(&get_output_filename(frame_number)).expect("error creating output file");
+        image::ImageRgb8(img).save(output_file, image::PNG).expect("error saving image");
 
         camera = camera.transform(&scene_file.animation.1);
     }
