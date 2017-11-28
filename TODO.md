@@ -30,6 +30,3 @@
 - More scenes
 - add "include" directive for scene files for copy-pasting purposes
 - make matrix a typedef of [[f64; 4]; 4] and then implement things for it?
-
-## known issues
-- Difference only sort of works (need better test case)

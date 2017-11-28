@@ -18,6 +18,13 @@ impl Difference {
 
 const EPSILON: f64 = 1e-10f64;
 
+fn advance_ray(ray: &Ray, distance: f64) -> Ray {
+    Ray {
+        origin: ray.at(distance),
+        direction: ray.direction,
+    }
+}
+
 fn flip_normal(i: Intersection) -> Intersection {
     Intersection {
         distance: i.distance,
@@ -27,7 +34,7 @@ fn flip_normal(i: Intersection) -> Intersection {
     }
 }
 
-fn bump_distance(intersection: Option<Intersection>, distance: f64) ->Option<Intersection> {
+fn advance_intersection(intersection: Option<Intersection>, distance: f64) ->Option<Intersection> {
     match intersection {
         Some(i) => Some(Intersection {
             distance: i.distance + distance,
@@ -46,31 +53,7 @@ impl Geometry for Difference {
             Some(lhs_intersection) => {
                 match self.rhs.intersect(ray) {
                     None => Some(lhs_intersection),
-                    Some(rhs_intersection) => {
-                        let inside_lhs = lhs_intersection.normal.dot(&-ray.direction) < 0f64;
-                        let inside_rhs = rhs_intersection.normal.dot(&-ray.direction) < 0f64;
-                        if inside_lhs && inside_rhs {
-                            if lhs_intersection.distance < rhs_intersection.distance {
-                                None
-                            } else {
-                                Some(flip_normal(rhs_intersection))
-                            }
-                        } else if inside_lhs {
-                            if lhs_intersection.distance < rhs_intersection.distance {
-                                Some(lhs_intersection)
-                            } else {
-                                Some(flip_normal(rhs_intersection))
-                            }
-                        } else if inside_rhs {
-                            self.march_out_of_rhs_and_recurse(ray, rhs_intersection)
-                        } else {
-                            if lhs_intersection.distance < rhs_intersection.distance {
-                                Some(lhs_intersection)
-                            } else {
-                                self.march_out_of_rhs_and_recurse(ray, rhs_intersection)
-                            }
-                        }
-                    }
+                    Some(rhs_intersection) => self.non_trivial_intersect(ray, lhs_intersection, rhs_intersection),
                 }
             }
         }
@@ -82,22 +65,40 @@ impl Geometry for Difference {
 }
 
 impl Difference {
-    fn march_out_of_rhs_and_recurse(&self, ray: &Ray, rhs_intersection: Intersection) -> Option<Intersection> {
-        let march_distance = rhs_intersection.distance + EPSILON;
-        let marched_ray = Ray {
-            origin: ray.at(march_distance),
-            direction: ray.direction,
-        };
-        match self.lhs.intersect(&marched_ray) {
-            Some(far_lhs_intersection) => {
-                let inside_far_lhs = far_lhs_intersection.normal.dot(&-ray.direction) < 0f64;
-                if inside_far_lhs {
-                    Some(flip_normal(rhs_intersection))
-                } else {
-                    bump_distance(self.intersect(&marched_ray), march_distance)
-                }
-            },
-            None => bump_distance(self.intersect(&marched_ray), march_distance)
+    fn non_trivial_intersect(&self, ray: &Ray, lhs_intersection: Intersection, rhs_intersection: Intersection) -> Option<Intersection> {
+        let inside_lhs = lhs_intersection.normal.dot(&-ray.direction) < 0f64;
+        let inside_rhs = rhs_intersection.normal.dot(&-ray.direction) < 0f64;
+        if inside_lhs && inside_rhs {
+            if lhs_intersection.distance < rhs_intersection.distance {
+                let d = lhs_intersection.distance + EPSILON;
+                advance_intersection(self.intersect(&advance_ray(ray, d)), d)
+            } else {
+                Some(flip_normal(rhs_intersection))
+            }
+        } else if inside_lhs {
+            if lhs_intersection.distance < rhs_intersection.distance {
+                Some(lhs_intersection)
+            } else {
+                Some(flip_normal(rhs_intersection))
+            }
+        } else if inside_rhs {
+            // TODO: We could optimize this to only recompute the near intersection, but I'm lazy
+            // and also it's possible for the two shapes to be perfectly colocated such that the
+            // marched ray would e.g. miss both, but then you reused one of the old intersections
+            // erroneously.
+            let d = if lhs_intersection.distance < rhs_intersection.distance {
+                lhs_intersection.distance
+            } else {
+                rhs_intersection.distance
+            } + EPSILON;
+            advance_intersection(self.intersect(&advance_ray(ray, d)), d)
+        } else {
+            if lhs_intersection.distance < rhs_intersection.distance {
+                Some(lhs_intersection)
+            } else {
+                let d = rhs_intersection.distance + EPSILON;
+                advance_intersection(self.intersect(&advance_ray(ray, d)), d)
+            }
         }
     }
 }
