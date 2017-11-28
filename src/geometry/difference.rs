@@ -27,12 +27,11 @@ fn flip_normal(i: Intersection) -> Intersection {
     }
 }
 
-fn bump_distance(intersection: Option<Intersection>, distance: f64, direction: &Vec3) ->Option<Intersection> {
+fn bump_distance(intersection: Option<Intersection>, distance: f64) ->Option<Intersection> {
     match intersection {
         Some(i) => Some(Intersection {
             distance: i.distance + distance,
-            // TODO: Ugh, Intersections really shouldn't be caching this.
-            location: i.location + (*direction) * distance,
+            location: i.location,
             normal: i.normal,
             uv: i.uv,
         }),
@@ -95,10 +94,10 @@ impl Difference {
                 if inside_far_lhs {
                     Some(flip_normal(rhs_intersection))
                 } else {
-                    bump_distance(self.intersect(&marched_ray), march_distance, &ray.direction)
+                    bump_distance(self.intersect(&marched_ray), march_distance)
                 }
             },
-            None => bump_distance(self.intersect(&marched_ray), march_distance, &ray.direction)
+            None => bump_distance(self.intersect(&marched_ray), march_distance)
         }
     }
 }
