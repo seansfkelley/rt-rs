@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use std::fmt::{ Debug, Formatter, Result };
-use std::ops::{Add, Sub, Div, Mul, Neg, Index};
+use std::ops::{ Add, Sub, Div, Mul, Neg, Index, IndexMut };
 
 pub trait Xyz {
     fn x(&self) -> f64;
@@ -35,6 +35,17 @@ macro_rules! xyz_base {
                     0 => &self.x,
                     1 => &self.y,
                     2 => &self.z,
+                    _ => { panic!("index out of range: {}", index); }
+                }
+            }
+        }
+
+        impl IndexMut<usize> for $name {
+            fn index_mut(&mut self, index: usize) -> &mut f64 {
+                match index {
+                    0 => &mut self.x,
+                    1 => &mut self.y,
+                    2 => &mut self.z,
                     _ => { panic!("index out of range: {}", index); }
                 }
             }

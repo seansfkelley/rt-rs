@@ -24,6 +24,7 @@
 - profile
 - parallelization
 - audit usages of Clone/Copy derivations and reference parameters to see if we're too copy-happy (or will rustc automatically optimize extraneous copies into moves?)
+- bounding boxes should maybe always be computed relative to the world for better bounds?
 
 ## misc
 - More scenes

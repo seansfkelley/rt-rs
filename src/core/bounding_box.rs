@@ -1,5 +1,6 @@
 use std::f64;
 use math::*;
+use super::ray::Ray;
 use super::transform::{ Transform, Transformable };
 
 #[derive(Debug, Clone)]
@@ -45,17 +46,13 @@ impl BoundingBox {
             ),
         }
     }
-}
 
-macro_rules! compare_and_set {
-    ($candidate:expr, $min:ident, $max:ident, $component:ident) => {
-        if $candidate.$component < $min.$component {
-            $min.$component = $candidate.$component;
-        }
-        if $candidate.$component > $max.$component {
-            $max.$component = $candidate.$component;
-        }
-    };
+    // pbrt pg. 194
+    pub fn intersect(&self, ray: &Ray) -> bool {
+        let mut t0 = 0f64;
+        let mut t1 = f64::INFINITY;
+        false
+    }
 }
 
 macro_rules! apply_transform {
@@ -74,9 +71,15 @@ macro_rules! apply_transform {
             let mut min = Point::uniform(f64::INFINITY);
             let mut max = Point::uniform(f64::NEG_INFINITY);
             for i in 0..8 {
-                compare_and_set!(candidates[i], min, max, x);
-                compare_and_set!(candidates[i], min, max, y);
-                compare_and_set!(candidates[i], min, max, z);
+                let c = candidates[i];
+                for j in 0..3 {
+                    if c[j] < min[j] {
+                        min[j] = c[j];
+                    }
+                    if c[j] > max[j] {
+                        max[j] = c[j];
+                    }
+                }
             }
             BoundingBox { min, max }
         }
