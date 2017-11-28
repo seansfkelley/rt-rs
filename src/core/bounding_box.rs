@@ -3,6 +3,14 @@ use math::*;
 use super::ray::Ray;
 use super::transform::{ Transform, Transformable };
 
+macro_rules! swap {
+    ($a:ident, $b:ident) => {
+        let temp = $a;
+        $a = $b;
+        $b = temp;
+    };
+}
+
 #[derive(Debug, Clone)]
 pub struct BoundingBox {
     pub min: Point,
@@ -49,21 +57,18 @@ impl BoundingBox {
 
     // pbrt pg. 194
     pub fn intersect(&self, ray: &Ray) -> bool {
-        let mut t0 = 0f64;
-        let mut t1 = f64::INFINITY;
+        let (mut t0, mut t1) = (0f64, f64::INFINITY);
 
         for i in 0..3 {
-            let mut (t_near, t_far) = (
+            let (mut t_near, mut t_far) = (
                 (self.min[i] - ray.origin[i]) / ray.direction[i],
                 (self.max[i] - ray.origin[i]) / ray.direction[i],
             );
             if t_near > t_far {
-                (t_near, t_far) = (t_far, t_near)
+                swap!(t_near, t_far);
             }
-            (t0, t1) = (
-                non_nan_max(t0, t_near)
-                non_nan_min(t1, t_far)
-            );
+            t0 = non_nan_max(t0, t_near);
+            t1 = non_nan_min(t1, t_far);
             if t0 > t1 {
                 return false;
             }
@@ -130,21 +135,11 @@ mod tests {
     }
 
     #[test]
-    fn it_should_rearrange_values_into_min_and_max_points() {
-        let bb = BoundingBox::new(
-            Point::new(-1f64, 1f64, -1f64),
-            Point::new(1f64, -1f64, 1f64),
-        );
-        assert_eq!(bb.min, Point::uniform(-1f64));
-        assert_eq!(bb.max, Point::uniform(1f64));
-    }
-
-    #[test]
     fn it_should_do_nothing_when_merged_with_a_point_inside() {
-        let bb = BoundingBox::new(
-            Point::uniform(-1f64),
-            Point::uniform(1f64),
-        ).with_point(
+        let bb = BoundingBox {
+            min: Point::uniform(-1f64),
+            max: Point::uniform(1f64),
+        }.with_point(
             Point::uniform(0f64),
         );
         assert_eq!(bb.min, Point::uniform(-1f64));
@@ -153,10 +148,10 @@ mod tests {
 
     #[test]
     fn it_should_expand_the_box_when_merged_with_a_point_outside() {
-        let bb = BoundingBox::new(
-            Point::uniform(-1f64),
-            Point::uniform(1f64),
-        ).with_point(
+        let bb = BoundingBox {
+            min: Point::uniform(-1f64),
+            max: Point::uniform(1f64),
+        }.with_point(
             Point::new(2f64, -3f64, 4f64),
         );
         assert_eq!(bb.min, Point::new(-1f64, -3f64, -1f64));
@@ -165,10 +160,10 @@ mod tests {
 
     #[test]
     fn it_should_maintain_min_max_under_transformation() {
-        let bb = BoundingBox::new(
-            Point::uniform(-1f64),
-            Point::uniform(2f64),
-        ).transform(
+        let bb = BoundingBox {
+            min: Point::uniform(-1f64),
+            max: Point::uniform(2f64),
+        }.transform(
             &Transform::new(Mat4::create_scale(Vec3::uniform(-3f64)))
         );
         assert_eq!(bb.min, Point::uniform(-6f64));
@@ -177,10 +172,10 @@ mod tests {
 
     #[test]
     fn it_should_bloat_the_bounding_box_under_some_transformations() {
-        let bb = BoundingBox::new(
-            Point::uniform(-1f64),
-            Point::uniform(1f64),
-        ).transform(
+        let bb = BoundingBox {
+            min: Point::uniform(-1f64),
+            max: Point::uniform(1f64),
+        }.transform(
             &Transform::new(Mat4::create_rotation(45f64.to_radians(), Vec3::Z_AXIS))
         );
         assert_near!(bb.min, Point::new(-2f64.sqrt(), -2f64.sqrt(), -1f64));

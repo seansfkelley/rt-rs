@@ -34,19 +34,24 @@ impl ProgressBar {
         self.operations_current == self.operations_total && self.frame_current == self.frame_total
     }
 
+    fn elapsed_time_seconds(&self) -> f64 {
+        let duration = self.start_timestamp.elapsed().unwrap();
+        (duration.as_secs() as f64 * 1e9f64 + duration.subsec_nanos() as f64) / 1e9f64
+    }
+
     pub fn render(&self) {
         let fraction_complete = self.operations_current as f64 / self.operations_total as f64;
-        let duration = self.start_timestamp.elapsed().unwrap();
-        let elapsed_time = (duration.as_secs() as f64 * 1e9f64 + duration.subsec_nanos() as f64) / 1e9f64;
+        let elapsed_time = self.elapsed_time_seconds();
         let eta = {
             let eta = elapsed_time / fraction_complete - elapsed_time;
             if eta.is_finite() { eta } else { 0f64 }
         };
 
-        let prefix = format!("frame {}/{} {:3.1}% [",
+        let prefix = format!("frame {}/{} - {:3.1}% - {:.1}s [",
             self.frame_current,
             self.frame_total,
             100f64 * fraction_complete,
+            elapsed_time,
         );
         let suffix = format!("] {:.1}s", eta);
         match terminal_size() {

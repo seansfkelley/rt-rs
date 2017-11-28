@@ -18,7 +18,6 @@
 - water
 
 ## performance/quality
-- bounding boxes
 - spatial indexing (kd-tree, r-tree?) - K
 - triangle mesh optimizations
 - profile
