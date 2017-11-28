@@ -39,7 +39,7 @@ impl RectPrism {
             } else if location.z.fuzzy_eq(self.max.z) {
                 Normal::new(0f64, 0f64, 1f64)
             } else {
-                panic!("should be unreachable");
+                unreachable!();
             };
 
         Intersection {
