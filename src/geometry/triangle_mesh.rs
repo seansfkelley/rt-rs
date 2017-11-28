@@ -87,4 +87,14 @@ impl Geometry for TriangleMesh {
 
         closest
     }
+
+    fn bound(&self) -> BoundingBox {
+        let mut bb = BoundingBox::empty();
+
+        for ref p in &self.positions {
+            bb = bb.with_point(p);
+        }
+
+        bb
+    }
 }

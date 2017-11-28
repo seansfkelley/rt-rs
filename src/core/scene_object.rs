@@ -1,6 +1,4 @@
 use std::rc::Rc;
-use super::ray::Ray;
-use super::intersection::Intersection;
 use material::Texture;
 use geometry::Geometry;
 use core::*;
@@ -14,5 +12,9 @@ pub struct SceneObject {
 impl Geometry for SceneObject {
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         self.shape.intersect(ray)
+    }
+
+    fn bound(&self) -> BoundingBox {
+        self.shape.bound()
     }
 }

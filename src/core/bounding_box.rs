@@ -1,46 +1,47 @@
-use std::cmp::{ min, max };
 use std::f64;
 use math::*;
 use super::transform::{ Transform, Transformable };
 
-#[derive(Debug)]
-struct BoundingBox {
-    min: Point,
-    max: Point,
+#[derive(Debug, Clone)]
+pub struct BoundingBox {
+    pub min: Point,
+    pub max: Point,
 }
 
 impl BoundingBox {
-    pub fn new(p1: Point, p2: Point) -> BoundingBox {
-        let (p1x, p1y, p1z) = p1.as_notnan();
-        let (p2x, p2y, p2z) = p2.as_notnan();
+    pub fn empty() -> BoundingBox {
+        BoundingBox {
+            min: Point::uniform(f64::INFINITY),
+            max: Point::uniform(f64::NEG_INFINITY),
+        }
+    }
+
+    pub fn union(bb1: &BoundingBox, bb2: &BoundingBox) -> BoundingBox {
         BoundingBox {
             min: Point::new(
-                min(p1x, p2x).into_inner(),
-                min(p1x, p2x).into_inner(),
-                min(p1y, p2y).into_inner(),
+                non_nan_min(bb1.min.x, bb2.min.x),
+                non_nan_min(bb1.min.y, bb2.min.y),
+                non_nan_min(bb1.min.z, bb2.min.z),
             ),
             max: Point::new(
-                max(p1y, p2y).into_inner(),
-                max(p1z, p2z).into_inner(),
-                max(p1z, p2z).into_inner(),
+                non_nan_max(bb1.max.x, bb2.max.x),
+                non_nan_max(bb1.max.y, bb2.max.y),
+                non_nan_max(bb1.max.z, bb2.max.z),
             ),
         }
     }
 
-    pub fn union(&self, p: Point) -> BoundingBox {
-        let (min_x, min_y, min_z) = self.min.as_notnan();
-        let (max_x, max_y, max_z) = self.max.as_notnan();
-        let (px, py, pz) = p.as_notnan();
+    pub fn with_point(&self, p: &Point) -> BoundingBox {
         BoundingBox {
             min: Point::new(
-                min(min_x, px).into_inner(),
-                min(min_y, py).into_inner(),
-                min(min_z, pz).into_inner(),
+                non_nan_min(self.min.x, p.x),
+                non_nan_min(self.min.y, p.y),
+                non_nan_min(self.min.z, p.z),
             ),
             max: Point::new(
-                max(max_x, px).into_inner(),
-                max(max_y, py).into_inner(),
-                max(max_z, pz).into_inner(),
+                non_nan_max(self.max.x, p.x),
+                non_nan_max(self.max.y, p.y),
+                non_nan_max(self.max.z, p.z),
             ),
         }
     }
@@ -118,11 +119,11 @@ mod tests {
     }
 
     #[test]
-    fn it_should_do_nothing_when_unioned_with_a_point_inside() {
+    fn it_should_do_nothing_when_merged_with_a_point_inside() {
         let bb = BoundingBox::new(
             Point::uniform(-1f64),
             Point::uniform(1f64),
-        ).union(
+        ).with_point(
             Point::uniform(0f64),
         );
         assert_eq!(bb.min, Point::uniform(-1f64));
@@ -130,11 +131,11 @@ mod tests {
     }
 
     #[test]
-    fn it_should_expand_the_box_when_unioned_with_a_point_outside() {
+    fn it_should_expand_the_box_when_merged_with_a_point_outside() {
         let bb = BoundingBox::new(
             Point::uniform(-1f64),
             Point::uniform(1f64),
-        ).union(
+        ).with_point(
             Point::new(2f64, -3f64, 4f64),
         );
         assert_eq!(bb.min, Point::new(-1f64, -3f64, -1f64));

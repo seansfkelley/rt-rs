@@ -4,7 +4,6 @@ extern crate image;
 extern crate rand;
 extern crate regex;
 extern crate lalrpop_util;
-extern crate ordered_float;
 extern crate terminal_size;
 
 mod core;

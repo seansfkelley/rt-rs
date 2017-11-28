@@ -8,8 +8,10 @@ pub use self::triangle_mesh::*;
 
 use core::ray::Ray;
 use core::intersection::Intersection;
+use core::bounding_box::BoundingBox;
 use std::fmt::Debug;
 
 pub trait Geometry : Debug {
     fn intersect(&self, ray: &Ray) -> Option<Intersection>;
+    fn bound(&self) -> BoundingBox;
 }

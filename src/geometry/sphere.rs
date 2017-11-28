@@ -73,6 +73,13 @@ impl Geometry for Sphere {
             None => None,
         }
     }
+
+    fn bound(&self) -> BoundingBox {
+        BoundingBox {
+            min: Point::uniform(-self.radius),
+            max: Point::uniform(self.radius),
+        }
+    }
 }
 
 #[cfg(test)]

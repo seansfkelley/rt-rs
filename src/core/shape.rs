@@ -8,11 +8,17 @@ use core::*;
 pub struct Shape {
     geometry: Rc<Geometry>,
     object_to_world: Transform,
+    bound: BoundingBox,
 }
 
 impl Shape {
     pub fn new(geometry: Rc<Geometry>, object_to_world: Transform) -> Shape {
-        Shape { geometry, object_to_world }
+        let bound = geometry.bound().transform(&object_to_world);
+        Shape {
+            geometry,
+            object_to_world,
+            bound,
+        }
     }
 }
 
@@ -28,6 +34,10 @@ impl Geometry for Shape {
             }),
             None => None,
         }
+    }
+
+    fn bound(&self) -> BoundingBox {
+        self.bound.clone()
     }
 }
 

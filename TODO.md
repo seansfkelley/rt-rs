@@ -15,6 +15,7 @@
 - displacement mapping
 - Revolving beziers
 - use any geometry as a light source
+- water
 
 ## performance/quality
 - bounding boxes
