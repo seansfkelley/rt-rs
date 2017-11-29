@@ -87,7 +87,9 @@ impl Geometry for TriangleMesh {
 
         closest
     }
+}
 
+impl Boundable for TriangleMesh {
     fn bound(&self) -> BoundingBox {
         let mut bb = BoundingBox::empty();
 

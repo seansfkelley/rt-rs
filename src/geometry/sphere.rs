@@ -73,7 +73,9 @@ impl Geometry for Sphere {
             None => None,
         }
     }
+}
 
+impl Boundable for Sphere {
     fn bound(&self) -> BoundingBox {
         BoundingBox {
             min: Point::uniform(-self.radius),

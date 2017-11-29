@@ -11,6 +11,10 @@ macro_rules! swap {
     };
 }
 
+pub trait Boundable {
+    fn bound(&self) -> BoundingBox;
+}
+
 #[derive(Debug, Clone)]
 pub struct BoundingBox {
     pub min: Point,

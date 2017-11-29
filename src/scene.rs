@@ -6,7 +6,7 @@ use geometry::Geometry;
 use util::Clamp;
 
 pub struct Scene {
-    objects: Vec<SceneObject>,
+    objects: KdTree,
     lights: Vec<Light>,
     background_color: Color,
     pub depth_limit: u32,
@@ -14,7 +14,7 @@ pub struct Scene {
 
 impl Scene {
     pub fn new(
-        objects: Vec<SceneObject>,
+        objects: KdTree,
         lights: Vec<Light>,
         background_color: Color,
         depth_limit: u32

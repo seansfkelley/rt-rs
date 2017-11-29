@@ -13,7 +13,9 @@ impl Geometry for SceneObject {
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         self.shape.intersect(ray)
     }
+}
 
+impl Boundable for SceneObject {
     fn bound(&self) -> BoundingBox {
         self.shape.bound()
     }

@@ -51,7 +51,7 @@ fn main() {
     };
 
     let scene = Scene::new(
-        scene_file.objects,
+        KdTree::from(scene_file.objects.into_iter().map(|o| Box::new::<Boundable>(o)).collect()),
         scene_file.lights,
         scene_file.parameters.background_color,
         scene_file.parameters.depth_limit
@@ -118,8 +118,6 @@ fn main() {
                 img.put_pixel(x, y, *Rgb::from_slice(&(color / (antialias * antialias) as f64).as_bytes()));
             }
         }
-
-
 
         let ref mut output_file = File::create(&get_output_filename(frame_number)).expect("error creating output file");
         image::ImageRgb8(img).save(output_file, image::PNG).expect("error saving image");

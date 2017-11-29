@@ -35,7 +35,9 @@ impl Geometry for Shape {
             None => None,
         }
     }
+}
 
+impl Boundable for Shape {
     fn bound(&self) -> BoundingBox {
         self.bound.clone()
     }

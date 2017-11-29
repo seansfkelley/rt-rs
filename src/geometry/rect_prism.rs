@@ -79,7 +79,9 @@ impl Geometry for RectPrism {
             Some(self.get_intersection(t0, &ray))
         }
     }
+}
 
+impl Boundable for RectPrism {
     fn bound(&self) -> BoundingBox {
         BoundingBox {
             min: self.min,

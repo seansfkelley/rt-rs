@@ -58,7 +58,9 @@ impl Geometry for Difference {
             }
         }
     }
+}
 
+impl Boundable for Difference {
     fn bound(&self) -> BoundingBox {
         BoundingBox::union(&self.lhs.bound(), &self.rhs.bound())
     }
