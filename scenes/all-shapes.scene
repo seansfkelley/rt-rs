@@ -1,5 +1,5 @@
 depth_limit 10
-background_color .1 .1 .1
+background_color #111
 image_dimensions 1024 1024
 antialias 3
 
@@ -78,5 +78,5 @@ transform pop
 
 light {
   position 0 0 -10
-  color #fff
+  color #c0c
 }

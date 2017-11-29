@@ -98,16 +98,16 @@ impl Scene {
 
         // TODO: increase other fractions if inside
         if !is_inside && phong_fraction > 0f64 {
-            color += phong_fraction * (material.ambient + self.get_visible_lights(intersection.nudged_location(normal))
+            color += phong_fraction * self.get_visible_lights(intersection.nudged_location(normal))
                 .iter()
-                .fold(BLACK, |color, light| {
+                .fold(material.ambient, |color, light| {
                     let light_direction = (light.position - intersection.location).as_normalized();
                     let normalized_normal = normal.as_normalized();
                     let diffuse_illumination = material.diffuse * light.color * normalized_normal.dot(&light_direction).max(0f64);
                     let specular_illumination = material.specular.0 * light.color
                         * normalized_normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(material.specular.1);
                     color + diffuse_illumination + specular_illumination
-                }));
+                });
         }
 
         if reflection_fraction > 0f64 {
