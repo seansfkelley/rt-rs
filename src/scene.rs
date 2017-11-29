@@ -76,7 +76,7 @@ impl Scene {
         let mut transmission_fraction = material.transmission.as_ref().map(|transmission| transmission.transmissivity).unwrap_or(0f64);
 
         let is_inside = intersection.normal.dot(&-ray.direction) < 0f64;
-        let normal = if is_inside { -intersection.normal } else { intersection.normal };
+        let normal = if is_inside { -intersection.normal.as_normalized() } else { intersection.normal.as_normalized() };
         let mut eta = 0f64;
 
         if material.transmission.is_some() && reflection_fraction > 0f64 {
@@ -102,10 +102,9 @@ impl Scene {
                 .iter()
                 .fold(material.ambient, |color, light| {
                     let light_direction = (light.position - intersection.location).as_normalized();
-                    let normalized_normal = normal.as_normalized();
-                    let diffuse_illumination = material.diffuse * light.color * normalized_normal.dot(&light_direction).max(0f64);
+                    let diffuse_illumination = material.diffuse * light.color * normal.dot(&light_direction).max(0f64);
                     let specular_illumination = material.specular.0 * light.color
-                        * normalized_normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(material.specular.1);
+                        * normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(material.specular.1);
                     color + diffuse_illumination + specular_illumination
                 });
         }
