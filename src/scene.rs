@@ -9,7 +9,7 @@ pub struct Scene {
     objects: KdTree<SceneObject>,
     lights: Vec<Light>,
     background_color: Color,
-    pub depth_limit: u32,
+    depth_limit: u32,
 }
 
 impl Scene {

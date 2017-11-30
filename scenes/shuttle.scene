@@ -1,5 +1,4 @@
 image_dimensions 250 250
-depth_limit 10
 antialias 1
 background_color .1 .1 .1
 

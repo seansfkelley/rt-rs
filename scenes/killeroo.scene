@@ -1,5 +1,4 @@
 image_dimensions 1024 1024
-depth_limit 10
 background_color .1 .1 .1
 
 camera perspective {

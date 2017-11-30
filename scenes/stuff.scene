@@ -1,4 +1,4 @@
-depth_limit 10
+depth_limit 5
 background_color .1 .1 .1
 
 camera perspective {
