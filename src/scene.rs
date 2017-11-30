@@ -40,7 +40,7 @@ impl Scene {
     fn get_closest_hit(&self, ray: &Ray) -> Option<TexturedIntersection> {
         let mut closest: Option<TexturedIntersection> = None;
 
-        for o in &self.objects.intersects(&ray) {
+        for o in self.objects.intersects(&ray) {
             if o.bound().intersect(&ray) {
                 match o.intersect(&ray) {
                     Some(intersection) => {

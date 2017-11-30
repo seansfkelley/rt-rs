@@ -14,14 +14,14 @@ enum Node<T: Boundable> {
     Leaf(Vec<T>),
 }
 
-struct TreeIterator<'a, T: Boundable + 'a> {
+pub struct TreeIterator<'a, T: Boundable + 'a> {
     node_queue: VecDeque<&'a Node<T>>,
     item_queue: VecDeque<&'a T>,
 }
 
 impl <'a, T: Boundable + 'a> TreeIterator<'a, T> {
     fn new(root: &'a Node<T>) -> TreeIterator<'a, T> {
-        let node_queue = VecDeque::new();
+        let mut node_queue = VecDeque::new();
         node_queue.push_back(root);
         TreeIterator {
             node_queue,
@@ -40,12 +40,12 @@ impl <'a, T: Boundable> Iterator for TreeIterator<'a, T> {
                 match self.node_queue.pop_front() {
                     Some(node) => {
                         match node {
-                            &Node::Internal(_, _, left, right) => {
+                            &Node::Internal(_, _, ref left, ref right) => {
                                 self.node_queue.push_back(&*left);
                                 self.node_queue.push_back(&*right);
                                 self.next()
                             },
-                            &Node::Leaf(items) => {
+                            &Node::Leaf(ref items) => {
                                 for i in items {
                                     self.item_queue.push_back(&i);
                                 }
@@ -72,7 +72,7 @@ impl <'a, T: Boundable> KdTree<T> {
         }
     }
 
-    pub fn intersects(&'a self, ray: &Ray) -> TreeIterator<'a, T> {
+    pub fn intersects(&'a self, _ray: &Ray) -> TreeIterator<'a, T> {
         TreeIterator::new(&self.tree)
     }
 }
