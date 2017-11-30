@@ -72,7 +72,7 @@ impl <'a, T: Boundable> KdTree<T> {
         }
     }
 
-    pub fn intersects(&self, ray: &Ray) -> TreeIterator<'a, T> {
+    pub fn intersects(&'a self, ray: &Ray) -> TreeIterator<'a, T> {
         TreeIterator::new(&self.tree)
     }
 }
