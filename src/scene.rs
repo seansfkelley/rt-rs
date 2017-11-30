@@ -6,7 +6,7 @@ use geometry::Geometry;
 use util::Clamp;
 
 pub struct Scene {
-    objects: KdTree,
+    objects: KdTree<SceneObject>,
     lights: Vec<Light>,
     background_color: Color,
     pub depth_limit: u32,
@@ -14,7 +14,7 @@ pub struct Scene {
 
 impl Scene {
     pub fn new(
-        objects: KdTree,
+        objects: KdTree<SceneObject>,
         lights: Vec<Light>,
         background_color: Color,
         depth_limit: u32
@@ -40,7 +40,7 @@ impl Scene {
     fn get_closest_hit(&self, ray: &Ray) -> Option<TexturedIntersection> {
         let mut closest: Option<TexturedIntersection> = None;
 
-        for o in &self.objects {
+        for o in &self.objects.intersects(&ray) {
             if o.bound().intersect(&ray) {
                 match o.intersect(&ray) {
                     Some(intersection) => {

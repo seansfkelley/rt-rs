@@ -51,7 +51,7 @@ fn main() {
     };
 
     let scene = Scene::new(
-        KdTree::from(scene_file.objects.into_iter().map(|o| Box::new::<Boundable>(o)).collect()),
+        KdTree::from(scene_file.objects),
         scene_file.lights,
         scene_file.parameters.background_color,
         scene_file.parameters.depth_limit
