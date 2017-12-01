@@ -2,8 +2,10 @@
 name = "rt-rs"
 version = "0.1.0"
 authors = ["Sean Kelley <seansfkelley@gmail.com>", "Kevin Verdieck <kevinverdieck@gmail.com>"]
-build = "build.rs"
 exclude = [ "/scenes/*", "/scripts/*", "out/*" ]
+
+[profile.release]
+debug = true
 
 [build-dependencies]
 lalrpop = "0.13.1"
