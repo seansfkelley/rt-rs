@@ -2,10 +2,10 @@ depth_limit 10
 background_color #111
 
 camera perspective {
-  position 0 0 -10
+  position 0 3 -20
   look_at 0 3 0
   up 0 1 0
-  field_of_view 60
+  field_of_view 30
 }
 
 // for pretty

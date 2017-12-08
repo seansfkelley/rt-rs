@@ -23,5 +23,5 @@ pub fn create_cloth(curves: Vec<Box<Curve>>, tessellation_factor: usize) -> Tria
         }
     }
 
-    TriangleMesh::new(positions, vec![], vec![], indices)
+    TriangleMesh::new(positions, None, None, indices, false)
 }

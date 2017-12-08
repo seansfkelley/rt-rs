@@ -120,11 +120,13 @@ Geometry: Box<Geometry> = {
         <normals:("normals" <List<Normal>>)?>
         <uvs:("uvs" <List<Tuple2<F64, F64>>>)?>
         "indices" <indices:List<Tuple3<Usize, Usize, Usize>>>
+        <is_closed:("is_closed" <Bool>)?>
     "}" => Box::new(TriangleMesh::new(
         positions,
-        normals.unwrap_or(vec![]),
-        uvs.unwrap_or(vec![]),
+        normals,
+        uvs,
         indices,
+        is_closed.unwrap_or(true),
     )),
     "difference" "{"
         "positive" "{"
@@ -194,6 +196,11 @@ Curve: Box<Curve> = {
         "p2" <p2: Point>
         "p3" <p3: Point>
     "}" => Box::new(CubicBezier { p0, p1, p2, p3 }),
+};
+
+Bool: bool = {
+    "true" => true,
+    "false" => false,
 };
 
 Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
