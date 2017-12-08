@@ -3,6 +3,7 @@
 - animate objects in scenes
 - procedural textures - K
 - procedural shapes - K
+- procedural scenes - K
 - 3D FRACTALS - K
 - BRDF
 - global illumination (photon mapping?) - K
@@ -16,6 +17,7 @@
 - Revolving beziers
 - use any geometry as a light source
 - water
+- named objects, geometries in scenes
 
 ## performance/quality
 - spatial indexing (kd-tree, r-tree?) - K

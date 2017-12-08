@@ -51,13 +51,19 @@ impl TriangleMesh {
             return None;
         }
 
+        // prbt pg. 143
+        // pbrt uses a different method to compute the normal, but it does use e2 x e1 in a special case
+        // and refers to it as the normal, so we use that here.
+        let mut normal = e2.cross(e1).as_normalized().as_normal();
+        // Flip normal if we hit back of a triangle for whatever reason
+        if normal.dot(&ray.direction) > 0f64 {
+            normal = -normal;
+        }
+
         Some(Intersection {
             distance: t,
             location: ray.at(t),
-            // prbt pg. 143
-            // pbrt uses a different method to compute the normal, but it does use e2 x e1 in a special case
-            // and refers to it as the normal, so we use that here.
-            normal: e2.cross(e1).as_normalized().as_normal(),
+            normal,
             uv: (0f64, 0f64),
         })
     }

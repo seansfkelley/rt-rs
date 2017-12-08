@@ -139,6 +139,14 @@ Geometry: Box<Geometry> = {
         Rc::new(Shape::new(Rc::from(positive_geometry), positive_transform.map(Transform::new).unwrap_or(IDENTITY_TRANSFORM))),
         Rc::new(Shape::new(Rc::from(negative_geometry), negative_transform.map(Transform::new).unwrap_or(IDENTITY_TRANSFORM))),
     )),
+    "cloth" "{"
+        "curves" <curves:List<Curve>>
+        <tessellation_factor:("tessellation_factor" <Usize>)?>
+    "}" => Box::new(create_cloth(
+        curves,
+        tessellation_factor.unwrap_or(100usize),
+    )),
+
 };
 
 Light: Light = "{"
@@ -177,6 +185,15 @@ Color: Color = {
         g: u32::from_str_radix(&<>[3..5], 16).unwrap() as f64 / 255f64,
         b: u32::from_str_radix(&<>[5..7], 16).unwrap() as f64 / 255f64,
     },
+};
+
+Curve: Box<Curve> = {
+    "cubic_bezier" "{"
+        "p0" <p0: Point>
+        "p1" <p1: Point>
+        "p2" <p2: Point>
+        "p3" <p3: Point>
+    "}" => Box::new(CubicBezier { p0, p1, p2, p3 }),
 };
 
 Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
