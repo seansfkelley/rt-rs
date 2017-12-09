@@ -123,7 +123,7 @@ Geometry: Box<Geometry> = {
         <is_closed:("is_closed" <Bool>)?>
     "}" => Box::new(TriangleMesh::new(
         positions,
-        normals,
+        normals.map(|ns| ns.iter().map(|n| n.as_normalized()).collect()),
         uvs,
         indices,
         is_closed.unwrap_or(true),

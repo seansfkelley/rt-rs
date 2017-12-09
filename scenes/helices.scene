@@ -11,7 +11,7 @@ camera perspective {
 // for pretty
 
 image_dimensions 1024 1024
-antialias 3
+antialias 1
 
 // for animation
 
@@ -79,16 +79,11 @@ transform pop
 
 
 light {
-  position 5 5 10
+  position 0 0 10
   color 0.4 0.4 0.4
 }
 
 light {
-  position 5 5 -10
-  color 0.4 0.4 0.4
-}
-
-light {
-  position -15 -15 0
+  position 0 0 -10
   color 0.4 0.4 0.4
 }

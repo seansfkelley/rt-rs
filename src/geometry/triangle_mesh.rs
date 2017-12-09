@@ -58,8 +58,16 @@ impl TriangleMesh {
         // prbt pg. 143
         // pbrt uses a different method to compute the normal, but it does use e2 x e1 in a special case
         // and refers to it as the normal, so we use that here.
-        let mut normal = e2.cross(e1).as_normalized().as_normal();
-        // Flip normal if we hit back of a triangle for whatever reason
+        let mut normal = match self.normals {
+            Some(ref normals) => {
+                let b3 = 1f64 - b2 - b1;
+                let (n1, n2, n3) = (normals[i1], normals[i2], normals[i3]);
+                n1 * b1 + n2 * b2 + n3 * b3
+            },
+            None => e2.cross(e1).as_normalized().as_normal(),
+        };
+
+        // Flip normal if the mesh isn't closed and we hit the back
         if !self.is_closed && normal.dot(&ray.direction) > 0f64 {
             normal = -normal;
         }
