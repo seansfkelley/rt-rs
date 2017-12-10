@@ -1,4 +1,5 @@
 use std::f64;
+use std::rc::Rc;
 use std::collections::{ VecDeque, HashSet };
 use ordered_float::NotNaN;
 use lazysort::SortedBy;
@@ -13,13 +14,13 @@ enum Axis {
 
 enum Node<T: Bounded> {
     Internal(Axis, f64, Box<Node<T>>, Box<Node<T>>),
-    Leaf(Vec<T>),
+    Leaf(Vec<Rc<T>>),
 }
 
 pub struct TreeIterator<'a, T: Bounded + 'a> {
     ray: &'a Ray,
     node_queue: VecDeque<&'a Node<T>>,
-    current_leaf_contents: Option<(&'a Vec<T>, usize)>,
+    current_leaf_contents: Option<(&'a Vec<Rc<T>>, usize)>,
 }
 
 impl <'a, T: Bounded + 'a> TreeIterator<'a, T> {
@@ -94,9 +95,9 @@ fn get_axis_index(axis: &Axis) -> usize {
     }
 }
 
-fn recursively_build_tree<T: Bounded>(items: Vec<(T, BoundingBox)>) -> Node<T> {
+fn recursively_build_tree<T: Bounded>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<T> {
     if items.len() < LEAF_THRESHOLD {
-        Node::Leaf(items.into_iter().map(|(i, _)| i).collect::<Vec<T>>())
+        Node::Leaf(items.into_iter().map(|(i, _)| Rc::clone(&i)).collect())
     } else {
         let node_bounds = items
             .iter()
@@ -153,11 +154,21 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(T, BoundingBox)>) -> Node<T> {
 
         match best_partition {
             Some((axis, distance)) => {
-                let left_nodes =
-                Node::Internal(*axis, distance, )
+                let axis_index = get_axis_index(axis);
+                let left_nodes = items
+                    .iter()
+                    .filter(|&&(_, ref bound)| bound.min[axis_index] <= distance)
+                    .map(|&(item, bound)| (Rc::clone(&item), bound))
+                    .collect();
+                let right_nodes = items
+                    .iter()
+                    .filter(|&&(_, ref bound)| bound.max[axis_index] >= distance)
+                    .map(|&(item, bound)| (Rc::clone(&item), bound))
+                    .collect();
+                Node::Internal(*axis, distance, Box::new(recursively_build_tree(left_nodes)), Box::new(recursively_build_tree(right_nodes)))
             },
             None => {
-                Node::Leaf(items.into_iter().map(|(i, _)| i).collect::<Vec<T>>())
+                Node::Leaf(items.into_iter().map(|(i, _)| Rc::clone(&i)).collect())
             },
         }
     }
@@ -165,10 +176,7 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(T, BoundingBox)>) -> Node<T> {
 
 impl <'a, T: Bounded> KdTree<T> {
     pub fn from(items: Vec<T>) -> KdTree<T> {
-        let pairs: Vec<(T, BoundingBox)> = items.into_iter().map(|i| {
-            let bound = i.bound();
-            (i, bound)
-        }).collect();
+        let pairs: Vec<(Rc<T>, BoundingBox)> = items.into_iter().map(|i| (Rc::new(i), i.bound())).collect();
         KdTree {
             tree: recursively_build_tree(pairs)
         }
