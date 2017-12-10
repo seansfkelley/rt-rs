@@ -6,9 +6,9 @@ use super::ray::Ray;
 use super::bounding_box::{ Bounded, BoundingBox };
 
 enum Axis {
-    X = 0,
-    Y = 1,
-    Z = 2,
+    X,
+    Y,
+    Z,
 }
 
 enum Node<T: Bounded> {
@@ -86,48 +86,59 @@ fn surface_area(bound: &BoundingBox) -> f64 {
     2f64 * (dimensions.x * dimensions.y + dimensions.y * dimensions.z + dimensions.z * dimensions.x)
 }
 
+fn get_axis_index(axis: &Axis) -> usize {
+    match axis {
+        &Axis::X => 0,
+        &Axis::Y => 1,
+        &Axis::Z => 2,
+    }
+}
+
 fn recursively_build_tree<T: Bounded>(items: Vec<(T, BoundingBox)>) -> Node<T> {
     if items.len() < LEAF_THRESHOLD {
         Node::Leaf(items.into_iter().map(|(i, _)| i).collect::<Vec<T>>())
     } else {
         let node_bounds = items
             .iter()
-            .fold(BoundingBox::empty(), |unioned_bounds, &(_, bound)| BoundingBox::union(&unioned_bounds, &bound));
+            .fold(BoundingBox::empty(), |unioned_bounds, &(_, ref bound)| BoundingBox::union(&unioned_bounds, bound));
         let node_surface_area = surface_area(&node_bounds);
 
         // TODO: This algorithm is n^2! There are papers on this topic to read.
-        let best_partition: Option<(Axis, NotNaN<f64>, NotNaN<f64>)> = [Axis::X, Axis::Y, Axis::Z]
+        let best_partition: Option<(&Axis, f64)> = [Axis::X, Axis::Y, Axis::Z]
             .into_iter()
             .map(|axis| {
-                items;
-                let axis_index = *axis as usize;
+                let axis_index = get_axis_index(axis);
 
-                let partition_candidates = items
-                    .iter()
-                    .flat_map(|&(_, ref bound)| vec![
-                        NotNaN::new(bound.min[axis_index]).unwrap(),
-                        NotNaN::new(bound.max[axis_index]).unwrap(),
-                    ].into_iter())
-                    .filter(|d| d >= node_bounds.min[axis_index] && d <= node_bounds.max[axis_index])
-                    .collect::<HashSet<NotNaN<f64>>>();
+                let mut partition_candidates: HashSet<NotNaN<f64>> = HashSet::new();
+                for &(_, ref bound) in &items {
+                    let (candidate0, candidate1) = (bound.min[axis_index], bound.max[axis_index]);
+                    let (min, max) = (node_bounds.min[axis_index], node_bounds.max[axis_index]);
+                    if min <= candidate0 && candidate0 <= max {
+                        partition_candidates.insert(NotNaN::new(candidate0).unwrap());
+                    }
+                    if min <= candidate1 && candidate1 <= max {
+                        partition_candidates.insert(NotNaN::new(candidate1).unwrap());
+                    }
+                }
 
                 if partition_candidates.len() > 0 {
                     partition_candidates
                         .into_iter()
+                        .map(|d| d.into_inner())
                         .map(|d| {
-                            let left_count = items.iter().filter(|&(_, bound)| bound.min[axis_index] <= d).count();
-                            let right_count = items.iter().filter(|&(_, bound)| bound.max[axis_index] >= d).count();
+                            let left_count = items.iter().filter(|&&(_, ref bound)| bound.min[axis_index] <= d).count();
+                            let right_count = items.iter().filter(|&&(_, ref bound)| bound.max[axis_index] >= d).count();
                             let mut left_bounds = node_bounds.clone();
                             left_bounds.max[axis_index] = d;
                             let mut right_bounds = node_bounds.clone();
                             right_bounds.min[axis_index] = d;
                             let cost = TRAVERSAL_COST + INTERSECTION_COST * (
-                                surface_area(left_bounds) * left_count / node_surface_area +
-                                surface_area(right_bounds) * right_count / node_surface_area
+                                surface_area(&left_bounds) * left_count as f64 / node_surface_area +
+                                surface_area(&right_bounds) * right_count  as f64 / node_surface_area
                             );
-                            (d.into_inner(), NotNaN::new(cost))
+                            (d, NotNaN::new(cost).unwrap())
                         })
-                        .sorted_by(|(_, a), (_, b)| a.cmp(b))
+                        .sorted_by(|&(_, a), &(_, b)| a.cmp(&b))
                         .nth(0)
                         .map(|(distance, cost)| (axis, distance, cost))
                 } else {
@@ -136,11 +147,19 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(T, BoundingBox)>) -> Node<T> {
             })
             .filter(|o| o.is_some())
             .map(|o| o.unwrap())
-            .sorted_by(|&(_, _, a), &(_, _, b)| a.cmp(b))
+            .sorted_by(|&(_, _, a), &(_, _, b)| a.cmp(&b))
             .nth(0)
-            .map(|(axis, distance, cost)| (axis, distance, cost.into_inner()));
+            .map(|(axis, distance, _)| (axis, distance));
 
-        Node::Leaf(items.into_iter().map(|(i, _)| i).collect::<Vec<T>>())
+        match best_partition {
+            Some((axis, distance)) => {
+                let left_nodes =
+                Node::Internal(*axis, distance, )
+            },
+            None => {
+                Node::Leaf(items.into_iter().map(|(i, _)| i).collect::<Vec<T>>())
+            },
+        }
     }
 }
 
