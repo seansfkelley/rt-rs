@@ -13,6 +13,7 @@ enum Axis {
     Z = 2,
 }
 
+#[derive(Debug)]
 enum Node<T: Bounded> {
     Internal(Axis, f64, Box<Node<T>>, Box<Node<T>>),
     Leaf(Vec<Rc<T>>),
@@ -58,9 +59,14 @@ impl <'a, T: Bounded> Iterator for TreeIterator<'a, T> {
         match self.node_queue.pop_front() {
             Some(node) => {
                 match node {
-                    &Node::Internal(_, _, ref left, ref right) => {
-                        self.node_queue.push_back(&*left);
-                        self.node_queue.push_back(&*right);
+                    &Node::Internal(axis, distance, ref left, ref right) => {
+                        let axis_index = axis as usize;
+                        if self.ray.origin[axis_index] < distance || self.ray.direction[axis_index] < 0f64 {
+                            self.node_queue.push_back(&*left);
+                        }
+                        if self.ray.origin[axis_index] > distance || self.ray.direction[axis_index] > 0f64 {
+                            self.node_queue.push_back(&*right);
+                        }
                         self.next()
                     },
                     &Node::Leaf(ref items) => {
@@ -75,11 +81,12 @@ impl <'a, T: Bounded> Iterator for TreeIterator<'a, T> {
 }
 
 // TODO: Consider newtype.
+#[derive(Debug)]
 pub struct KdTree<T: Bounded> {
     tree: Node<T>,
 }
 
-const LEAF_THRESHOLD: usize = 10;
+const LEAF_THRESHOLD: usize = 5;
 const TRAVERSAL_COST: f64 = 2.5;
 const INTERSECTION_COST: f64 = 0.9;
 
@@ -150,6 +157,7 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<
                 let axis_index = axis as usize;
                 let mut left_nodes: Vec<(Rc<T>, BoundingBox)> = vec![];
                 let mut right_nodes: Vec<(Rc<T>, BoundingBox)> = vec![];
+                // TODO: Putting a reference in each side means that we might try to intersect the same object twice sometimes!
                 for &(ref item, ref bound) in &items {
                     if bound.min[axis_index] <= distance {
                         left_nodes.push((Rc::clone(item), bound.clone()));
