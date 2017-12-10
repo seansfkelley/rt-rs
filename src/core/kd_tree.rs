@@ -96,45 +96,43 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(T, BoundingBox)>) -> Node<T> {
         let node_surface_area = surface_area(&node_bounds);
 
         // TODO: This algorithm is n^2! There are papers on this topic to read.
-        const best_partition: Option<(Axis, NotNaN<f64>, NotNaN<f64>)> = [Axis::X, Axis::Y, Axis::Z]
+        let best_partition: Option<(Axis, NotNaN<f64>, NotNaN<f64>)> = [Axis::X, Axis::Y, Axis::Z]
             .into_iter()
             .map(|axis| {
                 items;
-                // let axis_index = *axis as usize;
+                let axis_index = *axis as usize;
 
+                let partition_candidates = items
+                    .iter()
+                    .flat_map(|&(_, ref bound)| vec![
+                        NotNaN::new(bound.min[axis_index]).unwrap(),
+                        NotNaN::new(bound.max[axis_index]).unwrap(),
+                    ].into_iter())
+                    .filter(|d| d >= node_bounds.min[axis_index] && d <= node_bounds.max[axis_index])
+                    .collect::<HashSet<NotNaN<f64>>>();
 
-                // let partition_candidates = items
-                //     .iter()
-                //     .flat_map(|&(_, ref bound)| vec![
-                //         NotNaN::new(bound.min[axis_index]).unwrap(),
-                //         NotNaN::new(bound.max[axis_index]).unwrap(),
-                //     ].into_iter())
-                //     .filter(|d| d >= node_bounds.min[axis_index] && d <= node_bounds.max[axis_index])
-                //     .collect::<HashSet<NotNaN<f64>>>();
-                //
-                // if partition_candidates.len() > 0 {
-                //     partition_candidates
-                //         .into_iter()
-                //         .map(|d| {
-                //             let left_count = items.iter().filter(|&(_, bound)| bound.min[axis_index] <= d).count();
-                //             let right_count = items.iter().filter(|&(_, bound)| bound.max[axis_index] >= d).count();
-                //             let mut left_bounds = node_bounds.clone();
-                //             left_bounds.max[axis_index] = d;
-                //             let mut right_bounds = node_bounds.clone();
-                //             right_bounds.min[axis_index] = d;
-                //             let cost = TRAVERSAL_COST + INTERSECTION_COST * (
-                //                 surface_area(left_bounds) * left_count / node_surface_area +
-                //                 surface_area(right_bounds) * right_count / node_surface_area
-                //             );
-                //             (d.into_inner(), NotNaN::new(cost))
-                //         })
-                //         .sorted_by(|(_, a), (_, b)| a.cmp(b))
-                //         .nth(0)
-                //         .map(|(distance, cost)| (axis, distance, cost))
-                // } else {
-                //     None
-                // }
-                None
+                if partition_candidates.len() > 0 {
+                    partition_candidates
+                        .into_iter()
+                        .map(|d| {
+                            let left_count = items.iter().filter(|&(_, bound)| bound.min[axis_index] <= d).count();
+                            let right_count = items.iter().filter(|&(_, bound)| bound.max[axis_index] >= d).count();
+                            let mut left_bounds = node_bounds.clone();
+                            left_bounds.max[axis_index] = d;
+                            let mut right_bounds = node_bounds.clone();
+                            right_bounds.min[axis_index] = d;
+                            let cost = TRAVERSAL_COST + INTERSECTION_COST * (
+                                surface_area(left_bounds) * left_count / node_surface_area +
+                                surface_area(right_bounds) * right_count / node_surface_area
+                            );
+                            (d.into_inner(), NotNaN::new(cost))
+                        })
+                        .sorted_by(|(_, a), (_, b)| a.cmp(b))
+                        .nth(0)
+                        .map(|(distance, cost)| (axis, distance, cost))
+                } else {
+                    None
+                }
             })
             .filter(|o| o.is_some())
             .map(|o| o.unwrap())
