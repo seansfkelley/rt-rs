@@ -7,19 +7,23 @@ pub type TriangleIndices = (usize, usize, usize);
 #[derive(Debug)]
 pub struct TriangleMesh {
     positions: Vec<Point>,
-    normals: Vec<Normal>,
-    uvs: Vec<Uv>,
     indices: Vec<TriangleIndices>,
+    normals: Option<Vec<Normal>>,
+    uvs: Option<Vec<Uv>>,
+    is_closed: bool,
 }
 
 impl TriangleMesh {
     // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
-    pub fn new(positions: Vec<Point>, normals: Vec<Normal>, uvs: Vec<Uv>, indices: Vec<TriangleIndices>) -> TriangleMesh {
-        // TODO: When we actually do UVs and given normals, do this.
-        // assert_eq!(positions.len(), normals.len());
-        // assert_eq!(positions.len(), uvs.len());
+    pub fn new(positions: Vec<Point>, normals: Option<Vec<Normal>>, uvs: Option<Vec<Uv>>, indices: Vec<TriangleIndices>, is_closed: bool) -> TriangleMesh {
+        if normals.is_some() {
+            assert_eq!(positions.len(), normals.as_ref().unwrap().len());
+        }
+        if uvs.is_some() {
+            assert_eq!(positions.len(), uvs.as_ref().unwrap().len());
+        }
         // TODO: Also check that the coordinates are in-bounds.
-        TriangleMesh { positions, normals, uvs, indices }
+        TriangleMesh { positions, indices, normals, uvs, is_closed }
     }
 
     fn intersect_triplet(&self, triplet: &TriangleIndices, ray: &Ray) -> Option<Intersection> {
@@ -51,13 +55,27 @@ impl TriangleMesh {
             return None;
         }
 
+        // prbt pg. 143
+        // pbrt uses a different method to compute the normal, but it does use e2 x e1 in a special case
+        // and refers to it as the normal, so we use that here.
+        let mut normal = match self.normals {
+            Some(ref normals) => {
+                let b3 = 1f64 - b2 - b1;
+                let (n1, n2, n3) = (normals[i1], normals[i2], normals[i3]);
+                n1 * b1 + n2 * b2 + n3 * b3
+            },
+            None => e2.cross(e1).as_normalized().as_normal(),
+        };
+
+        // Flip normal if the mesh isn't closed and we hit the back
+        if !self.is_closed && normal.dot(&ray.direction) > 0f64 {
+            normal = -normal;
+        }
+
         Some(Intersection {
             distance: t,
             location: ray.at(t),
-            // prbt pg. 143
-            // pbrt uses a different method to compute the normal, but it does use e2 x e1 in a special case
-            // and refers to it as the normal, so we use that here.
-            normal: e2.cross(e1).as_normalized().as_normal(),
+            normal,
             uv: (0f64, 0f64),
         })
     }

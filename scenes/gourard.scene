@@ -1,0 +1,62 @@
+depth_limit 10
+background_color #111
+
+camera perspective {
+  position 0 0 -4
+  look_at 0 0 0
+  up 0 1 0
+  field_of_view 60
+}
+
+// for pretty
+
+// image_dimensions 1024 1024
+// antialias 1
+
+// for animation
+
+image_dimensions 512 512
+antialias 1
+
+animation {
+  frames 18
+  camera_transforms [
+    rotate 10 0 1 0
+  ]
+}
+
+texture purple_plastic constant flat {
+  color #f0f
+}
+
+object {
+  geometry triangle_mesh {
+    positions [
+      0 0 0,
+      -1 -1 1,
+      1 -1 1,
+      -1 1 1,
+      1 1 1,
+    ]
+    // normals [
+    //   0 0 -1,
+    //   -1 -1 -1,
+    //   1 -1 -1,
+    //   -1 1 -1,
+    //   1 1 -1,
+    // ]
+    indices [
+      0 1 2,
+      0 2 4,
+      0 3 1,
+      0 4 3,
+    ]
+    is_closed true
+  }
+  texture purple_plastic
+}
+
+light {
+  position 5 2 -10
+  color 0.4 0.4 0.4
+}

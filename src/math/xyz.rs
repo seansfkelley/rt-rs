@@ -243,7 +243,7 @@ impl Vec3 {
 
     // TODO: Remove this?
     pub fn assert_normalized(&self) {
-        debug_assert!((self.magnitude() - 1f64).abs() < 1e-10);
+        assert!((self.magnitude() - 1f64).abs() < 1e-10);
     }
 
     pub fn reflect(&self, axis: Vec3) -> Vec3 {

@@ -1,6 +1,6 @@
 image_dimensions 1024 1024
 depth_limit 3
-background_color .1 .1 .1
+background_color #111
 
 camera perspective {
   position 0 5 -10
@@ -42,5 +42,5 @@ object {
 
 light {
   position 0 5 -10
-  color #fff
+  color #bbb
 }
