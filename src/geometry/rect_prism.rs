@@ -81,7 +81,7 @@ impl Geometry for RectPrism {
     }
 }
 
-impl Boundable for RectPrism {
+impl Bounded for RectPrism {
     fn bound(&self) -> BoundingBox {
         BoundingBox {
             min: self.min,

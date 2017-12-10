@@ -107,7 +107,7 @@ impl Geometry for TriangleMesh {
     }
 }
 
-impl Boundable for TriangleMesh {
+impl Bounded for TriangleMesh {
     fn bound(&self) -> BoundingBox {
         let mut bb = BoundingBox::empty();
 

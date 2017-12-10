@@ -15,7 +15,7 @@ impl Geometry for SceneObject {
     }
 }
 
-impl Boundable for SceneObject {
+impl Bounded for SceneObject {
     fn bound(&self) -> BoundingBox {
         self.shape.bound()
     }

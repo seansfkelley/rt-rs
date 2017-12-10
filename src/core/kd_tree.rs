@@ -1,7 +1,7 @@
 use std::f64;
 use std::collections::VecDeque;
 use super::ray::Ray;
-use super::bounding_box::Boundable;
+use super::bounding_box::Bounded;
 
 enum Axis {
     X,
@@ -9,17 +9,17 @@ enum Axis {
     Z,
 }
 
-enum Node<T: Boundable> {
+enum Node<T: Bounded> {
     Internal(Axis, f64, Box<Node<T>>, Box<Node<T>>),
     Leaf(Vec<T>),
 }
 
-pub struct TreeIterator<'a, T: Boundable + 'a> {
+pub struct TreeIterator<'a, T: Bounded + 'a> {
     node_queue: VecDeque<&'a Node<T>>,
     item_queue: VecDeque<&'a T>,
 }
 
-impl <'a, T: Boundable + 'a> TreeIterator<'a, T> {
+impl <'a, T: Bounded + 'a> TreeIterator<'a, T> {
     fn new(root: &'a Node<T>) -> TreeIterator<'a, T> {
         let mut node_queue = VecDeque::new();
         node_queue.push_back(root);
@@ -30,7 +30,7 @@ impl <'a, T: Boundable + 'a> TreeIterator<'a, T> {
     }
 }
 
-impl <'a, T: Boundable> Iterator for TreeIterator<'a, T> {
+impl <'a, T: Bounded> Iterator for TreeIterator<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<&'a T> {
@@ -61,11 +61,11 @@ impl <'a, T: Boundable> Iterator for TreeIterator<'a, T> {
 }
 
 // TODO: Consider newtype.
-pub struct KdTree<T: Boundable> {
+pub struct KdTree<T: Bounded> {
     tree: Node<T>,
 }
 
-impl <'a, T: Boundable> KdTree<T> {
+impl <'a, T: Bounded> KdTree<T> {
     pub fn from(items: Vec<T>) -> KdTree<T> {
         KdTree {
             tree: Node::Leaf(items)

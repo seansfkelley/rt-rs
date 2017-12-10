@@ -11,7 +11,7 @@ macro_rules! swap {
     };
 }
 
-pub trait Boundable {
+pub trait Bounded {
     fn bound(&self) -> BoundingBox;
 }
 

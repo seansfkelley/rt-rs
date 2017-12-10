@@ -12,9 +12,9 @@ pub use self::cloth::*;
 
 use core::ray::Ray;
 use core::intersection::Intersection;
-use core::bounding_box::Boundable;
+use core::bounding_box::Bounded;
 use std::fmt::Debug;
 
-pub trait Geometry : Debug + Boundable {
+pub trait Geometry : Debug + Bounded {
     fn intersect(&self, ray: &Ray) -> Option<Intersection>;
 }
