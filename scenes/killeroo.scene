@@ -1,19 +1,30 @@
 image_dimensions 1024 1024
-depth_limit 10
+depth_limit 0
+antialias 1
 background_color .1 .1 .1
 
 camera perspective {
-  position 0 0 -200
-  look_at 0 0 0
+  position 0 80 -200
+  look_at -30 -50 0
   up 0 1 0
 }
 
 texture white constant flat {
-  color #fff
+  color #ccc
+}
+
+light {
+  position 50 100 -200
+  color #555
+}
+
+light {
+  position -50 100 -200
+  color #555
 }
 
 transform rotate -75 1 0 0
-transform rotate 105 0 1 0
+transform rotate 55 0 1 0
 object {
   geometry triangle_mesh {
     positions [
@@ -12628,9 +12639,4 @@ object {
     ]
   }
   texture white
-}
-
-light {
-  position 0 0 -200
-  color #fff
 }
