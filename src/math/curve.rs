@@ -21,10 +21,10 @@ impl Curve for CubicBezier {
     }
 }
 
+#[allow(dead_code)]
 pub struct Path {
     curves: Vec<Box<Curve>>,
 }
-
 
 impl Curve for Path {
     fn at(&self, t: f64) -> Point {
