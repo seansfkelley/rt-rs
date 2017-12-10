@@ -6,10 +6,11 @@ use lazysort::SortedBy;
 use super::ray::Ray;
 use super::bounding_box::{ Bounded, BoundingBox };
 
+#[derive(Debug, Clone, Copy)]
 enum Axis {
-    X,
-    Y,
-    Z,
+    X = 0,
+    Y = 1,
+    Z = 2,
 }
 
 enum Node<T: Bounded> {
@@ -87,14 +88,6 @@ fn surface_area(bound: &BoundingBox) -> f64 {
     2f64 * (dimensions.x * dimensions.y + dimensions.y * dimensions.z + dimensions.z * dimensions.x)
 }
 
-fn get_axis_index(axis: &Axis) -> usize {
-    match axis {
-        &Axis::X => 0,
-        &Axis::Y => 1,
-        &Axis::Z => 2,
-    }
-}
-
 fn recursively_build_tree<T: Bounded>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<T> {
     if items.len() < LEAF_THRESHOLD {
         Node::Leaf(items.into_iter().map(|(i, _)| Rc::clone(&i)).collect())
@@ -105,10 +98,10 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<
         let node_surface_area = surface_area(&node_bounds);
 
         // TODO: This algorithm is n^2! There are papers on this topic to read.
-        let best_partition: Option<(&Axis, f64)> = [Axis::X, Axis::Y, Axis::Z]
+        let best_partition: Option<(Axis, f64)> = [Axis::X, Axis::Y, Axis::Z]
             .into_iter()
             .map(|axis| {
-                let axis_index = get_axis_index(axis);
+                let axis_index = *axis as usize;
 
                 let mut partition_candidates: HashSet<NotNaN<f64>> = HashSet::new();
                 for &(_, ref bound) in &items {
@@ -150,22 +143,22 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<
             .map(|o| o.unwrap())
             .sorted_by(|&(_, _, a), &(_, _, b)| a.cmp(&b))
             .nth(0)
-            .map(|(axis, distance, _)| (axis, distance));
+            .map(|(axis, distance, _)| (*axis, distance));
 
         match best_partition {
             Some((axis, distance)) => {
-                let axis_index = get_axis_index(axis);
-                let left_nodes = items
-                    .iter()
-                    .filter(|&&(_, ref bound)| bound.min[axis_index] <= distance)
-                    .map(|&(item, bound)| (Rc::clone(&item), bound))
-                    .collect();
-                let right_nodes = items
-                    .iter()
-                    .filter(|&&(_, ref bound)| bound.max[axis_index] >= distance)
-                    .map(|&(item, bound)| (Rc::clone(&item), bound))
-                    .collect();
-                Node::Internal(*axis, distance, Box::new(recursively_build_tree(left_nodes)), Box::new(recursively_build_tree(right_nodes)))
+                let axis_index = axis as usize;
+                let mut left_nodes: Vec<(Rc<T>, BoundingBox)> = vec![];
+                let mut right_nodes: Vec<(Rc<T>, BoundingBox)> = vec![];
+                for &(ref item, ref bound) in &items {
+                    if bound.min[axis_index] <= distance {
+                        left_nodes.push((Rc::clone(item), bound.clone()));
+                    }
+                    if bound.max[axis_index] >= distance {
+                        right_nodes.push((Rc::clone(item), bound.clone()));
+                    }
+                }
+                Node::Internal(axis, distance, Box::new(recursively_build_tree(left_nodes)), Box::new(recursively_build_tree(right_nodes)))
             },
             None => {
                 Node::Leaf(items.into_iter().map(|(i, _)| Rc::clone(&i)).collect())
@@ -176,7 +169,10 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<
 
 impl <'a, T: Bounded> KdTree<T> {
     pub fn from(items: Vec<T>) -> KdTree<T> {
-        let pairs: Vec<(Rc<T>, BoundingBox)> = items.into_iter().map(|i| (Rc::new(i), i.bound())).collect();
+        let pairs: Vec<(Rc<T>, BoundingBox)> = items.into_iter().map(|i| {
+            let bound = i.bound();
+            (Rc::new(i), bound)
+        }).collect();
         KdTree {
             tree: recursively_build_tree(pairs)
         }
