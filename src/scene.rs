@@ -75,7 +75,7 @@ impl Scene {
         let mut reflection_fraction = material.reflectivity;
         let mut transmission_fraction = material.transmission.as_ref().map(|transmission| transmission.transmissivity).unwrap_or(0f64);
 
-        let is_inside = intersection.normal.dot(&-ray.direction) < 0f64;
+        let is_inside = intersection.normal.dot(&ray.direction) > 0f64;
         let normal = if is_inside { -intersection.normal.as_normalized() } else { intersection.normal.as_normalized() };
         let mut eta = 0f64;
 

@@ -5,25 +5,49 @@ use geometry::Geometry;
 pub type TriangleIndices = (usize, usize, usize);
 
 #[derive(Debug)]
+pub enum Smoothing {
+    None,
+    Implicit,
+    Explicit(Vec<Normal>),
+}
+
+#[derive(Debug)]
 pub struct TriangleMesh {
     positions: Vec<Point>,
     indices: Vec<TriangleIndices>,
     normals: Option<Vec<Normal>>,
     uvs: Option<Vec<Uv>>,
-    is_closed: bool,
+    closed: bool,
 }
 
 impl TriangleMesh {
     // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
-    pub fn new(positions: Vec<Point>, normals: Option<Vec<Normal>>, uvs: Option<Vec<Uv>>, indices: Vec<TriangleIndices>, is_closed: bool) -> TriangleMesh {
-        if normals.is_some() {
-            assert_eq!(positions.len(), normals.as_ref().unwrap().len());
-        }
+    pub fn new(positions: Vec<Point>, smoothing: Smoothing, uvs: Option<Vec<Uv>>, indices: Vec<TriangleIndices>, closed: bool) -> TriangleMesh {
+        let normals = match smoothing {
+            Smoothing::Explicit(normals) => {
+                assert_eq!(positions.len(), normals.len());
+                Some(normals)
+            },
+            Smoothing::Implicit => Some(TriangleMesh::compute_implicit_normals(&positions, &indices)),
+            Smoothing::None => None,
+        };
+
         if uvs.is_some() {
             assert_eq!(positions.len(), uvs.as_ref().unwrap().len());
         }
         // TODO: Also check that the coordinates are in-bounds.
-        TriangleMesh { positions, indices, normals, uvs, is_closed }
+        TriangleMesh { positions, indices, normals, uvs, closed }
+    }
+
+    fn compute_implicit_normals(positions: &Vec<Point>, indices: &Vec<TriangleIndices>) -> Vec<Normal> {
+        let mut normals = vec![Normal::uniform(0f64); positions.len()];
+        for &(i1, i2, i3) in indices {
+            let normal = (positions[i3] - positions[i1]).cross(positions[i2] - positions[i1]).as_normal();
+            normals[i1] = normals[i1] + normal;
+            normals[i2] = normals[i2] + normal;
+            normals[i3] = normals[i3] + normal;
+        }
+        normals.iter().map(|n| n.as_normalized()).collect()
     }
 
     fn intersect_triplet(&self, triplet: &TriangleIndices, ray: &Ray) -> Option<Intersection> {
@@ -60,15 +84,15 @@ impl TriangleMesh {
         // and refers to it as the normal, so we use that here.
         let mut normal = match self.normals {
             Some(ref normals) => {
-                let b3 = 1f64 - b2 - b1;
-                let (n1, n2, n3) = (normals[i1], normals[i2], normals[i3]);
-                n1 * b1 + n2 * b2 + n3 * b3
+                let b0 = 1f64 - b2 - b1;
+                let (n0, n1, n2) = (normals[i1], normals[i2], normals[i3]);
+                n0 * b0 + n1 * b1 + n2 * b2
             },
             None => e2.cross(e1).as_normalized().as_normal(),
         };
 
         // Flip normal if the mesh isn't closed and we hit the back
-        if !self.is_closed && normal.dot(&ray.direction) > 0f64 {
+        if !self.closed && normal.dot(&ray.direction) > 0f64 {
             normal = -normal;
         }
 

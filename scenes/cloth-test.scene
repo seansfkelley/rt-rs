@@ -57,6 +57,6 @@ light {
 }
 
 light {
-  position 0 0 -10
+  position 5 2 -10
   color 0.4 0.4 0.4
 }

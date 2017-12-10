@@ -11,7 +11,7 @@ camera perspective {
 // for pretty
 
 image_dimensions 1024 1024
-antialias 1
+antialias 3
 
 // for animation
 
@@ -27,34 +27,9 @@ antialias 1
 
 texture purple_plastic constant flat {
   color #f0f
-  specular_exponent 1
-  reflectivity .1
 }
 
 transform translate -3 0 0
-object {
-  geometry cloth {
-    curves [
-      cubic_bezier {
-        p0 -1 0 0
-        p1 -2 2 2
-        p2 3 4 2
-        p3 2 6 0
-      },
-      cubic_bezier {
-        p0 1 0 0
-        p1 2 2 -2
-        p2 -3 4 -2
-        p3 -2 6 0
-      },
-    ]
-    tessellation_factor 100
-  }
-  texture purple_plastic
-}
-transform pop
-
-transform translate 3 0 0
 object {
   geometry cloth {
     curves [
@@ -77,13 +52,30 @@ object {
 }
 transform pop
 
-
-light {
-  position 0 0 10
-  color 0.4 0.4 0.4
+transform translate 3 0 0
+object {
+  geometry cloth {
+    curves [
+      cubic_bezier {
+        p0 -1 0 0
+        p1 -2 2 2
+        p2 3 4 2
+        p3 2 6 0
+      },
+      cubic_bezier {
+        p0 1 0 0
+        p1 2 2 -2
+        p2 -3 4 -2
+        p3 -2 6 0
+      },
+    ]
+    tessellation_factor 100
+  }
+  texture purple_plastic
 }
+transform pop
 
 light {
-  position 0 0 -10
+  position 5 2 -10
   color 0.4 0.4 0.4
 }

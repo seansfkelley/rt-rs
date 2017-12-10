@@ -117,13 +117,13 @@ Geometry: Box<Geometry> = {
     "}" => Box::new(RectPrism::new(min, max)),
     "triangle_mesh" "{"
         "positions" <positions:List<Point>>
-        <normals:("normals" <List<Normal>>)?>
+        <smoothing:("smoothing" <Smoothing>)?>
         <uvs:("uvs" <List<Tuple2<F64, F64>>>)?>
         "indices" <indices:List<Tuple3<Usize, Usize, Usize>>>
         <is_closed:("is_closed" <Bool>)?>
     "}" => Box::new(TriangleMesh::new(
         positions,
-        normals.map(|ns| ns.iter().map(|n| n.as_normalized()).collect()),
+        smoothing.unwrap_or(Smoothing::Implicit),
         uvs,
         indices,
         is_closed.unwrap_or(true),
@@ -201,6 +201,12 @@ Curve: Box<Curve> = {
 Bool: bool = {
     "true" => true,
     "false" => false,
+};
+
+Smoothing: Smoothing = {
+    "none" => Smoothing::None,
+    "implicit" => Smoothing::Implicit,
+    "explicit" <normals:List<Normal>> => Smoothing::Explicit(normals),
 };
 
 Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
