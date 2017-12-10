@@ -15,17 +15,19 @@ enum Node<T: Bounded> {
 }
 
 pub struct TreeIterator<'a, T: Bounded + 'a> {
+    ray: &'a Ray,
     node_queue: VecDeque<&'a Node<T>>,
-    item_queue: VecDeque<&'a T>,
+    current_leaf_contents: Option<(&'a Vec<T>, usize)>,
 }
 
 impl <'a, T: Bounded + 'a> TreeIterator<'a, T> {
-    fn new(root: &'a Node<T>) -> TreeIterator<'a, T> {
+    fn new(ray: &'a Ray, root: &'a Node<T>) -> TreeIterator<'a, T> {
         let mut node_queue = VecDeque::new();
         node_queue.push_back(root);
         TreeIterator {
+            ray,
             node_queue,
-            item_queue: VecDeque::new(),
+            current_leaf_contents: None,
         }
     }
 }
@@ -34,28 +36,36 @@ impl <'a, T: Bounded> Iterator for TreeIterator<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<&'a T> {
-        match self.item_queue.pop_front() {
-            Some(item) => Some(item),
-            None => {
-                match self.node_queue.pop_front() {
-                    Some(node) => {
-                        match node {
-                            &Node::Internal(_, _, ref left, ref right) => {
-                                self.node_queue.push_back(&*left);
-                                self.node_queue.push_back(&*right);
-                                self.next()
-                            },
-                            &Node::Leaf(ref items) => {
-                                for i in items {
-                                    self.item_queue.push_back(&i);
-                                }
-                                self.next()
-                            }
-                        }
-                    },
-                    None => None
+        match self.current_leaf_contents {
+            Some((items, mut index)) => {
+                while index < items.len() {
+                    let item = &items[index];
+                    if item.bound().intersect(self.ray) {
+                        self.current_leaf_contents = Some((items, index + 1));
+                        return Some(&items[index]);
+                    } else {
+                        index += 1;
+                    }
                 }
-            }
+            },
+            None => {},
+        }
+
+        match self.node_queue.pop_front() {
+            Some(node) => {
+                match node {
+                    &Node::Internal(_, _, ref left, ref right) => {
+                        self.node_queue.push_back(&*left);
+                        self.node_queue.push_back(&*right);
+                        self.next()
+                    },
+                    &Node::Leaf(ref items) => {
+                        self.current_leaf_contents = Some((items, 0usize));
+                        self.next()
+                    }
+                }
+            },
+            None => None,
         }
     }
 }
@@ -72,7 +82,7 @@ impl <'a, T: Bounded> KdTree<T> {
         }
     }
 
-    pub fn intersects(&'a self, _ray: &Ray) -> TreeIterator<'a, T> {
-        TreeIterator::new(&self.tree)
+    pub fn intersects(&'a self, ray: &'a Ray) -> TreeIterator<'a, T> {
+        TreeIterator::new(ray, &self.tree)
     }
 }

@@ -41,28 +41,26 @@ impl Scene {
         let mut closest: Option<TexturedIntersection> = None;
 
         for o in self.objects.intersects(&ray) {
-            if o.bound().intersect(&ray) {
-                match o.intersect(&ray) {
-                    Some(intersection) => {
-                        closest = match closest {
-                            Some(closest_intersection) => {
-                                if intersection.distance < closest_intersection.intersection.distance {
-                                    Some(TexturedIntersection {
-                                        intersection,
-                                        texture: Rc::clone(&o.texture),
-                                    })
-                                } else {
-                                    Some(closest_intersection)
-                                }
+            match o.intersect(&ray) {
+                Some(intersection) => {
+                    closest = match closest {
+                        Some(closest_intersection) => {
+                            if intersection.distance < closest_intersection.intersection.distance {
+                                Some(TexturedIntersection {
+                                    intersection,
+                                    texture: Rc::clone(&o.texture),
+                                })
+                            } else {
+                                Some(closest_intersection)
                             }
-                            None => Some(TexturedIntersection {
-                                intersection,
-                                texture: Rc::clone(&o.texture),
-                            })
-                        };
-                    }
-                    None => {}
+                        }
+                        None => Some(TexturedIntersection {
+                            intersection,
+                            texture: Rc::clone(&o.texture),
+                        })
+                    };
                 }
+                None => {}
             }
         }
 
