@@ -21,3 +21,17 @@ impl Curve for CubicBezier {
     }
 }
 
+pub struct Path {
+    curves: Vec<Box<Curve>>,
+}
+
+
+impl Curve for Path {
+    fn at(&self, t: f64) -> Point {
+        let scaled_t = t * self.curves.len() as f64;
+        let floor_t = scaled_t.floor();
+        let curve = &self.curves[floor_t as usize];
+        let curve_t = scaled_t - floor_t;
+        curve.at(curve_t)
+    }
+}
