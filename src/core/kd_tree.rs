@@ -61,13 +61,13 @@ impl <'a, T: Bounded> Iterator for TreeIterator<'a, T> {
                 match node {
                     &Node::Internal(axis, distance, ref left, ref right) => {
                         let axis_index = axis as usize;
-                        let denominator = self.ray.direction[axis_index];
-                        if denominator != 0f64 {
-                            let origin_component = self.ray.origin[axis_index];
-                            if (distance - origin_component) / denominator > 0f64 {
-                                self.node_queue.push_back(&*left);
-                                self.node_queue.push_back(&*right);
-                            } else if origin_component < distance {
+                        let direction_component = self.ray.direction[axis_index];
+                        let origin_component = self.ray.origin[axis_index];
+                        if direction_component != 0f64 && (distance - origin_component) / direction_component > 0f64 {
+                            self.node_queue.push_back(&*left);
+                            self.node_queue.push_back(&*right);
+                        } else {
+                            if origin_component < distance {
                                 self.node_queue.push_back(&*left);
                             } else {
                                 self.node_queue.push_back(&*right);
