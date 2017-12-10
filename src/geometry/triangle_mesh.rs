@@ -1,6 +1,9 @@
+use std::rc::Rc;
 use core::*;
 use math::*;
 use geometry::Geometry;
+use kd_tree::KdTree;
+use bounding_box::{ Bounded, BoundingBox };
 
 pub type TriangleIndices = (usize, usize, usize);
 
@@ -13,11 +16,26 @@ pub enum Smoothing {
 
 #[derive(Debug)]
 pub struct TriangleMesh {
-    positions: Vec<Point>,
-    indices: Vec<TriangleIndices>,
+    triangles: KdTree<Triangle>,
+    positions: Rc<Vec<Point>>,
     normals: Option<Vec<Normal>>,
     uvs: Option<Vec<Uv>>,
     closed: bool,
+}
+
+#[derive(Debug)]
+struct Triangle {
+    all_positions: Rc<Vec<Point>>,
+    indices: TriangleIndices,
+}
+
+impl Bounded for Triangle {
+    fn bound(&self) -> BoundingBox {
+        BoundingBox::empty()
+            .with_point(&self.all_positions[self.indices.0])
+            .with_point(&self.all_positions[self.indices.1])
+            .with_point(&self.all_positions[self.indices.2])
+    }
 }
 
 impl TriangleMesh {
@@ -35,8 +53,19 @@ impl TriangleMesh {
         if uvs.is_some() {
             assert_eq!(positions.len(), uvs.as_ref().unwrap().len());
         }
+
+        let rc_positions = Rc::new(positions);
+
+        let triangles = KdTree::from(indices
+            .into_iter()
+            .map(|indices| Triangle {
+                all_positions: Rc::clone(&rc_positions),
+                indices,
+            })
+            .collect());
+
         // TODO: Also check that the coordinates are in-bounds.
-        TriangleMesh { positions, indices, normals, uvs, closed }
+        TriangleMesh { positions: rc_positions, triangles, normals, uvs, closed }
     }
 
     fn compute_implicit_normals(positions: &Vec<Point>, indices: &Vec<TriangleIndices>) -> Vec<Normal> {
@@ -109,8 +138,8 @@ impl Geometry for TriangleMesh {
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         let mut closest: Option<Intersection> = None;
 
-        for triplet in &self.indices {
-            match self.intersect_triplet(&triplet, ray) {
+        for triangle in self.triangles.intersects(ray) {
+            match self.intersect_triplet(&triangle.indices, ray) {
                 Some(intersection) => {
                     closest = match closest {
                         Some(closest_intersection) => {
@@ -135,7 +164,7 @@ impl Bounded for TriangleMesh {
     fn bound(&self) -> BoundingBox {
         let mut bb = BoundingBox::empty();
 
-        for ref p in &self.positions {
+        for ref p in self.positions.as_ref() {
             bb = bb.with_point(p);
         }
 
