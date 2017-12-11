@@ -71,10 +71,14 @@ impl Geometry for RectPrism {
             }
         }
 
-        if t1 < 0f64 {
+        if t1 < ray.t_min || t0 > ray.t_max {
             None
-        } else if t0 < 0f64 {
-            Some(self.get_intersection(t1, &ray))
+        } else if t0 < ray.t_min {
+            if t1 <= ray.t_max {
+                Some(self.get_intersection(t1, &ray))
+            } else {
+                None
+            }
         } else {
             Some(self.get_intersection(t0, &ray))
         }
@@ -89,3 +93,55 @@ impl Bounded for RectPrism {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    lazy_static! {
+        static ref SIMPLE_RECT_PRISM: RectPrism = RectPrism::new(Point::uniform(-1f64), Point::uniform(1f64));
+    }
+
+    #[test]
+    fn it_should_intersect_a_half_infinite_ray_from_outside() {
+        let r = Ray::half_infinite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS);
+        let i = SIMPLE_RECT_PRISM.intersect(&r);
+        assert!(i.is_some());
+        assert_eq!(i.unwrap().distance, 4f64);
+    }
+
+    #[test]
+    fn it_should_intersect_a_finite_ray_from_outside() {
+        let r = Ray::finite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS, 0f64, 5f64);
+        let i = SIMPLE_RECT_PRISM.intersect(&r);
+        assert!(i.is_some());
+        assert_eq!(i.unwrap().distance, 4f64);
+    }
+
+    #[test]
+    fn it_should_intersect_a_finite_ray_from_inside() {
+        let r = Ray::finite(Point::new(0f64, 0f64, 0f64), Vec3::Z_AXIS, 0f64, 5f64);
+        let i = SIMPLE_RECT_PRISM.intersect(&r);
+        assert!(i.is_some());
+        assert_eq!(i.unwrap().distance, 1f64);
+    }
+
+    #[test]
+    fn it_should_not_intersect_a_half_infinite_ray_from_outside() {
+        let r = Ray::half_infinite(Point::new(5f64, 0f64, -5f64), Vec3::Z_AXIS);
+        assert!(SIMPLE_RECT_PRISM.intersect(&r).is_none());
+    }
+
+    #[test]
+    fn it_should_not_intersect_a_finite_ray_from_outside() {
+        let r = Ray::finite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS, 0f64, 1f64);
+        assert!(SIMPLE_RECT_PRISM.intersect(&r).is_none());
+    }
+
+    #[test]
+    fn it_should_not_intersect_a_finite_ray_from_inside() {
+        let r = Ray::finite(Point::new(0f64, 0f64, 0f64), Vec3::Z_AXIS, 0f64, 0.5f64);
+        assert!(SIMPLE_RECT_PRISM.intersect(&r).is_none());
+    }
+}
+

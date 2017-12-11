@@ -11,7 +11,7 @@ camera perspective {
 // for pretty
 
 image_dimensions 1024 1024
-antialias 1
+antialias 3
 
 // for animation
 
@@ -38,7 +38,7 @@ texture blue constant flat {
 }
 
 texture purple constant flat {
-  color #f0f
+  color #a0a
 }
 
 texture cyan_plastic constant flat {
@@ -176,8 +176,9 @@ object {
   texture yellow_matte
 }
 
-transform scale 5 5 5
-transform translate 10 -15 30
+transform scale 2 5 2
+transform rotate 30 0 0 1
+transform translate -8 -15 30
 object {
   geometry cloth {
     curves [

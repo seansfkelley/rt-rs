@@ -61,7 +61,7 @@ impl BoundingBox {
 
     // pbrt pg. 194
     pub fn intersect(&self, ray: &Ray) -> bool {
-        let (mut t0, mut t1) = (0f64, f64::INFINITY);
+        let (mut t0, mut t1) = (ray.t_min, ray.t_max);
 
         for i in 0..3 {
             let (mut t_near, mut t_far) = (
@@ -129,6 +129,13 @@ impl Transformable for BoundingBox {
 mod tests {
     use super::*;
 
+    lazy_static! {
+        static ref SIMPLE_BOUNDING_BOX: BoundingBox = BoundingBox {
+            min: Point::uniform(-1f64),
+            max: Point::uniform(1f64),
+        };
+    }
+
     macro_rules! assert_near {
         ( $ left : expr , $ right : expr ) => {
             assert!(($left - $right).magnitude() < 1e-10f64);
@@ -140,24 +147,14 @@ mod tests {
 
     #[test]
     fn it_should_do_nothing_when_merged_with_a_point_inside() {
-        let bb = BoundingBox {
-            min: Point::uniform(-1f64),
-            max: Point::uniform(1f64),
-        }.with_point(
-            Point::uniform(0f64),
-        );
+        let bb = SIMPLE_BOUNDING_BOX.with_point(&Point::uniform(0f64));
         assert_eq!(bb.min, Point::uniform(-1f64));
         assert_eq!(bb.max, Point::uniform(1f64));
     }
 
     #[test]
     fn it_should_expand_the_box_when_merged_with_a_point_outside() {
-        let bb = BoundingBox {
-            min: Point::uniform(-1f64),
-            max: Point::uniform(1f64),
-        }.with_point(
-            Point::new(2f64, -3f64, 4f64),
-        );
+        let bb = SIMPLE_BOUNDING_BOX.with_point(&Point::new(2f64, -3f64, 4f64));
         assert_eq!(bb.min, Point::new(-1f64, -3f64, -1f64));
         assert_eq!(bb.max, Point::new(2f64, 1f64, 4f64));
     }
@@ -176,13 +173,46 @@ mod tests {
 
     #[test]
     fn it_should_bloat_the_bounding_box_under_some_transformations() {
-        let bb = BoundingBox {
-            min: Point::uniform(-1f64),
-            max: Point::uniform(1f64),
-        }.transform(
-            &Transform::new(Mat4::create_rotation(45f64.to_radians(), Vec3::Z_AXIS))
+        let bb = SIMPLE_BOUNDING_BOX.transform(
+            &Transform::new(Mat4::create_rotation(45f64.to_radians(), Vec3::Z_AXIS)),
         );
         assert_near!(bb.min, Point::new(-2f64.sqrt(), -2f64.sqrt(), -1f64));
         assert_near!(bb.max, Point::new( 2f64.sqrt(),  2f64.sqrt(),  1f64));
+    }
+
+    #[test]
+    fn it_should_intersect_a_half_infinite_ray_from_outside() {
+        let r = Ray::half_infinite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS);
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
+    }
+
+    #[test]
+    fn it_should_intersect_a_half_infinite_ray_from_inside() {
+        let r = Ray::half_infinite(Point::new(0f64, 0f64, 0f64), Vec3::Z_AXIS);
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
+    }
+
+    #[test]
+    fn it_should_not_intersect_a_half_infinite_ray_from_outside() {
+        let r = Ray::half_infinite(Point::new(5f64, 0f64, -5f64), Vec3::Z_AXIS);
+        assert!(!SIMPLE_BOUNDING_BOX.intersect(&r));
+    }
+
+    #[test]
+    fn it_should_intersect_a_finite_ray_from_outside() {
+        let r = Ray::finite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS, 0f64, 5f64);
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
+    }
+
+    #[test]
+    fn it_should_intersect_a_piercing_finite_ray_from_inside() {
+        let r = Ray::finite(Point::new(0f64, 0f64, 0f64), Vec3::Z_AXIS, 0f64, 5f64);
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
+    }
+
+    #[test]
+    fn it_should_intersect_a_fully_contained_finite_ray_from_inside() {
+        let r = Ray::finite(Point::new(0f64, 0f64, 0f64), Vec3::Z_AXIS, 0f64, 0.5f64);
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
     }
 }

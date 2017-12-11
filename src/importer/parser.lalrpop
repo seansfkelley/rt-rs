@@ -117,9 +117,9 @@ Geometry: Box<Geometry> = {
     "}" => Box::new(RectPrism::new(min, max)),
     "triangle_mesh" "{"
         "positions" <positions:List<Point>>
-        <smoothing:("smoothing" <Smoothing>)?>
         <uvs:("uvs" <List<Tuple2<F64, F64>>>)?>
         "indices" <indices:List<Tuple3<Usize, Usize, Usize>>>
+        <smoothing:("smoothing" <Smoothing>)?>
         <is_closed:("is_closed" <Bool>)?>
     "}" => Box::new(TriangleMesh::new(
         positions,

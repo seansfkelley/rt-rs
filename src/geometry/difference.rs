@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::f64;
 
 use core::*;
 use math::*;
@@ -18,13 +19,6 @@ impl Difference {
 
 const EPSILON: f64 = 1e-10f64;
 
-fn advance_ray(ray: &Ray, distance: f64) -> Ray {
-    Ray {
-        origin: ray.at(distance),
-        direction: ray.direction,
-    }
-}
-
 fn flip_normal(i: Intersection) -> Intersection {
     Intersection {
         distance: i.distance,
@@ -34,28 +28,20 @@ fn flip_normal(i: Intersection) -> Intersection {
     }
 }
 
-fn advance_intersection(intersection: Option<Intersection>, distance: f64) ->Option<Intersection> {
-    match intersection {
-        Some(i) => Some(Intersection {
-            distance: i.distance + distance,
-            location: i.location,
-            normal: i.normal,
-            uv: i.uv,
-        }),
-        None => None,
-    }
-}
-
 impl Geometry for Difference {
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-        match self.lhs.intersect(ray) {
-            None => None,
-            Some(lhs_intersection) => {
-                match self.rhs.intersect(ray) {
-                    None => Some(lhs_intersection),
-                    Some(rhs_intersection) => self.non_trivial_intersect(ray, lhs_intersection, rhs_intersection),
+        // We have to remove the outer limit on rays because we also use them to determine
+        // if we're inside geometries. If we're inside but the limit doesn't let us hit the
+        // surface, we assume we don't collide at all and weird things happen!
+        match self.internal_intersect(ray.with_max(f64::INFINITY)) {
+            Some(intersection) => {
+                if intersection.distance > ray.t_max {
+                    None
+                } else {
+                    Some(intersection)
                 }
-            }
+            },
+            None => None,
         }
     }
 }
@@ -67,13 +53,25 @@ impl Bounded for Difference {
 }
 
 impl Difference {
-    fn non_trivial_intersect(&self, ray: &Ray, lhs_intersection: Intersection, rhs_intersection: Intersection) -> Option<Intersection> {
-        let inside_lhs = lhs_intersection.normal.dot(&-ray.direction) < 0f64;
-        let inside_rhs = rhs_intersection.normal.dot(&-ray.direction) < 0f64;
+    fn internal_intersect(&self, ray: Ray) -> Option<Intersection> {
+        match self.lhs.intersect(&ray) {
+            None => None,
+            Some(lhs_intersection) => {
+                match self.rhs.intersect(&ray) {
+                    None => Some(lhs_intersection),
+                    Some(rhs_intersection) => self.internal_intersect_nontrivial(ray, lhs_intersection, rhs_intersection),
+                }
+            }
+        }
+    }
+
+    fn internal_intersect_nontrivial(&self, ray: Ray, lhs_intersection: Intersection, rhs_intersection: Intersection) -> Option<Intersection> {
+        let inside_lhs = lhs_intersection.normal.dot(&ray.direction) > 0f64;
+        let inside_rhs = rhs_intersection.normal.dot(&ray.direction) > 0f64;
         if inside_lhs && inside_rhs {
             if lhs_intersection.distance < rhs_intersection.distance {
                 let d = lhs_intersection.distance + EPSILON;
-                advance_intersection(self.intersect(&advance_ray(ray, d)), d)
+                self.internal_intersect(ray.with_min(d))
             } else {
                 Some(flip_normal(rhs_intersection))
             }
@@ -93,13 +91,13 @@ impl Difference {
             } else {
                 rhs_intersection.distance
             } + EPSILON;
-            advance_intersection(self.intersect(&advance_ray(ray, d)), d)
+            self.internal_intersect(ray.with_min(d))
         } else {
             if lhs_intersection.distance < rhs_intersection.distance {
                 Some(lhs_intersection)
             } else {
                 let d = rhs_intersection.distance + EPSILON;
-                advance_intersection(self.intersect(&advance_ray(ray, d)), d)
+                self.internal_intersect(ray.with_min(d))
             }
         }
     }

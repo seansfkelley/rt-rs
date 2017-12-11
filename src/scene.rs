@@ -22,43 +22,33 @@ impl Scene {
         Scene { objects, lights, background_color, depth_limit }
     }
 
-    pub fn raytrace(&self, ray: &Ray) -> Color {
+    pub fn raytrace(&self, ray: Ray) -> Color {
         self.cast_ray(ray, 0)
     }
 
-    fn cast_ray(&self, ray: &Ray, depth: u32) -> Color {
+    fn cast_ray(&self, ray: Ray, depth: u32) -> Color {
         if depth > self.depth_limit {
             self.background_color
         } else {
-            match self.get_closest_hit(ray) {
-                Some(ref object_hit) => self.get_color(ray, object_hit, depth),
+            match self.get_closest_hit(ray.clone()) {
+                Some(ref object_hit) => self.get_color(&ray, object_hit, depth),
                 None => self.background_color,
             }
         }
     }
 
-    fn get_closest_hit(&self, ray: &Ray) -> Option<TexturedIntersection> {
+    fn get_closest_hit(&self, ray: Ray) -> Option<TexturedIntersection> {
         let mut closest: Option<TexturedIntersection> = None;
+        let mut r = ray;
 
         for o in self.objects.intersects(&ray) {
-            match o.intersect(&ray) {
+            match o.intersect(&r) {
                 Some(intersection) => {
-                    closest = match closest {
-                        Some(closest_intersection) => {
-                            if intersection.distance < closest_intersection.intersection.distance {
-                                Some(TexturedIntersection {
-                                    intersection,
-                                    texture: Rc::clone(&o.texture),
-                                })
-                            } else {
-                                Some(closest_intersection)
-                            }
-                        }
-                        None => Some(TexturedIntersection {
-                            intersection,
-                            texture: Rc::clone(&o.texture),
-                        })
-                    };
+                    closest = Some(TexturedIntersection {
+                        intersection,
+                        texture: Rc::clone(&o.texture),
+                    });
+                    r = r.with_max(intersection.distance);
                 }
                 None => {}
             }
@@ -109,7 +99,7 @@ impl Scene {
 
         if reflection_fraction > 0f64 {
             let new_direction = ray.direction.reflect(normal.as_vector());
-            let ref new_ray = Ray::new(intersection.nudged_location(normal), new_direction);
+            let new_ray = Ray::half_infinite(intersection.nudged_location(normal), new_direction);
             color += reflection_fraction * self.cast_ray(new_ray, depth + 1)
         }
 
@@ -119,7 +109,7 @@ impl Scene {
             if k >= 0f64 {
                 let direction = ray.direction * eta + (normal * (eta * cos_i - k.sqrt())).as_vector();
                 let origin = intersection.nudged_location(-normal);
-                let ref new_ray = Ray::new(origin, direction.as_normalized());
+                let new_ray = Ray::half_infinite(origin, direction.as_normalized());
                 color += transmission_fraction * self.cast_ray(new_ray, depth + 1)
             }
         }
@@ -149,7 +139,7 @@ impl Scene {
             .iter()
             .filter(|light| {
                 let light_direction = (light.position - point).as_normalized();
-                let ref ray = Ray::new(point, light_direction);
+                let ray = Ray::half_infinite(point, light_direction);
                 self.get_closest_hit(ray).is_none()
             })
             .collect::<Vec<&Light>>()

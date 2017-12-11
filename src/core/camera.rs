@@ -56,14 +56,14 @@ impl Camera {
 
     pub fn get_ray(&self, image_x: f64, image_y: f64) -> Ray {
         let ray = match self.kind {
-            CameraKind::Orthographic => Ray {
-                origin: Point::new(image_x, image_y, 0f64).transform(&self.raster_to_camera),
-                direction: Vec3::Z_AXIS,
-            },
-            CameraKind::Perspective => Ray {
-                origin: Point::uniform(0f64),
-                direction: Point::new(image_x, image_y, 0f64).transform(&self.raster_to_camera).as_vector().as_normalized(),
-            },
+            CameraKind::Orthographic => Ray::half_infinite(
+                Point::new(image_x, image_y, 0f64).transform(&self.raster_to_camera),
+                Vec3::Z_AXIS,
+            ),
+            CameraKind::Perspective => Ray::half_infinite(
+                Point::uniform(0f64),
+                Point::new(image_x, image_y, 0f64).transform(&self.raster_to_camera).as_vector().as_normalized(),
+            )
         };
         ray.transform(&self.camera_to_world)
     }
