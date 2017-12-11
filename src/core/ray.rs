@@ -11,13 +11,23 @@ pub struct Ray {
 }
 
 impl Ray {
-    pub fn new(origin: Point, direction: Vec3) -> Ray {
+    pub fn half_infinite(origin: Point, direction: Vec3) -> Ray {
         direction.assert_normalized();
         Ray {
             origin,
             direction,
             t_min: 0f64,
             t_max: f64::INFINITY,
+        }
+    }
+
+    pub fn finite(origin: Point, direction: Vec3, t_min: f64, t_max: f64) -> Ray {
+        direction.assert_normalized();
+        Ray {
+            origin,
+            direction,
+            t_min,
+            t_max,
         }
     }
 
@@ -62,29 +72,36 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_should_default_to_an_infinitely_long_ray() {
-        let r = Ray::new(Point::uniform(0f64), Vec3::X_AXIS);
+    fn it_should_create_a_half_infinitely_long_ray() {
+        let r = Ray::half_infinite(Point::uniform(0f64), Vec3::X_AXIS);
         assert_eq!(r.t_min, 0f64);
         assert_eq!(r.t_max, f64::INFINITY);
     }
 
     #[test]
+    fn it_should_create_a_finite_ray() {
+        let r = Ray::finite(Point::uniform(0f64), Vec3::X_AXIS, 0f64, 1f64);
+        assert_eq!(r.t_min, 0f64);
+        assert_eq!(r.t_max, 1f64);
+    }
+
+    #[test]
     #[should_panic]
     fn it_should_throw_if_the_direction_is_not_normalized() {
-        Ray::new(Point::uniform(0f64), Vec3::uniform(1f64));
+        Ray::half_infinite(Point::uniform(0f64), Vec3::uniform(1f64));
     }
 
     #[test]
     #[should_panic]
     fn it_should_throw_if_calling_at_with_out_of_bounds_t() {
-        let r = Ray::new(Point::uniform(0f64), Vec3::X_AXIS);
+        let r = Ray::half_infinite(Point::uniform(0f64), Vec3::X_AXIS);
         r.at(-1f64);
     }
 
     #[test]
     #[should_panic]
     fn it_should_throw_if_calling_split_with_out_of_bounds_t() {
-        let r = Ray::new(Point::uniform(0f64), Vec3::X_AXIS);
+        let r = Ray::half_infinite(Point::uniform(0f64), Vec3::X_AXIS);
         r.split(-1f64);
     }
 

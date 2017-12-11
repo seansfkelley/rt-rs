@@ -111,7 +111,7 @@ impl Scene {
 
         if reflection_fraction > 0f64 {
             let new_direction = ray.direction.reflect(normal.as_vector());
-            let ref new_ray = Ray::new(intersection.nudged_location(normal), new_direction);
+            let ref new_ray = Ray::half_infinite(intersection.nudged_location(normal), new_direction);
             color += reflection_fraction * self.cast_ray(new_ray, depth + 1)
         }
 
@@ -121,7 +121,7 @@ impl Scene {
             if k >= 0f64 {
                 let direction = ray.direction * eta + (normal * (eta * cos_i - k.sqrt())).as_vector();
                 let origin = intersection.nudged_location(-normal);
-                let ref new_ray = Ray::new(origin, direction.as_normalized());
+                let ref new_ray = Ray::half_infinite(origin, direction.as_normalized());
                 color += transmission_fraction * self.cast_ray(new_ray, depth + 1)
             }
         }
@@ -151,7 +151,7 @@ impl Scene {
             .iter()
             .filter(|light| {
                 let light_direction = (light.position - point).as_normalized();
-                let ref ray = Ray::new(point, light_direction);
+                let ref ray = Ray::half_infinite(point, light_direction);
                 self.get_closest_hit(ray).is_none()
             })
             .collect::<Vec<&Light>>()
