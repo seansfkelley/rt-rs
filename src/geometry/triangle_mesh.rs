@@ -108,7 +108,7 @@ impl TriangleMesh {
 impl Geometry for TriangleMesh {
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         let mut closest: Option<Intersection> = None;
-        let mut r = *ray;
+        let mut r = ray.clone();
 
         for triplet in &self.indices {
             match self.intersect_triplet(&triplet, &r) {
