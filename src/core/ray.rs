@@ -59,10 +59,6 @@ impl Ray {
             t_max: t,
         }
     }
-
-    pub fn is_empty(&self) -> bool {
-        self.t_min > self.t_max
-    }
 }
 
 impl Transformable for Ray {
@@ -131,11 +127,5 @@ mod tests {
         assert_eq!(r1.direction, r.direction);
         assert_eq!(r1.t_min, 0.5f64);
         assert_eq!(r1.t_max, 1f64);
-    }
-
-    #[test]
-    fn it_should_be_considered_empty_if_the_t_range_is_reversed() {
-        let r = Ray::finite(Point::uniform(0f64), Vec3::X_AXIS, 1f64, 0f64);
-        assert!(r.is_empty());
     }
 }
