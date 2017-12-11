@@ -26,7 +26,7 @@ use std::env;
 use std::thread;
 use std::time::Duration;
 use std::sync::{ Arc, Mutex };
-use std::io::{ stdout, Write };
+use std::io::{ stderr, Write };
 use progress_bar::ProgressBar;
 
 fn main() {
@@ -78,8 +78,8 @@ fn main() {
                 thread::sleep(Duration::from_millis(100));
             } else {
                 progress_render.lock().unwrap().render();
-                println!();
-                stdout().flush().ok().unwrap();
+                eprintln!();
+                stderr().flush().ok().unwrap();
                 thread::sleep(Duration::from_millis(200)); // time to flush the buffers, sometimes
                 break;
             }

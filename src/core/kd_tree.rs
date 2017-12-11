@@ -1,6 +1,7 @@
 use std::f64;
 use std::rc::Rc;
 use std::collections::{ VecDeque, HashSet };
+use std::fmt::{ Debug, Formatter, Result };
 use ordered_float::NotNaN;
 use lazysort::SortedBy;
 use super::ray::Ray;
@@ -13,10 +14,24 @@ enum Axis {
     Z = 2,
 }
 
-#[derive(Debug)]
 enum Node<T: Bounded> {
     Internal(Axis, f64, Box<Node<T>>, Box<Node<T>>),
     Leaf(Vec<Rc<T>>),
+}
+
+impl <T: Bounded> Node<T> {
+    fn fmt_indented(&self, f: &mut Formatter, indent_level: usize) -> Result {
+        match self {
+            &Node::Internal(ref axis, ref distance, ref left, ref right) => {
+                write!(f, "{}split {:?}@{}\n",  " ".repeat(indent_level * 2), *axis, distance)?;
+                left.fmt_indented(f, indent_level + 1)?;
+                right.fmt_indented(f, indent_level + 1)
+            },
+            &Node::Leaf(ref items) => {
+                write!(f, "{}{} nodes\n", " ".repeat(indent_level * 2), items.len())
+            },
+        }
+    }
 }
 
 pub struct TreeIterator<'a, T: Bounded + 'a> {
@@ -87,7 +102,6 @@ impl <'a, T: Bounded> Iterator for TreeIterator<'a, T> {
 }
 
 // TODO: Consider newtype.
-#[derive(Debug)]
 pub struct KdTree<T: Bounded> {
     tree: Node<T>,
 }
@@ -200,5 +214,11 @@ impl <'a, T: Bounded> KdTree<T> {
 
     pub fn intersects(&'a self, ray: &'a Ray) -> TreeIterator<'a, T> {
         TreeIterator::new(ray, &self.tree)
+    }
+}
+
+impl <T: Bounded> Debug for KdTree<T> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        self.tree.fmt_indented(f, 0)
     }
 }

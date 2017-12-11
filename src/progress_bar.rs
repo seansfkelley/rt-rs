@@ -1,4 +1,4 @@
-use std::io::{ stdout, Write };
+use std::io::{ stderr, Write };
 use std::cmp::min;
 use std::time::SystemTime;
 use terminal_size::{ terminal_size, Width };
@@ -59,8 +59,8 @@ impl ProgressBar {
                 let total_bar_width = (width as usize) - prefix.len() - suffix.len();
                 let fill_width = (total_bar_width as f64 * fraction_complete).floor() as usize;
                 let empty_width = total_bar_width - fill_width;
-                print!("\r{}{}{}{}", prefix, "=".repeat(fill_width), " ".repeat(empty_width), suffix);
-                stdout().flush().ok().unwrap();
+                eprint!("\r{}{}{}{}", prefix, "=".repeat(fill_width), " ".repeat(empty_width), suffix);
+                stderr().flush().ok().unwrap();
             },
             None => {},
         }
