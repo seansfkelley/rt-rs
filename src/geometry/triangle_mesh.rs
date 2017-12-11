@@ -111,7 +111,7 @@ impl Geometry for TriangleMesh {
         let mut r = *ray;
 
         for triplet in &self.indices {
-            match self.intersect_triplet(&triplet, ray) {
+            match self.intersect_triplet(&triplet, &r) {
                 Some(intersection) => {
                     closest = Some(intersection);
                     r = r.with_max(intersection.distance);
