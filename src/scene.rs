@@ -19,7 +19,6 @@ impl Scene {
         background_color: Color,
         depth_limit: u32
     ) -> Scene {
-        println!("{:?}", objects);
         Scene { objects, lights, background_color, depth_limit }
     }
 

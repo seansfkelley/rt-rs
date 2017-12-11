@@ -20,10 +20,21 @@ enum Node<T: Bounded> {
 }
 
 impl <T: Bounded> Node<T> {
+    fn size(&self) -> usize {
+        match self {
+            &Node::Internal(_, _, ref left, ref right) => {
+                left.size() + right.size()
+            },
+            &Node::Leaf(ref items) => {
+                items.len()
+            },
+        }
+    }
+
     fn fmt_indented(&self, f: &mut Formatter, indent_level: usize) -> Result {
         match self {
             &Node::Internal(ref axis, ref distance, ref left, ref right) => {
-                write!(f, "{}split {:?}@{}\n",  " ".repeat(indent_level * 2), *axis, distance)?;
+                write!(f, "{}{} nodes, split {:?} at {}\n",  " ".repeat(indent_level * 2), self.size(), *axis, distance)?;
                 left.fmt_indented(f, indent_level + 1)?;
                 right.fmt_indented(f, indent_level + 1)
             },

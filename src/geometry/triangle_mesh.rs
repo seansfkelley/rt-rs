@@ -56,6 +56,8 @@ impl TriangleMesh {
 
         let rc_positions = Rc::new(positions);
 
+        println!("{} unique triangles", indices.len());
+
         let triangles = KdTree::from(indices
             .into_iter()
             .map(|indices| Triangle {
@@ -63,6 +65,8 @@ impl TriangleMesh {
                 indices,
             })
             .collect());
+
+        println!("{:?}", triangles);
 
         // TODO: Also check that the coordinates are in-bounds.
         TriangleMesh { positions: rc_positions, triangles, normals, uvs, closed }
