@@ -18,10 +18,13 @@ impl Difference {
 
 const EPSILON: f64 = 1e-10f64;
 
-fn advance_ray(ray: &Ray, distance: f64) -> Ray {
+// TODO: Should we also move max_t?
+fn advance_ray(ray: &Ray, t: f64) -> Ray {
     Ray {
-        origin: ray.at(distance),
+        origin: ray.origin,
         direction: ray.direction,
+        t_min: ray.t_min + t,
+        t_max: ray.t_max + t,
     }
 }
 

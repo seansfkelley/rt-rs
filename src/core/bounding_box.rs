@@ -140,7 +140,7 @@ mod tests {
             min: Point::uniform(-1f64),
             max: Point::uniform(1f64),
         }.with_point(
-            Point::uniform(0f64),
+            &Point::uniform(0f64),
         );
         assert_eq!(bb.min, Point::uniform(-1f64));
         assert_eq!(bb.max, Point::uniform(1f64));
@@ -152,7 +152,7 @@ mod tests {
             min: Point::uniform(-1f64),
             max: Point::uniform(1f64),
         }.with_point(
-            Point::new(2f64, -3f64, 4f64),
+            &Point::new(2f64, -3f64, 4f64),
         );
         assert_eq!(bb.min, Point::new(-1f64, -3f64, -1f64));
         assert_eq!(bb.max, Point::new(2f64, 1f64, 4f64));

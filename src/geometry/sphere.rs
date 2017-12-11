@@ -86,27 +86,13 @@ impl Geometry for Sphere {
 mod tests {
     use super::*;
 
-    const STRAIGHT_RAY: Ray = Ray {
-        origin: Point { x: 0f64, y: 0f64, z: 5f64 },
-        direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 }
-    };
-
-    const OFFSET_RAY: Ray = Ray {
-        origin: Point { x: 5f64, y: 0f64, z: 5f64 },
-        direction: Vec3 { x: 0f64, y: 0f64, z: -1f64 }
-    };
-
     #[test]
     fn it_should_intersect() {
-        let sphere = Sphere::new(1f64);
-        assert!(sphere.intersect(&STRAIGHT_RAY).is_some());
-        assert!(sphere.intersect(&OFFSET_RAY).is_none());
+        assert!(Sphere::new(1f64).intersect(&Ray::new(Point::new(0f64, 0f64, 5f64), Vec3::new(0f64, 0f64, -1f64))).is_some());
     }
 
-    // #[test]
-    // fn it_should_intersect_translations() {
-    //     let sphere = Sphere::new(1f64, Mat4::create_translation(Vec3::new(5f64, 0f64, 0f64)), BLANK_MATERIAL);
-    //     assert!(sphere.intersect(&STRAIGHT_RAY).is_none());
-    //     assert!(sphere.intersect(&OFFSET_RAY).is_some());
-    // }
+    #[test]
+    fn it_should_not_intersect() {
+        assert!(Sphere::new(1f64).intersect(&Ray::new(Point::new(5f64, 0f64, 5f64), Vec3::new(0f64, 0f64, -1f64))).is_none());
+    }
 }
