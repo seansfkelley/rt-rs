@@ -21,6 +21,7 @@ impl Ray {
         }
     }
 
+    #[cfg(test)]
     pub fn finite(origin: Point, direction: Vec3, t_min: f64, t_max: f64) -> Ray {
         direction.assert_normalized();
         Ray {
