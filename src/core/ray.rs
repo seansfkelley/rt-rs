@@ -38,12 +38,29 @@ impl Ray {
     }
 
     pub fn split(&self, t: f64) -> (Ray, Ray) {
-        assert!(t >= self.t_min);
-        assert!(t <= self.t_max);
-        (
-            Ray { origin: self.origin, direction: self.direction, t_min: self.t_min, t_max: t },
-            Ray { origin: self.origin, direction: self.direction, t_min: t, t_max: self.t_max },
-        )
+        (self.with_max(t), self.with_min(t))
+    }
+
+    pub fn with_min(&self, t: f64) -> Ray {
+        Ray {
+            origin: self.origin,
+            direction: self.direction,
+            t_min: t,
+            t_max: self.t_max,
+        }
+    }
+
+    pub fn with_max(&self, t: f64) -> Ray {
+        Ray {
+            origin: self.origin,
+            direction: self.direction,
+            t_min: self.t_min,
+            t_max: t,
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.t_min > self.t_max
     }
 }
 
@@ -99,20 +116,8 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
-    fn it_should_throw_if_calling_split_with_out_of_bounds_t() {
-        let r = Ray::half_infinite(Point::uniform(0f64), Vec3::X_AXIS);
-        r.split(-1f64);
-    }
-
-    #[test]
     fn it_should_split_into_two_rays_that_exactly_cover_the_interval_of_t() {
-        let r = Ray {
-            origin: Point::uniform(0f64),
-            direction: Vec3::X_AXIS,
-            t_min: 0f64,
-            t_max: 1f64,
-        };
+        let r = Ray::finite(Point::uniform(0f64), Vec3::X_AXIS, 0f64, 1f64);
 
         let (r0, r1) = r.split(0.5f64);
 
@@ -125,5 +130,11 @@ mod tests {
         assert_eq!(r1.direction, r.direction);
         assert_eq!(r1.t_min, 0.5f64);
         assert_eq!(r1.t_max, 1f64);
+    }
+
+    #[test]
+    fn it_should_be_considered_empty_if_the_t_range_is_reversed() {
+        let r = Ray::finite(Point::uniform(0f64), Vec3::X_AXIS, 1f64, 0f64);
+        assert!(r.is_empty());
     }
 }

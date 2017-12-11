@@ -111,7 +111,7 @@ fn main() {
                                     rng.next_f64() * (y_max - y_min) + y_min,
                                 )
                             };
-                        color = color + scene.raytrace(&camera.get_ray(x as f64 + x_jitter, y as f64 + y_jitter));
+                        color = color + scene.raytrace(camera.get_ray(x as f64 + x_jitter, y as f64 + y_jitter));
                     }
                 }
                 progress_main.lock().unwrap().increment_operations(antialias * antialias);
