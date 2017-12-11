@@ -2,7 +2,7 @@ use std::f64;
 use math::*;
 use super::transform::{ Transform, Transformable };
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Ray {
     pub origin: Point,
     pub direction: Vec3,

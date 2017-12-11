@@ -141,10 +141,10 @@ impl TriangleMesh {
 impl Geometry for TriangleMesh {
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         let mut closest: Option<Intersection> = None;
-        let mut r = *ray;
+        let mut r = ray.clone();
 
         for triangle in self.triangles.intersects(ray) {
-            match self.intersect_triplet(&triangle.indices, ray) {
+            match self.intersect_triplet(&triangle.indices, &r) {
                 Some(intersection) => {
                     closest = Some(intersection);
                     r = r.with_max(intersection.distance);

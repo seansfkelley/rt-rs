@@ -41,7 +41,7 @@ impl Scene {
         let mut closest: Option<TexturedIntersection> = None;
         let mut r = ray;
 
-        for o in self.objects.intersects(&ray) {
+        for o in self.objects.intersects(&r) {
             match o.intersect(&r) {
                 Some(intersection) => {
                     closest = Some(TexturedIntersection {
