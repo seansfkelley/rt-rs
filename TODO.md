@@ -1,5 +1,5 @@
 ## features
-- triangle mesh normals and texture mapping
+- triangle mesh texture mapping
 - animate objects in scenes
 - procedural textures - K
 - procedural shapes - K
@@ -14,14 +14,13 @@
 - attenuation
 - interactivity
 - displacement mapping
-- Revolving beziers
+- revolving beziers
 - use any geometry as a light source
 - water
 - named objects, geometries in scenes
 
 ## performance/quality
-- spatial indexing (kd-tree, r-tree?) - K
-- triangle mesh optimizations
+- r-tree/bvh (would these be better than the kd-tree?)
 - profile
 - parallelization
 - audit usages of Clone/Copy derivations and reference parameters to see if we're too copy-happy (or will rustc automatically optimize extraneous copies into moves?)
@@ -29,6 +28,5 @@
 - display image as it is being created
 
 ## misc
-- More scenes
 - add "include" directive for scene files for copy-pasting purposes
 - make matrix a typedef of [[f64; 4]; 4] and then implement things for it?
