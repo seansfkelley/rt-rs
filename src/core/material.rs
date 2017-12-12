@@ -1,6 +1,4 @@
-use std::path::Path;
 use std::fmt::Debug;
-use image::{RgbImage, Pixel, open as openImage};
 use color::{Color, BLACK};
 use core::*;
 
@@ -38,43 +36,6 @@ pub struct ConstantTexture {
 impl Texture for ConstantTexture {
     fn get_material(&self, _intersection: &Intersection) -> Material {
         self.material
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct ImageTexture {
-    image: RgbImage,
-    reflectivity: f64,
-}
-
-impl ImageTexture {
-    pub fn from_path(p: &Path, reflectivity: f64) -> ImageTexture {
-        let image = match openImage(p) {
-            Ok(img) => { img.to_rgb() }
-            Err(reason) => { panic!("could not open image at {:?}: {:?}", p, reason); }
-        };
-        ImageTexture {
-            image,
-            reflectivity,
-        }
-    }
-}
-
-impl Texture for ImageTexture {
-    fn get_material(&self, intersection: &Intersection) -> Material {
-        let (width, height) = self.image.dimensions();
-        let pixel = self.image.get_pixel((width as f64 * intersection.uv.0) as u32, (height as f64 * intersection.uv.1) as u32);
-        let rgb = pixel.channels();
-        let color = Color::new(rgb[0] as f64 / 255f64, rgb[1] as f64 / 255f64, rgb[2] as f64 / 255f64);
-
-        // TODO: How to do more properly??
-        Material {
-            ambient: color * 0.1f64,
-            diffuse: color,
-            specular: SpecularLighting(BLACK, 0f64),
-            transmission: None,
-            reflectivity: self.reflectivity,
-        }
     }
 }
 

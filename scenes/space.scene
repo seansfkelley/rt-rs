@@ -2,15 +2,15 @@ depth_limit 10
 background_color #000
 
 camera perspective {
-  position 0 0 -20
+  position 0 5 -20
   look_at 0 0 0
   up 0 1 0
-  field_of_view 30
+  field_of_view 25
 }
 
 // for pretty
 
-image_dimensions 1024 1024
+image_dimensions 1024 768
 antialias 3
 
 // for animation
@@ -26,30 +26,42 @@ antialias 3
 // }
 
 texture earth image {
-  path "textures/earth.png"
+  diffuse "textures/earth.png"
+  ambient 0.2 * diffuse
+  specular "textures/earth-specular.png"
+  reflectivity 1 * specular
+}
+
+texture moon image {
+  diffuse "textures/moon.png"
+  ambient 0.2 * diffuse
+  specular 0.7 * diffuse
+  reflectivity constant #555
 }
 
 transform rotate -90 1 0 0
-transform rotate 90 0 1 0
+transform rotate 120 0 1 0
+transform translate -1 0 0
 object {
   geometry sphere {
     radius 3
   }
   texture earth
 }
-transform pop 2
+transform pop all
 
-light {
-  position 5 5 10
-  color #777
+transform rotate -90 1 0 0
+transform rotate 180 0 1 0
+transform translate 3 3 -1
+object {
+  geometry sphere {
+    radius 1
+  }
+  texture moon
 }
+transform pop all
 
 light {
-  position 5 5 -10
-  color #777
-}
-
-light {
-  position -5 5 0
-  color #777
+  position 0 5 -20
+  color #fff
 }

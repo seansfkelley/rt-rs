@@ -33,6 +33,10 @@ impl Color {
             b: self.b.clamp(0f64, 1f64),
         }
     }
+
+    pub fn average(&self) -> f64 {
+        return (self.r + self.g + self.b) / 3f64;
+    }
 }
 
 impl Add for Color {
