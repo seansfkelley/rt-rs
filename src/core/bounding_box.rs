@@ -60,7 +60,7 @@ impl BoundingBox {
     }
 
     // pbrt pg. 194
-    pub fn intersect(&self, ray: &Ray) -> bool {
+    pub fn intersect(&self, ray: &Ray) -> Option<(f64, f64)> {
         let (mut t0, mut t1) = (ray.t_min, ray.t_max);
 
         for i in 0..3 {
@@ -74,11 +74,11 @@ impl BoundingBox {
             t0 = non_nan_max(t0, t_near);
             t1 = non_nan_min(t1, t_far);
             if t0 > t1 {
-                return false;
+                return None;
             }
         }
 
-        true
+        Some((t0, t1))
     }
 }
 
@@ -183,36 +183,36 @@ mod tests {
     #[test]
     fn it_should_intersect_a_half_infinite_ray_from_outside() {
         let r = Ray::half_infinite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS);
-        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r).is_some());
     }
 
     #[test]
     fn it_should_intersect_a_half_infinite_ray_from_inside() {
         let r = Ray::half_infinite(Point::new(0f64, 0f64, 0f64), Vec3::Z_AXIS);
-        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r).is_some());
     }
 
     #[test]
     fn it_should_not_intersect_a_half_infinite_ray_from_outside() {
         let r = Ray::half_infinite(Point::new(5f64, 0f64, -5f64), Vec3::Z_AXIS);
-        assert!(!SIMPLE_BOUNDING_BOX.intersect(&r));
+        assert!(!SIMPLE_BOUNDING_BOX.intersect(&r).is_none());
     }
 
     #[test]
     fn it_should_intersect_a_finite_ray_from_outside() {
         let r = Ray::finite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS, 0f64, 5f64);
-        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r).is_some());
     }
 
     #[test]
     fn it_should_intersect_a_piercing_finite_ray_from_inside() {
         let r = Ray::finite(Point::new(0f64, 0f64, 0f64), Vec3::Z_AXIS, 0f64, 5f64);
-        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r).is_some());
     }
 
     #[test]
     fn it_should_intersect_a_fully_contained_finite_ray_from_inside() {
         let r = Ray::finite(Point::new(0f64, 0f64, 0f64), Vec3::Z_AXIS, 0f64, 0.5f64);
-        assert!(SIMPLE_BOUNDING_BOX.intersect(&r));
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r).is_some());
     }
 }

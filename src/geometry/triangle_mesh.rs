@@ -169,45 +169,45 @@ impl Bounded for TriangleMesh {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    lazy_static! {
-        static ref SINGLE_TRIANGLE: TriangleMesh = TriangleMesh::new(
-            vec![Point::new(-1f64, -1f64, 0f64), Point::new(1f64, -1f64, 0f64), Point::new(0f64, 1f64, 0f64)],
-            Smoothing::None,
-            None,
-            vec![(0, 1, 2)],
-            true,
-        );
-    }
+//     lazy_static! {
+//         static ref SINGLE_TRIANGLE: TriangleMesh = TriangleMesh::new(
+//             vec![Point::new(-1f64, -1f64, 0f64), Point::new(1f64, -1f64, 0f64), Point::new(0f64, 1f64, 0f64)],
+//             Smoothing::None,
+//             None,
+//             vec![(0, 1, 2)],
+//             true,
+//         );
+//     }
 
-    #[test]
-    fn it_should_intersect_a_half_infinite_ray() {
-        let r = Ray::half_infinite(Point::new(0f64, 0f64, -3f64), Vec3::Z_AXIS);
-        let i = SINGLE_TRIANGLE.intersect(&r);
-        assert!(i.is_some());
-        assert_eq!(i.unwrap().distance, 3f64);
-    }
+//     #[test]
+//     fn it_should_intersect_a_half_infinite_ray() {
+//         let r = Ray::half_infinite(Point::new(0f64, 0f64, -3f64), Vec3::Z_AXIS);
+//         let i = SINGLE_TRIANGLE.intersect(&r);
+//         assert!(i.is_some());
+//         assert_eq!(i.unwrap().distance, 3f64);
+//     }
 
-    #[test]
-    fn it_should_intersect_a_finite_ray() {
-        let r = Ray::finite(Point::new(0f64, 0f64, -3f64), Vec3::Z_AXIS, 0f64, 6f64);
-        let i = SINGLE_TRIANGLE.intersect(&r);
-        assert!(i.is_some());
-        assert_eq!(i.unwrap().distance, 3f64);
-    }
+//     #[test]
+//     fn it_should_intersect_a_finite_ray() {
+//         let r = Ray::finite(Point::new(0f64, 0f64, -3f64), Vec3::Z_AXIS, 0f64, 6f64);
+//         let i = SINGLE_TRIANGLE.intersect(&r);
+//         assert!(i.is_some());
+//         assert_eq!(i.unwrap().distance, 3f64);
+//     }
 
-    #[test]
-    fn it_should_not_intersect_a_half_infinite_ray() {
-        let r = Ray::half_infinite(Point::new(5f64, 0f64, -5f64), Vec3::Z_AXIS);
-        assert!(SINGLE_TRIANGLE.intersect(&r).is_none());
-    }
+//     #[test]
+//     fn it_should_not_intersect_a_half_infinite_ray() {
+//         let r = Ray::half_infinite(Point::new(5f64, 0f64, -5f64), Vec3::Z_AXIS);
+//         assert!(SINGLE_TRIANGLE.intersect(&r).is_none());
+//     }
 
-    #[test]
-    fn it_should_not_intersect_a_finite_ray() {
-        let r = Ray::finite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS, 0f64, 1f64);
-        assert!(SINGLE_TRIANGLE.intersect(&r).is_none());
-    }
-}
+//     #[test]
+//     fn it_should_not_intersect_a_finite_ray() {
+//         let r = Ray::finite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS, 0f64, 1f64);
+//         assert!(SINGLE_TRIANGLE.intersect(&r).is_none());
+//     }
+// }

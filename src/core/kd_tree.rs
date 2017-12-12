@@ -46,13 +46,13 @@ impl <T: Bounded> Node<T> {
 }
 
 pub struct TreeIterator<'a, T: Bounded + 'a> {
-    ray: &'a Ray,
+    ray: Ray,
     node_queue: VecDeque<&'a Node<T>>,
     current_leaf_contents: Option<(&'a Vec<Rc<T>>, usize)>,
 }
 
 impl <'a, T: Bounded + 'a> TreeIterator<'a, T> {
-    fn new(ray: &'a Ray, root: &'a Node<T>) -> TreeIterator<'a, T> {
+    fn new(ray: Ray, root: &'a Node<T>) -> TreeIterator<'a, T> {
         let mut node_queue = VecDeque::new();
         node_queue.push_back(root);
         TreeIterator {
@@ -71,7 +71,7 @@ impl <'a, T: Bounded> Iterator for TreeIterator<'a, T> {
             Some((items, mut index)) => {
                 while index < items.len() {
                     let item = &items[index];
-                    if item.bound().intersect(self.ray) {
+                    if item.bound().intersect(&self.ray).is_some() {
                         self.current_leaf_contents = Some((items, index + 1));
                         return Some(&items[index]);
                     } else {
@@ -223,7 +223,7 @@ impl <'a, T: Bounded> KdTree<T> {
         }
     }
 
-    pub fn intersects(&'a self, ray: &'a Ray) -> TreeIterator<'a, T> {
+    pub fn intersect(&'a self, ray: Ray) -> TreeIterator<'a, T> {
         TreeIterator::new(ray, &self.tree)
     }
 }
