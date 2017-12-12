@@ -1,5 +1,6 @@
 image_dimensions 1024 1024
-background_color .1 .1 .1
+background_color #111
+antialias 3
 
 camera perspective {
   position 0 80 -200
