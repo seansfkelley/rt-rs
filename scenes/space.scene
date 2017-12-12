@@ -1,0 +1,55 @@
+depth_limit 10
+background_color #000
+
+camera perspective {
+  position 0 0 -20
+  look_at 0 0 0
+  up 0 1 0
+  field_of_view 30
+}
+
+// for pretty
+
+image_dimensions 1024 1024
+antialias 3
+
+// for animation
+
+// image_dimensions 512 512
+// antialias 1
+//
+// animation {
+//   frames 18
+//   camera_transforms [
+//     rotate 10 0 1 0
+//   ]
+// }
+
+texture earth image {
+  path "textures/earth.png"
+}
+
+transform rotate -90 1 0 0
+transform rotate 90 0 1 0
+object {
+  geometry sphere {
+    radius 3
+  }
+  texture earth
+}
+transform pop 2
+
+light {
+  position 5 5 10
+  color #777
+}
+
+light {
+  position 5 5 -10
+  color #777
+}
+
+light {
+  position -5 5 0
+  color #777
+}
