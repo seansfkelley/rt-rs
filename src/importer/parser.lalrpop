@@ -81,9 +81,16 @@ Material: Material = {
 Texture: Box<Texture> = {
     "constant" <Material> => Box::new(ConstantTexture { material: <> }),
     "image" "{"
-        "path" <path:Path>
-        <reflectivity:("reflectivity" <F64>)?>
-    "}" => Box::new(ImageTexture::from_path(path.as_ref(), reflectivity.unwrap_or(0f64))),
+        "diffuse" <diffuse:ImageTextureFacet>
+        <ambient:("ambient" <ImageTextureFacet>)?>
+        <specular:("specular" <ImageTextureFacet>)?>
+        <reflectivity:("reflectivity" <ImageTextureFacet>)?>
+    "}" => Box::new(ImageTexture::new(
+        ambient.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.1f64)),
+        diffuse,
+        specular.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.3f64)),
+        reflectivity.unwrap_or(ImageTextureFacet::Constant(BLACK)),
+    )),
     "checkerboard" "{"
         <checks_per_unit:("checks_per_unit" <U32>)?>
         <color_a:("color_a" <Color>)?>
@@ -95,6 +102,18 @@ Texture: Box<Texture> = {
     }),
 };
 
+LightingFacet: LightingFacet = {
+    "ambient" => LightingFacet::Ambient,
+    "diffuse" => LightingFacet::Diffuse,
+    "specular" => LightingFacet::Specular,
+    "reflectivity" => LightingFacet::Reflectivity,
+};
+
+ImageTextureFacet: ImageTextureFacet = {
+    <fraction:F64> "*" <facet:LightingFacet> => ImageTextureFacet::Reference(facet, fraction),
+    "constant" <color:Color> => ImageTextureFacet::Constant(color),
+    <path:Path> => ImageTextureFacet::from_path(path.as_ref()),
+};
 
 Transform: Mat4 = {
     "scale" <Vec3> => Mat4::create_scale(<>),
