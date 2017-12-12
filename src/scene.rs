@@ -36,16 +36,22 @@ impl Scene {
     }
 
     fn get_color(&self, ray: &Ray, intersection: Intersection, depth: u32) -> Color {
+        const NUDGE_FACTOR: f64 = 1e-10f64;
+
         let material = intersection.material.expect("scene intersections should always have a material");
         let mut reflection_fraction = material.reflectivity;
         let mut transmission_fraction = material.transmission.as_ref().map(|transmission| transmission.transmissivity).unwrap_or(0f64);
 
         let is_inside = intersection.normal.dot(&ray.direction) > 0f64;
         let normal = if is_inside { -intersection.normal.as_normalized() } else { intersection.normal.as_normalized() };
+        let location = intersection.location;
+
+        let nudged_location = |normal: Normal| location + (normal * NUDGE_FACTOR).as_vector();
+
         let mut eta = 0f64;
 
         if material.transmission.is_some() && reflection_fraction > 0f64 {
-            let transmission = material.transmission.unwrap();
+            let transmission = material.transmission.as_ref().unwrap();
             let (eta_i, eta_t) = if is_inside {
                 (transmission.index_of_refraction, 1f64)
             } else {
@@ -63,10 +69,10 @@ impl Scene {
 
         // TODO: increase other fractions if inside
         if !is_inside && phong_fraction > 0f64 {
-            color += phong_fraction * self.get_visible_lights(intersection.nudged_location(normal))
+            color += phong_fraction * self.get_visible_lights(nudged_location(normal))
                 .iter()
                 .fold(material.ambient, |color, light| {
-                    let light_direction = (light.position - intersection.location).as_normalized();
+                    let light_direction = (light.position - location).as_normalized();
                     let diffuse_illumination = material.diffuse * light.color * normal.dot(&light_direction).max(0f64);
                     let specular_illumination = material.specular.0 * light.color
                         * normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(material.specular.1);
@@ -76,7 +82,7 @@ impl Scene {
 
         if reflection_fraction > 0f64 {
             let new_direction = ray.direction.reflect(normal.as_vector());
-            let new_ray = Ray::half_infinite(intersection.nudged_location(normal), new_direction);
+            let new_ray = Ray::half_infinite(nudged_location(normal), new_direction);
             color += reflection_fraction * self.cast_ray(new_ray, depth + 1)
         }
 
@@ -85,7 +91,7 @@ impl Scene {
             let k = 1f64 - eta * eta * (1f64 - cos_i * cos_i);
             if k >= 0f64 {
                 let direction = ray.direction * eta + (normal * (eta * cos_i - k.sqrt())).as_vector();
-                let origin = intersection.nudged_location(-normal);
+                let origin = nudged_location(-normal);
                 let new_ray = Ray::half_infinite(origin, direction.as_normalized());
                 color += transmission_fraction * self.cast_ray(new_ray, depth + 1)
             }

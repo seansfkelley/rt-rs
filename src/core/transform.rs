@@ -5,7 +5,7 @@ pub static IDENTITY_TRANSFORM: Transform = Transform {
     m_inverse: IDENTITY_MATRIX,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Transform {
     pub m: Mat4,
     pub m_inverse: Mat4,
@@ -13,10 +13,8 @@ pub struct Transform {
 
 impl Transform {
     pub fn new(m: Mat4) -> Transform {
-        Transform {
-            m,
-            m_inverse: m.invert().expect("transforms should always be invertible"),
-        }
+        let m_inverse = m.invert().expect("transforms should always be invertible");
+        Transform { m, m_inverse }
     }
 }
 

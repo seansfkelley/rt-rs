@@ -2,7 +2,7 @@ use std::ops::{ Add, Sub, Div, Mul, AddAssign, SubAssign, DivAssign, MulAssign }
 use util::Clamp;
 use std::fmt::{ Debug, Formatter, Result };
 
-#[derive(Copy, Clone)]
+#[derive(Clone, Copy)]
 pub struct Color {
     pub r: f64,
     pub g: f64,

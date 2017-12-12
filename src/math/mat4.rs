@@ -4,7 +4,7 @@ use std::result::Result;
 use std::fmt::{ Debug, Formatter, Error };
 use super::xyz::*;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Mat4 {
     // (row, column)
     pub cells: [[f64; 4]; 4],
@@ -78,22 +78,6 @@ impl Mat4 {
                 [  0f64, 0f64,        0f64,       1f64]
             ],
         }.invert().unwrap()
-    }
-
-    pub fn translate(&self, translation: Vec3) -> Mat4 {
-        *self * Mat4::create_translation(translation)
-    }
-
-    pub fn scale(&self, scale: Vec3) -> Mat4 {
-        *self * Mat4::create_scale(scale)
-    }
-
-    pub fn rotate(&self, theta: f64, axis: Vec3) -> Mat4 {
-        *self * Mat4::create_rotation(theta, axis)
-    }
-
-    pub fn look_at(&self, position: Point, look_at: Point, in_up: Vec3) -> Mat4 {
-        *self * Mat4::create_look_at(position, look_at, in_up)
     }
 
     pub fn transpose(&self) -> Mat4 {
@@ -265,6 +249,30 @@ impl Mul for Mat4 {
     type Output = Mat4;
 
     fn mul(self, other: Mat4) -> Mat4 {
+        self.mul(&other)
+    }
+}
+
+impl <'a> Mul<&'a Mat4> for Mat4 {
+    type Output = Mat4;
+
+    fn mul(self, other: &'a Mat4) -> Mat4 {
+        (&self).mul(other)
+    }
+}
+
+impl <'a> Mul<Mat4> for &'a Mat4 {
+    type Output = Mat4;
+
+    fn mul(self, other: Mat4) -> Mat4 {
+        self.mul(&other)
+    }
+}
+
+impl <'a> Mul<&'a Mat4> for &'a Mat4 {
+    type Output = Mat4;
+
+    fn mul(self, other: &Mat4) -> Mat4 {
         let mut cells = [[0f64; 4]; 4];
         for row in 0..4 {
             for col in 0..4 {

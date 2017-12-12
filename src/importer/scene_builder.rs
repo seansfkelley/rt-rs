@@ -67,8 +67,8 @@ impl SceneBuilder {
 
     fn get_current_transform(&self) -> Transform {
         match self.transform_stack.last() {
-            Some(transform) => *transform,
-            None => IDENTITY_TRANSFORM,
+            Some(transform) => transform.clone(),
+            None => IDENTITY_TRANSFORM.clone(),
         }
     }
 
@@ -129,7 +129,7 @@ impl SceneBuilder {
         match self.animation {
             Some((ref frames, ref matrices)) => (
                 *frames,
-                Transform::new(matrices.into_iter().rev().fold(IDENTITY_MATRIX, |a, b| a * (*b))),
+                Transform::new(matrices.into_iter().rev().fold(IDENTITY_MATRIX, |a, b| a * b)),
             ),
             None => (1, Transform::new(IDENTITY_MATRIX)),
         }

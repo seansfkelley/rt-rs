@@ -157,8 +157,8 @@ Geometry: Box<Geometry> = {
             <negative_transform:("transform" <Transform>)?>
         "}"
     "}" => Box::new(Difference::new(
-        Rc::new(Shape::new(Rc::from(positive_geometry), positive_transform.map(Transform::new).unwrap_or(IDENTITY_TRANSFORM))),
-        Rc::new(Shape::new(Rc::from(negative_geometry), negative_transform.map(Transform::new).unwrap_or(IDENTITY_TRANSFORM))),
+        Rc::new(Shape::new(Rc::from(positive_geometry), positive_transform.map(Transform::new).unwrap_or(IDENTITY_TRANSFORM.clone()))),
+        Rc::new(Shape::new(Rc::from(negative_geometry), negative_transform.map(Transform::new).unwrap_or(IDENTITY_TRANSFORM.clone()))),
     )),
     "cloth" "{"
         "curves" <curves:List<Curve>>

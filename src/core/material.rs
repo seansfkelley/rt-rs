@@ -4,10 +4,10 @@ use core::*;
 
 type SpecularExponent = f64;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct SpecularLighting(pub Color, pub SpecularExponent);
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Transmission {
     pub transmissivity: f64,
     pub index_of_refraction: f64,
@@ -15,7 +15,7 @@ pub struct Transmission {
 
 type Reflectivity = f64;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct Material {
     pub ambient: Color,
     pub diffuse: Color,
@@ -35,11 +35,11 @@ pub struct ConstantTexture {
 
 impl Texture for ConstantTexture {
     fn get_material(&self, _uv: Uv) -> Material {
-        self.material
+        self.material.clone()
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct CheckerboardTexture {
     pub checks_per_unit: u32,
     pub color_a: Color,

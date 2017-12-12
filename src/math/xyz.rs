@@ -10,7 +10,7 @@ pub trait Xyz {
 
 macro_rules! xyz_base {
     ($name:ident) => {
-        #[derive(Copy, Clone, PartialEq)]
+        #[derive(PartialEq, Clone, Copy)]
         pub struct $name {
             pub x: f64,
             pub y: f64,

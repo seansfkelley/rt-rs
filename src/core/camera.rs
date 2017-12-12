@@ -15,7 +15,7 @@ pub enum CameraKind {
     Perspective,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug)]
 pub struct Camera {
     raster_to_camera: Transform,
     camera_to_world: Transform,
@@ -72,18 +72,18 @@ impl Camera {
 impl Transformable for Camera {
     fn transform(&self, transform: &Transform) -> Camera {
         Camera {
-            raster_to_camera: self.raster_to_camera,
+            raster_to_camera: self.raster_to_camera.clone(),
             // TODO: Unsure if this is the right order.
-            camera_to_world: Transform::new(transform.m * self.camera_to_world.m),
+            camera_to_world: Transform::new(&transform.m * &self.camera_to_world.m),
             kind: self.kind,
         }
     }
 
     fn invert_transform(&self, transform: &Transform) -> Camera {
         Camera {
-            raster_to_camera: self.raster_to_camera,
+            raster_to_camera: self.raster_to_camera.clone(),
             // TODO: Unsure if this is the right order.
-            camera_to_world: Transform::new(transform.m_inverse * self.camera_to_world.m_inverse),
+            camera_to_world: Transform::new(&transform.m_inverse * &self.camera_to_world.m_inverse),
             kind: self.kind,
         }
     }
