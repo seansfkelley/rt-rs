@@ -35,17 +35,19 @@ impl Geometry for Triangle {
 
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         // pbrt pg. 141
-        let (i1, i2, i3) = self.indices;
-        let (p1, p2, p3) = (self.mesh.positions[i1], self.mesh.positions[i2], self.mesh.positions[i3]);
-        let e1 = p2 - p1;
-        let e2 = p3 - p1;
+        // Note that we renamed the indices to be consistent with the mathematical notation and so that
+        // the indices were consistent between point, barycentric and normal names.
+        let (i0, i1, i2) = self.indices;
+        let (p0, p1, p2) = (self.mesh.positions[i0], self.mesh.positions[i1], self.mesh.positions[i2]);
+        let e1 = p1 - p0;
+        let e2 = p2 - p0;
         let s1 = ray.direction.cross(e2);
         let divisor = s1.dot(&e1);
         if divisor == 0f64 {
             return None;
         }
 
-        let d = ray.origin - p1;
+        let d = ray.origin - p0;
         let b1 = d.dot(&s1) / divisor;
         if b1 < 0f64 || b1 > 1f64 {
             return None;
@@ -62,17 +64,16 @@ impl Geometry for Triangle {
             return None;
         }
 
-        // prbt pg. 143
         let mut normal = match self.mesh.normals {
             Some(ref normals) => {
                 let b0 = 1f64 - b2 - b1;
-                let (n0, n1, n2) = (normals[i1], normals[i2], normals[i3]);
+                let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
                 n0 * b0 + n1 * b1 + n2 * b2
             },
+            // prbt pg. 143
             None => e2.cross(e1).as_normalized().as_normal(),
         };
 
-        // Flip normal if the mesh isn't closed and we hit the back
         if !self.mesh.closed && normal.dot(&ray.direction) > 0f64 {
             normal = -normal;
         }
@@ -118,11 +119,11 @@ impl TriangleMesh {
 
     fn compute_implicit_normals(positions: &Vec<Point>, indices: &Vec<TriangleIndices>) -> Vec<Normal> {
         let mut normals = vec![Normal::uniform(0f64); positions.len()];
-        for &(i1, i2, i3) in indices {
-            let normal = (positions[i3] - positions[i1]).cross(positions[i2] - positions[i1]).as_normal();
+        for &(i0, i1, i2) in indices {
+            let normal = (positions[i2] - positions[i0]).cross(positions[i1] - positions[i0]).as_normal();
+            normals[i0] = normals[i0] + normal;
             normals[i1] = normals[i1] + normal;
             normals[i2] = normals[i2] + normal;
-            normals[i3] = normals[i3] + normal;
         }
         normals.iter().map(|n| n.as_normalized()).collect()
     }
