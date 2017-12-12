@@ -1,9 +1,10 @@
 use std::f64;
 use std::rc::Rc;
-use std::collections::{ VecDeque, HashSet };
+use std::collections::HashSet;
 use std::fmt::{ Debug, Formatter, Result };
 use ordered_float::NotNaN;
 use lazysort::SortedBy;
+use super::intersection::Intersection;
 use super::ray::Ray;
 use super::bounding_box::{ Bounded, BoundingBox };
 
@@ -45,76 +46,70 @@ impl <T: Bounded> Node<T> {
     }
 }
 
-pub struct TreeIterator<'a, T: Bounded + 'a> {
-    ray: Ray,
-    node_queue: VecDeque<&'a Node<T>>,
-    current_leaf_contents: Option<(&'a Vec<Rc<T>>, usize)>,
-}
+// pbrt pg. 240
+fn intersect<T: Bounded>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
+    let (t_min_init, t_max_init) = match tree.bound.intersect(&ray) {
+        Some((t0, t1)) => (t0, t1),
+        None => { return None; }
+    };
+    let mut node_stack = vec![(&tree.root, t_min_init, t_max_init)];
+    let mut r = ray;
+    let mut closest: Option<Intersection> = None;
 
-impl <'a, T: Bounded + 'a> TreeIterator<'a, T> {
-    fn new(ray: Ray, root: &'a Node<T>) -> TreeIterator<'a, T> {
-        let mut node_queue = VecDeque::new();
-        node_queue.push_back(root);
-        TreeIterator {
-            ray,
-            node_queue,
-            current_leaf_contents: None,
-        }
-    }
-}
-
-impl <'a, T: Bounded> Iterator for TreeIterator<'a, T> {
-    type Item = &'a T;
-
-    fn next(&mut self) -> Option<&'a T> {
-        match self.current_leaf_contents {
-            Some((items, mut index)) => {
-                while index < items.len() {
-                    let item = &items[index];
-                    if item.bound().intersect(&self.ray).is_some() {
-                        self.current_leaf_contents = Some((items, index + 1));
-                        return Some(&items[index]);
+    while node_stack.len() > 0 {
+        let (node, t_min, t_max) = node_stack.pop().unwrap();
+        if t_min < r.t_max {
+            match node {
+                &Node::Internal(axis, distance, ref left, ref right) => {
+                    let axis_index = axis as usize;
+                    let origin_component = r.origin[axis_index];
+                    // TODO: If origin_component == distance, we can check the direction to be more clever.
+                    let (near, far) = if origin_component < distance {
+                        (left, right)
                     } else {
-                        index += 1;
-                    }
-                }
-            },
-            None => {},
-        }
+                        (right, left)
+                    };
 
-        match self.node_queue.pop_front() {
-            Some(node) => {
-                match node {
-                    &Node::Internal(axis, distance, ref left, ref right) => {
-                        let axis_index = axis as usize;
-                        let direction_component = self.ray.direction[axis_index];
-                        let origin_component = self.ray.origin[axis_index];
-                        if direction_component != 0f64 && (distance - origin_component) / direction_component > 0f64 {
-                            self.node_queue.push_back(&*left);
-                            self.node_queue.push_back(&*right);
-                        } else {
-                            if origin_component < distance {
-                                self.node_queue.push_back(&*left);
-                            } else {
-                                self.node_queue.push_back(&*right);
-                            }
-                        }
-                        self.next()
-                    },
-                    &Node::Leaf(ref items) => {
-                        self.current_leaf_contents = Some((items, 0usize));
-                        self.next()
+                    let t_plane = (distance - origin_component) / r.direction[axis_index];
+                    if t_plane > t_max || t_plane <= 0f64 {
+                        // t_plane > t_max means we hit the plane outside the current node's bounds, so skip far.
+                        // t_plane <= 0 is not because the starting point of the ray is significant, but because the
+                        // sign tells us if we're pointing away from the plane and can skip far.
+                        // Note that this automatically handles both infinities.
+                        node_stack.push((near, t_min, t_max));
+                    } else if t_plane < t_min {
+                        // t_plane < t_min means we're poining towards the plane, but it's behind where we care about
+                        // so skip near.
+                        node_stack.push((far, t_min, t_max));
+                    } else {
+                        node_stack.push((far, t_plane, t_max));
+                        node_stack.push((near, t_min, t_plane));
                     }
-                }
-            },
-            None => None,
+                },
+                &Node::Leaf(ref items) => {
+                    // TODO: How does t_min, t_max here relate to that currently set on r?
+                    for item in items {
+                        // TODO: Adjust t range as we go.
+                        // TODO: Should Bounded: Intersectable, or should we just use Intersectable and have it include Bounded?
+                        match item.intersect(&r) {
+                            Some(intersection) => {
+
+                            },
+                            None => {},
+                        }
+                    }
+                },
+            }
         }
     }
+
+    closest
 }
 
 // TODO: Consider newtype.
 pub struct KdTree<T: Bounded> {
-    tree: Node<T>,
+    root: Node<T>,
+    bound: BoundingBox,
 }
 
 const LEAF_THRESHOLD: usize = 5;
@@ -212,24 +207,28 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<
     }
 }
 
-impl <'a, T: Bounded> KdTree<T> {
+impl <T: Bounded> KdTree<T> {
     pub fn from(items: Vec<T>) -> KdTree<T> {
         let pairs: Vec<(Rc<T>, BoundingBox)> = items.into_iter().map(|i| {
             let bound = i.bound();
             (Rc::new(i), bound)
         }).collect();
+        let tree_bound = pairs
+            .iter()
+            .fold(BoundingBox::empty(), |unioned_bounds, &(_, ref bound)| BoundingBox::union(&unioned_bounds, bound));
         KdTree {
-            tree: recursively_build_tree(pairs)
+            root: recursively_build_tree(pairs),
+            bound: tree_bound,
         }
     }
 
-    pub fn intersect(&'a self, ray: Ray) -> TreeIterator<'a, T> {
-        TreeIterator::new(ray, &self.tree)
+    pub fn intersect(&self, ray: Ray) -> Option<Intersection> {
+        intersect(&self, ray)
     }
 }
 
 impl <T: Bounded> Debug for KdTree<T> {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        self.tree.fmt_indented(f, 0)
+        self.root.fmt_indented(f, 0)
     }
 }
