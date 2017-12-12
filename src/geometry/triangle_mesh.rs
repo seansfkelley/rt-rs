@@ -80,8 +80,6 @@ impl TriangleMesh {
         }
 
         // prbt pg. 143
-        // pbrt uses a different method to compute the normal, but it does use e2 x e1 in a special case
-        // and refers to it as the normal, so we use that here.
         let mut normal = match self.normals {
             Some(ref normals) => {
                 let b0 = 1f64 - b2 - b1;
