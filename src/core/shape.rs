@@ -1,7 +1,4 @@
 use std::rc::Rc;
-use super::ray::Ray;
-use super::intersection::Intersection;
-use geometry::Geometry;
 use core::*;
 
 #[derive(Debug, Clone)]
@@ -23,6 +20,10 @@ impl Shape {
 }
 
 impl Geometry for Shape {
+    fn bound(&self) -> BoundingBox {
+        self.bound.clone()
+    }
+
     fn intersect(&self, world_ray: &Ray) -> Option<Intersection> {
         let ref object_ray = world_ray.invert_transform(&self.object_to_world);
         match self.geometry.intersect(object_ray) {
@@ -36,11 +37,3 @@ impl Geometry for Shape {
         }
     }
 }
-
-impl Bounded for Shape {
-    fn bound(&self) -> BoundingBox {
-        self.bound.clone()
-    }
-}
-
-

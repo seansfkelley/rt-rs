@@ -3,7 +3,6 @@ use std::boxed::Box;
 use std::rc::Rc;
 use core::*;
 use math::*;
-use geometry::*;
 
 #[derive(Debug, Default)]
 pub struct SceneBuilder {

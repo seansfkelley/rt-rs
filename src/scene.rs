@@ -2,7 +2,6 @@ use std::rc::Rc;
 use math::*;
 use core::*;
 use color::Color;
-use geometry::Geometry;
 use util::Clamp;
 
 pub struct Scene {
@@ -41,7 +40,7 @@ impl Scene {
         let mut closest: Option<TexturedIntersection> = None;
         let mut r = ray;
 
-        for o in self.objects.intersects(r.clone()) {
+        for o in self.objects.intersect(&r) {
             match o.intersect(&r) {
                 Some(intersection) => {
                     closest = Some(TexturedIntersection {

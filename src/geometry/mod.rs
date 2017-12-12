@@ -9,12 +9,3 @@ pub use self::rect_prism::*;
 pub use self::sphere::*;
 pub use self::triangle_mesh::*;
 pub use self::cloth::*;
-
-use core::ray::Ray;
-use core::intersection::Intersection;
-use core::bounding_box::Bounded;
-use std::fmt::Debug;
-
-pub trait Geometry : Debug + Bounded {
-    fn intersect(&self, ray: &Ray) -> Option<Intersection>;
-}

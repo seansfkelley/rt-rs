@@ -1,7 +1,6 @@
 use std::f64;
 use math::*;
-use super::ray::Ray;
-use super::transform::{ Transform, Transformable };
+use core::*;
 
 macro_rules! swap {
     ($a:ident, $b:ident) => {
@@ -9,10 +8,6 @@ macro_rules! swap {
         $a = $b;
         $b = temp;
     };
-}
-
-pub trait Bounded {
-    fn bound(&self) -> BoundingBox;
 }
 
 #[derive(Debug, Clone)]

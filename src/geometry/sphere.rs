@@ -1,7 +1,6 @@
 use std::f64::consts::PI;
 
 use core::*;
-use geometry::Geometry;
 use math::*;
 
 #[derive(Debug)]
@@ -55,6 +54,13 @@ fn quadratic(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
 }
 
 impl Geometry for Sphere {
+    fn bound(&self) -> BoundingBox {
+        BoundingBox {
+            min: Point::uniform(-self.radius),
+            max: Point::uniform(self.radius),
+        }
+    }
+
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         let (a, b, c) = (
             ray.direction.magnitude2(),
@@ -77,15 +83,6 @@ impl Geometry for Sphere {
                 }
             }
             None => None,
-        }
-    }
-}
-
-impl Bounded for Sphere {
-    fn bound(&self) -> BoundingBox {
-        BoundingBox {
-            min: Point::uniform(-self.radius),
-            max: Point::uniform(self.radius),
         }
     }
 }

@@ -4,9 +4,7 @@ use std::collections::HashSet;
 use std::fmt::{ Debug, Formatter, Result };
 use ordered_float::NotNaN;
 use lazysort::SortedBy;
-use super::intersection::Intersection;
-use super::ray::Ray;
-use super::bounding_box::{ Bounded, BoundingBox };
+use core::*;
 
 #[derive(Debug, Clone, Copy)]
 enum Axis {
@@ -15,12 +13,12 @@ enum Axis {
     Z = 2,
 }
 
-enum Node<T: Bounded> {
+enum Node<T: Geometry> {
     Internal(Axis, f64, Box<Node<T>>, Box<Node<T>>),
     Leaf(Vec<Rc<T>>),
 }
 
-impl <T: Bounded> Node<T> {
+impl <T: Geometry> Node<T> {
     fn size(&self) -> usize {
         match self {
             &Node::Internal(_, _, ref left, ref right) => {
@@ -47,7 +45,7 @@ impl <T: Bounded> Node<T> {
 }
 
 // pbrt pg. 240
-fn intersect<T: Bounded>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
+fn intersect<T: Geometry>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
     let (t_min_init, t_max_init) = match tree.bound.intersect(&ray) {
         Some((t0, t1)) => (t0, t1),
         None => { return None; }
@@ -87,13 +85,11 @@ fn intersect<T: Bounded>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
                     }
                 },
                 &Node::Leaf(ref items) => {
-                    // TODO: How does t_min, t_max here relate to that currently set on r?
                     for item in items {
-                        // TODO: Adjust t range as we go.
-                        // TODO: Should Bounded: Intersectable, or should we just use Intersectable and have it include Bounded?
                         match item.intersect(&r) {
                             Some(intersection) => {
-
+                                closest = Some(intersection);
+                                r.t_max = intersection.distance;
                             },
                             None => {},
                         }
@@ -106,8 +102,7 @@ fn intersect<T: Bounded>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
     closest
 }
 
-// TODO: Consider newtype.
-pub struct KdTree<T: Bounded> {
+pub struct KdTree<T: Geometry> {
     root: Node<T>,
     bound: BoundingBox,
 }
@@ -121,7 +116,7 @@ fn surface_area(bound: &BoundingBox) -> f64 {
     2f64 * (dimensions.x * dimensions.y + dimensions.y * dimensions.z + dimensions.z * dimensions.x)
 }
 
-fn recursively_build_tree<T: Bounded>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<T> {
+fn recursively_build_tree<T: Geometry>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<T> {
     if items.len() < LEAF_THRESHOLD {
         Node::Leaf(items.into_iter().map(|(i, _)| Rc::clone(&i)).collect())
     } else {
@@ -207,7 +202,7 @@ fn recursively_build_tree<T: Bounded>(items: Vec<(Rc<T>, BoundingBox)>) -> Node<
     }
 }
 
-impl <T: Bounded> KdTree<T> {
+impl <T: Geometry> KdTree<T> {
     pub fn from(items: Vec<T>) -> KdTree<T> {
         let pairs: Vec<(Rc<T>, BoundingBox)> = items.into_iter().map(|i| {
             let bound = i.bound();
@@ -221,13 +216,19 @@ impl <T: Bounded> KdTree<T> {
             bound: tree_bound,
         }
     }
+}
 
-    pub fn intersect(&self, ray: Ray) -> Option<Intersection> {
-        intersect(&self, ray)
+impl <T: Geometry> Geometry for KdTree<T> {
+    fn bound(&self) -> BoundingBox {
+        self.bound
+    }
+
+    fn intersect(&self, ray: &Ray) -> Option<Intersection> {
+        intersect(&self, ray.clone())
     }
 }
 
-impl <T: Bounded> Debug for KdTree<T> {
+impl <T: Geometry> Debug for KdTree<T> {
     fn fmt(&self, f: &mut Formatter) -> Result {
         self.root.fmt_indented(f, 0)
     }

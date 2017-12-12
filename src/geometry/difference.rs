@@ -3,7 +3,6 @@ use std::f64;
 
 use core::*;
 use math::*;
-use geometry::Geometry;
 
 #[derive(Debug)]
 pub struct Difference {
@@ -29,6 +28,10 @@ fn flip_normal(i: Intersection) -> Intersection {
 }
 
 impl Geometry for Difference {
+    fn bound(&self) -> BoundingBox {
+        BoundingBox::union(&self.lhs.bound(), &self.rhs.bound())
+    }
+
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         // We have to remove the outer limit on rays because we also use them to determine
         // if we're inside geometries. If we're inside but the limit doesn't let us hit the
@@ -43,12 +46,6 @@ impl Geometry for Difference {
             },
             None => None,
         }
-    }
-}
-
-impl Bounded for Difference {
-    fn bound(&self) -> BoundingBox {
-        BoundingBox::union(&self.lhs.bound(), &self.rhs.bound())
     }
 }
 

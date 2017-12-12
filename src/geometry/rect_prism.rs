@@ -1,6 +1,5 @@
 use std::f64;
 use core::*;
-use geometry::Geometry;
 use math::*;
 
 macro_rules! swap {
@@ -52,6 +51,13 @@ impl RectPrism {
 }
 
 impl Geometry for RectPrism {
+    fn bound(&self) -> BoundingBox {
+        BoundingBox {
+            min: self.min,
+            max: self.max,
+        }
+    }
+
     // pbrt pg. 194
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         let (mut t0, mut t1) = (f64::NEG_INFINITY, f64::INFINITY);
@@ -81,15 +87,6 @@ impl Geometry for RectPrism {
             }
         } else {
             Some(self.get_intersection(t0, &ray))
-        }
-    }
-}
-
-impl Bounded for RectPrism {
-    fn bound(&self) -> BoundingBox {
-        BoundingBox {
-            min: self.min,
-            max: self.max,
         }
     }
 }
