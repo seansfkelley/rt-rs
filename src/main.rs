@@ -6,6 +6,7 @@ extern crate regex;
 extern crate lalrpop_util;
 extern crate terminal_size;
 extern crate ordered_float;
+extern crate rayon;
 
 mod core;
 mod geometry;
@@ -15,17 +16,22 @@ mod math;
 mod importer;
 mod progress_bar;
 
-use core::*;
-use rand::Rng;
-use scene::Scene;
-use image::{ RgbImage, Rgb, Pixel };
 use std::fs::{ File, create_dir_all };
 use std::path::{ Path, PathBuf };
+use std::collections::HashMap;
+use std::iter::FromIterator;
 use std::env;
 use std::thread;
 use std::time::Duration;
 use std::sync::{ Arc, Mutex };
 use std::io::{ stderr, Write };
+
+use rayon::prelude::*;
+use image::{ RgbImage, Rgb, Pixel };
+
+use core::*;
+use rand::Rng;
+use scene::Scene;
 use progress_bar::ProgressBar;
 
 fn main() {
@@ -63,37 +69,41 @@ fn main() {
     let mut camera = scene_file.camera;
     let frame_count = scene_file.animation.0;
 
-    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * antialias * antialias * frame_count, frame_count)));
-    let progress_render = progress_main.clone();
-    thread::spawn(move || {
-        loop {
-            let is_complete = {
-                let p = progress_render.lock().unwrap();
-                p.render();
-                p.is_complete()
-            };
+    // let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * antialias * antialias * frame_count, frame_count)));
+    // let progress_render = progress_main.clone();
+    // thread::spawn(move || {
+    //     loop {
+    //         let is_complete = {
+    //             let p = progress_render.lock().unwrap();
+    //             p.render();
+    //             p.is_complete()
+    //         };
 
-            if !is_complete {
-                thread::sleep(Duration::from_millis(100));
-            } else {
-                progress_render.lock().unwrap().render();
-                eprintln!();
-                stderr().flush().ok().unwrap();
-                thread::sleep(Duration::from_millis(200)); // time to flush the buffers, sometimes
-                break;
-            }
-        }
-    });
+    //         if !is_complete {
+    //             thread::sleep(Duration::from_millis(100));
+    //         } else {
+    //             progress_render.lock().unwrap().render();
+    //             eprintln!();
+    //             stderr().flush().ok().unwrap();
+    //             thread::sleep(Duration::from_millis(200)); // time to flush the buffers, sometimes
+    //             break;
+    //         }
+    //     }
+    // });
 
-    let mut rng = rand::thread_rng();
     for frame_number in 0..frame_count {
-        progress_main.lock().unwrap().increment_frame();
+        // progress_main.lock().unwrap().increment_frame();
 
         let mut img = RgbImage::new(width, height);
 
-        for x in 0..width {
-            for y in 0..height {
-                let mut color = color::BLACK;
+        (0..width)
+            .flat_map(|x| (0..height).into_iter().map(|y| (x, y)))
+            .collect::<Vec<(u32, u32)>>()
+            .into_par_iter()
+            .map(|(image_x, image_y)| {
+                let mut rng = rand::thread_rng();
+
+                let mut color = color::BLACK.clone();
                 for sample_x in 0..antialias {
                     for sample_y in 0..antialias {
                         let (x_jitter, y_jitter) =
@@ -112,13 +122,18 @@ fn main() {
                                     rng.next_f64() * (y_max - y_min) + y_min,
                                 )
                             };
-                        color = color + scene.raytrace(camera.get_ray(x as f64 + x_jitter, y as f64 + y_jitter));
+                        color = color + scene.raytrace(camera.get_ray(image_x as f64 + x_jitter, image_y as f64 + y_jitter));
                     }
                 }
-                progress_main.lock().unwrap().increment_operations(antialias * antialias);
-                img.put_pixel(x, y, *Rgb::from_slice(&(color / (antialias * antialias) as f64).as_bytes()));
-            }
-        }
+                (image_x, image_y, color / (antialias * antialias) as f64)
+            })
+            .collect::<Vec<(u32, u32, Color)>>()
+            .into_iter()
+            .for_each(|(x, y, color)| {
+                img.put_pixel(x, y, *Rgb::from_slice(&color.as_bytes()));
+            });
+
+        // progress_main.lock().unwrap().increment_operations(antialias * antialias);
 
         let ref mut output_file = File::create(&get_output_filename(frame_number)).expect("error creating output file");
         image::ImageRgb8(img).save(output_file, image::PNG).expect("error saving image");
