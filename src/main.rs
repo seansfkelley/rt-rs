@@ -23,10 +23,15 @@ use std::fs::{ File, create_dir_all };
 use std::path::{ Path, PathBuf };
 use std::env;
 use std::thread;
-use std::time::Duration;
+use std::time::{ Duration, SystemTime };
 use std::sync::{ Arc, Mutex };
 use std::io::{ stderr, Write };
 use progress_bar::ProgressBar;
+
+fn seconds_since(t: SystemTime) -> f64 {
+    let duration = t.elapsed().unwrap();
+    (duration.as_secs() as f64 * 1e9f64 + duration.subsec_nanos() as f64) / 1e9f64
+}
 
 fn main() {
     let mut args = env::args();
@@ -38,7 +43,14 @@ fn main() {
         panic!("more than one argument provided");
     }
 
+    let parse_start_time = SystemTime::now();
     let scene_file = importer::parse(Path::new(&scene_file_path));
+    eprintln!("{} parsed and objects constructed in {:.1}s", scene_file_path, seconds_since(parse_start_time));
+
+    let tree_start_time = SystemTime::now();
+    let object_tree = KdTree::from(scene_file.objects);
+    eprintln!("spatial index built in {:.1}s", seconds_since(tree_start_time));
+
     let output_directory: PathBuf = vec![
         "out",
         Path::new(&scene_file_path).file_stem().expect("no file stem").to_str().expect("cannot convert path to string"),
@@ -52,7 +64,7 @@ fn main() {
     };
 
     let scene = Scene::new(
-        KdTree::from(scene_file.objects),
+        object_tree,
         scene_file.lights,
         scene_file.parameters.background_color,
         scene_file.parameters.depth_limit
