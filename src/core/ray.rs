@@ -38,10 +38,6 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn split(&self, t: f64) -> (Ray, Ray) {
-        (self.with_max(t), self.with_min(t))
-    }
-
     pub fn with_min(&self, t: f64) -> Ray {
         Ray {
             origin: self.origin,
@@ -110,22 +106,5 @@ mod tests {
     fn it_should_throw_if_calling_at_with_out_of_bounds_t() {
         let r = Ray::half_infinite(Point::uniform(0f64), Vec3::X_AXIS);
         r.at(-1f64);
-    }
-
-    #[test]
-    fn it_should_split_into_two_rays_that_exactly_cover_the_interval_of_t() {
-        let r = Ray::finite(Point::uniform(0f64), Vec3::X_AXIS, 0f64, 1f64);
-
-        let (r0, r1) = r.split(0.5f64);
-
-        assert_eq!(r0.origin, r.origin);
-        assert_eq!(r0.direction, r.direction);
-        assert_eq!(r0.t_min, 0f64);
-        assert_eq!(r0.t_max, 0.5f64);
-
-        assert_eq!(r1.origin, r.origin);
-        assert_eq!(r1.direction, r.direction);
-        assert_eq!(r1.t_min, 0.5f64);
-        assert_eq!(r1.t_max, 1f64);
     }
 }
