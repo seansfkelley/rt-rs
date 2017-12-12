@@ -70,6 +70,13 @@ texture glass constant transmissive {
   reflectivity 0.95
 }
 
+texture earth image {
+  diffuse "textures/earth.png"
+  ambient 0.2 * diffuse
+  specular "textures/earth-specular.png"
+  reflectivity 1 * specular
+}
+
 transform translate -4 -4 2
 object {
   geometry sphere {
@@ -173,7 +180,7 @@ object {
       transform translate 3 -3.5 -.5
     }
   }
-  texture yellow_matte
+  texture earth
 }
 
 transform scale 2 5 2
