@@ -190,7 +190,7 @@ mod tests {
     #[test]
     fn it_should_not_intersect_a_half_infinite_ray_from_outside() {
         let r = Ray::half_infinite(Point::new(5f64, 0f64, -5f64), Vec3::Z_AXIS);
-        assert!(!SIMPLE_BOUNDING_BOX.intersect(&r).is_none());
+        assert!(SIMPLE_BOUNDING_BOX.intersect(&r).is_none());
     }
 
     #[test]
