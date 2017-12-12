@@ -6,7 +6,6 @@ extern crate regex;
 extern crate lalrpop_util;
 extern crate terminal_size;
 extern crate ordered_float;
-extern crate lazysort;
 
 mod core;
 mod geometry;

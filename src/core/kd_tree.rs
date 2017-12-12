@@ -3,7 +3,6 @@ use std::rc::Rc;
 use std::collections::HashSet;
 use std::fmt::{ Debug, Formatter, Result };
 use ordered_float::NotNaN;
-use lazysort::SortedBy;
 use core::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -61,14 +60,14 @@ fn intersect<T: Geometry>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
                 &Node::Internal(axis, distance, ref left, ref right) => {
                     let axis_index = axis as usize;
                     let origin_component = r.origin[axis_index];
-                    // TODO: If origin_component == distance, we can check the direction to be more clever.
-                    let (near, far) = if origin_component < distance {
+                    let direction_component = r.direction[axis_index];
+                    let (near, far) = if (origin_component < distance) || (origin_component == distance && direction_component <= 0f64) {
                         (left, right)
                     } else {
                         (right, left)
                     };
 
-                    let t_plane = (distance - origin_component) / r.direction[axis_index];
+                    let t_plane = (distance - origin_component) / direction_component;
                     if t_plane > t_max || t_plane <= 0f64 {
                         // t_plane > t_max means we hit the plane outside the current node's bounds, so skip far.
                         // t_plane <= 0 is not because the starting point of the ray is significant, but because the
@@ -108,8 +107,9 @@ pub struct KdTree<T: Geometry> {
 }
 
 const LEAF_THRESHOLD: usize = 5;
-const TRAVERSAL_COST: f64 = 2.5;
-const INTERSECTION_COST: f64 = 0.9;
+const TRAVERSAL_COST: f64 = 1f64;
+const INTERSECTION_COST: f64 = 20f64;
+const EMPTY_BONUS: f64 = 0.5;
 
 fn surface_area(bound: &BoundingBox) -> f64 {
     let dimensions = bound.max - bound.min;
@@ -134,43 +134,35 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Rc<T>, BoundingBox)>) -> Node
                 let mut partition_candidates: HashSet<NotNaN<f64>> = HashSet::new();
                 for &(_, ref bound) in &items {
                     let (candidate0, candidate1) = (bound.min[axis_index], bound.max[axis_index]);
-                    let (min, max) = (node_bounds.min[axis_index], node_bounds.max[axis_index]);
-                    if min <= candidate0 && candidate0 <= max {
-                        partition_candidates.insert(NotNaN::new(candidate0).unwrap());
-                    }
-                    if min <= candidate1 && candidate1 <= max {
-                        partition_candidates.insert(NotNaN::new(candidate1).unwrap());
-                    }
+                    partition_candidates.insert(NotNaN::new(candidate0).unwrap());
+                    partition_candidates.insert(NotNaN::new(candidate1).unwrap());
                 }
 
-                if partition_candidates.len() > 0 {
-                    partition_candidates
-                        .into_iter()
-                        .map(|d| d.into_inner())
-                        .map(|d| {
-                            let left_count = items.iter().filter(|&&(_, ref bound)| bound.min[axis_index] <= d).count();
-                            let right_count = items.iter().filter(|&&(_, ref bound)| bound.max[axis_index] >= d).count();
-                            let mut left_bounds = node_bounds.clone();
-                            left_bounds.max[axis_index] = d;
-                            let mut right_bounds = node_bounds.clone();
-                            right_bounds.min[axis_index] = d;
-                            let cost = TRAVERSAL_COST + INTERSECTION_COST * (
-                                surface_area(&left_bounds) * left_count as f64 / node_surface_area +
-                                surface_area(&right_bounds) * right_count  as f64 / node_surface_area
-                            );
-                            (d, NotNaN::new(cost).unwrap())
-                        })
-                        .sorted_by(|&(_, a), &(_, b)| a.cmp(&b))
-                        .nth(0)
-                        .map(|(distance, cost)| (axis, distance, cost))
-                } else {
-                    None
-                }
+                let (node_min, node_max) = (node_bounds.min[axis_index], node_bounds.max[axis_index]);
+                partition_candidates
+                    .into_iter()
+                    .map(|d| d.into_inner())
+                    .filter(|&d| node_min <= d && d <= node_max)
+                    .map(|d| {
+                        let left_count = items.iter().filter(|&&(_, ref bound)| bound.min[axis_index] <= d).count();
+                        let right_count = items.iter().filter(|&&(_, ref bound)| bound.max[axis_index] >= d).count();
+                        let mut left_bounds = node_bounds.clone();
+                        left_bounds.max[axis_index] = d;
+                        let mut right_bounds = node_bounds.clone();
+                        right_bounds.min[axis_index] = d;
+                        let bonus_multiplier = 1f64 - (if left_count == 0 || right_count == 0 { EMPTY_BONUS } else { 0f64 });
+                        let cost = TRAVERSAL_COST + INTERSECTION_COST * bonus_multiplier * (
+                            surface_area(&left_bounds) * left_count as f64 / node_surface_area +
+                            surface_area(&right_bounds) * right_count  as f64 / node_surface_area
+                        );
+                        (d, NotNaN::new(cost).unwrap())
+                    })
+                    .min_by_key(|&(_, cost)| cost)
+                    .map(|(distance, cost)| (axis, distance, cost))
             })
             .filter(|o| o.is_some())
             .map(|o| o.unwrap())
-            .sorted_by(|&(_, _, a), &(_, _, b)| a.cmp(&b))
-            .nth(0)
+            .min_by_key(|&(_, _, cost)| cost)
             .map(|(axis, distance, _)| (*axis, distance));
 
         match best_partition {
