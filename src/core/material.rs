@@ -24,7 +24,7 @@ pub struct Material {
     pub reflectivity: Reflectivity,
 }
 
-pub trait Texture: Debug {
+pub trait Texture: Debug + Send + Sync {
     fn get_material(&self, uv: Uv) -> Material;
 }
 

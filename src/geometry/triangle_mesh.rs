@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 use core::*;
 use math::*;
 
@@ -21,7 +21,7 @@ struct TriangleMeshData {
 
 #[derive(Debug)]
 pub struct Triangle {
-    mesh: Rc<TriangleMeshData>,
+    mesh: Arc<TriangleMeshData>,
     indices: TriangleIndices,
 }
 
@@ -106,12 +106,12 @@ impl TriangleMesh {
             assert_eq!(positions.len(), uvs.as_ref().unwrap().len());
         }
 
-        let mesh = Rc::new(TriangleMeshData { positions, normals, uvs, closed });
+        let mesh = Arc::new(TriangleMeshData { positions, normals, uvs, closed });
 
         KdTree::from(indices
             .into_iter()
             .map(|indices| Triangle {
-                mesh: Rc::clone(&mesh),
+                mesh: Arc::clone(&mesh),
                 indices,
             })
             .collect())

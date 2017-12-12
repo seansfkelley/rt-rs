@@ -97,7 +97,7 @@ fn main() {
         let mut img = RgbImage::new(width, height);
 
         (0..width)
-            .flat_map(|x| (0..height).into_iter().map(|y| (x, y)))
+            .flat_map(|x| (0..height).map(|y| (x, y)).collect::<Vec<(u32, u32)>>().into_iter())
             .collect::<Vec<(u32, u32)>>()
             .into_par_iter()
             .map(|(image_x, image_y)| {

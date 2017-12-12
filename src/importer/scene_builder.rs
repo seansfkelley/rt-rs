@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::boxed::Box;
-use std::rc::Rc;
+use std::sync::Arc;
 use core::*;
 use math::*;
 
@@ -12,8 +12,8 @@ pub struct SceneBuilder {
     antialias: Option<u32>,
     depth_limit: Option<u32>,
     background_color: Option<Color>,
-    textures: HashMap<String, Rc<Texture>>,
-    // TODO: Should transform be an Rc instead? Feels like this can get expensive.
+    textures: HashMap<String, Arc<Texture>>,
+    // TODO: Should transform be an Arc instead? Feels like this can get expensive.
     transform_stack: Vec<Transform>,
     pub objects: Vec<SceneObject>,
     pub lights: Vec<Light>,
@@ -62,7 +62,7 @@ impl SceneBuilder {
     optional_setter!(background_color, Color);
 
     pub fn register_texture(&mut self, name: &str, texture: Box<Texture>) {
-        self.textures.insert(name.to_owned(), Rc::from(texture));
+        self.textures.insert(name.to_owned(), Arc::from(texture));
     }
 
     fn get_current_transform(&self) -> Transform {
@@ -95,8 +95,8 @@ impl SceneBuilder {
         let transform = self.get_current_transform();
         let texture_name = partial_object.1.to_owned();
         self.objects.push(SceneObject {
-            shape: Shape::new(Rc::from(partial_object.0), transform),
-            texture: Rc::clone(self.textures.get(&texture_name).expect(format!("no texture named '{}' defined", texture_name).as_str())),
+            shape: Shape::new(Arc::from(partial_object.0), transform),
+            texture: Arc::clone(self.textures.get(&texture_name).expect(format!("no texture named '{}' defined", texture_name).as_str())),
         });
     }
 

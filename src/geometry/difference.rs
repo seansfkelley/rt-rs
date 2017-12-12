@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 use std::f64;
 
 use core::*;
@@ -6,12 +6,12 @@ use math::*;
 
 #[derive(Debug)]
 pub struct Difference {
-    lhs: Rc<Geometry>,
-    rhs: Rc<Geometry>,
+    lhs: Arc<Geometry>,
+    rhs: Arc<Geometry>,
 }
 
 impl Difference {
-    pub fn new(lhs: Rc<Geometry>, rhs: Rc<Geometry>) -> Difference {
+    pub fn new(lhs: Arc<Geometry>, rhs: Arc<Geometry>) -> Difference {
         Difference { lhs, rhs }
     }
 }

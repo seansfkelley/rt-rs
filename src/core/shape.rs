@@ -1,15 +1,15 @@
-use std::rc::Rc;
+use std::sync::Arc;
 use core::*;
 
 #[derive(Debug, Clone)]
 pub struct Shape {
-    geometry: Rc<Geometry>,
+    geometry: Arc<Geometry>,
     object_to_world: Transform,
     bound: BoundingBox,
 }
 
 impl Shape {
-    pub fn new(geometry: Rc<Geometry>, object_to_world: Transform) -> Shape {
+    pub fn new(geometry: Arc<Geometry>, object_to_world: Transform) -> Shape {
         let bound = geometry.bound().transform(&object_to_world);
         Shape {
             geometry,

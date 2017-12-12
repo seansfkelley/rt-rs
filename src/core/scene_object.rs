@@ -1,10 +1,10 @@
-use std::rc::Rc;
+use std::sync::Arc;
 use core::*;
 
 #[derive(Debug)]
 pub struct SceneObject {
     pub shape: Shape,
-    pub texture: Rc<Texture>,
+    pub texture: Arc<Texture>,
 }
 
 impl Geometry for SceneObject {
