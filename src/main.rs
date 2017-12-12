@@ -18,8 +18,6 @@ mod progress_bar;
 
 use std::fs::{ File, create_dir_all };
 use std::path::{ Path, PathBuf };
-use std::collections::HashMap;
-use std::iter::FromIterator;
 use std::env;
 use std::thread;
 use std::time::{ Duration, SystemTime };
@@ -81,30 +79,30 @@ fn main() {
     let mut camera = scene_file.camera;
     let frame_count = scene_file.animation.0;
 
-    // let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * antialias * antialias * frame_count, frame_count)));
-    // let progress_render = progress_main.clone();
-    // thread::spawn(move || {
-    //     loop {
-    //         let is_complete = {
-    //             let p = progress_render.lock().unwrap();
-    //             p.render();
-    //             p.is_complete()
-    //         };
+    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * antialias * antialias * frame_count, frame_count)));
+    let progress_render = progress_main.clone();
+    thread::spawn(move || {
+        loop {
+            let is_complete = {
+                let p = progress_render.lock().unwrap();
+                p.render();
+                p.is_complete()
+            };
 
-    //         if !is_complete {
-    //             thread::sleep(Duration::from_millis(100));
-    //         } else {
-    //             progress_render.lock().unwrap().render();
-    //             eprintln!();
-    //             stderr().flush().ok().unwrap();
-    //             thread::sleep(Duration::from_millis(200)); // time to flush the buffers, sometimes
-    //             break;
-    //         }
-    //     }
-    // });
+            if !is_complete {
+                thread::sleep(Duration::from_millis(100));
+            } else {
+                progress_render.lock().unwrap().render();
+                eprintln!();
+                stderr().flush().ok().unwrap();
+                thread::sleep(Duration::from_millis(200)); // time to flush the buffers, sometimes
+                break;
+            }
+        }
+    });
 
     for frame_number in 0..frame_count {
-        // progress_main.lock().unwrap().increment_frame();
+        progress_main.lock().unwrap().increment_frame();
 
         let mut img = RgbImage::new(width, height);
 
@@ -137,6 +135,7 @@ fn main() {
                         color = color + scene.raytrace(camera.get_ray(image_x as f64 + x_jitter, image_y as f64 + y_jitter));
                     }
                 }
+                progress_main.lock().unwrap().increment_operations(antialias * antialias);
                 (image_x, image_y, color / (antialias * antialias) as f64)
             })
             .collect::<Vec<(u32, u32, Color)>>()
@@ -145,7 +144,6 @@ fn main() {
                 img.put_pixel(x, y, *Rgb::from_slice(&color.as_bytes()));
             });
 
-        // progress_main.lock().unwrap().increment_operations(antialias * antialias);
 
         let ref mut output_file = File::create(&get_output_filename(frame_number)).expect("error creating output file");
         image::ImageRgb8(img).save(output_file, image::PNG).expect("error saving image");
