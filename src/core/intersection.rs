@@ -4,7 +4,7 @@ use core::*;
 
 pub type Uv = (f64, f64);
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Intersection {
     pub distance: f64,
     pub location: Point,
