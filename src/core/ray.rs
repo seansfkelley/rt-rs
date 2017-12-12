@@ -38,7 +38,7 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn with_min(&self, t: f64) -> Ray {
+    pub fn with_min(self, t: f64) -> Ray {
         Ray {
             origin: self.origin,
             direction: self.direction,
@@ -47,7 +47,7 @@ impl Ray {
         }
     }
 
-    pub fn with_max(&self, t: f64) -> Ray {
+    pub fn with_max(self, t: f64) -> Ray {
         Ray {
             origin: self.origin,
             direction: self.direction,

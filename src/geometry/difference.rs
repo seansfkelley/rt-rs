@@ -24,6 +24,7 @@ fn flip_normal(i: Intersection) -> Intersection {
         location: i.location,
         normal: -i.normal,
         uv: i.uv,
+        material: i.material,
     }
 }
 
@@ -36,7 +37,7 @@ impl Geometry for Difference {
         // We have to remove the outer limit on rays because we also use them to determine
         // if we're inside geometries. If we're inside but the limit doesn't let us hit the
         // surface, we assume we don't collide at all and weird things happen!
-        match self.internal_intersect(ray.with_max(f64::INFINITY)) {
+        match self.internal_intersect(ray.clone().with_max(f64::INFINITY)) {
             Some(intersection) => {
                 if intersection.distance > ray.t_max {
                     None

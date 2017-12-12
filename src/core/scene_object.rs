@@ -13,6 +13,9 @@ impl Geometry for SceneObject {
     }
 
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-        self.shape.intersect(ray)
+        self.shape.intersect(ray).map(|i| {
+            let material = self.texture.get_material(i.uv);
+            i.with_material(material)
+        })
     }
 }

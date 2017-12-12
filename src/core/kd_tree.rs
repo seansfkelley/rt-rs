@@ -88,8 +88,8 @@ fn intersect<T: Geometry>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
                     for item in items {
                         match item.intersect(&r) {
                             Some(intersection) => {
-                                closest = Some(intersection);
                                 r.t_max = intersection.distance;
+                                closest = Some(intersection);
                             },
                             None => {},
                         }
@@ -220,11 +220,16 @@ impl <T: Geometry> KdTree<T> {
 
 impl <T: Geometry> Geometry for KdTree<T> {
     fn bound(&self) -> BoundingBox {
-        self.bound
+        self.bound.clone()
     }
 
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         intersect(&self, ray.clone())
+    }
+
+    fn does_intersect(&self, ray: &Ray) -> bool {
+        // TODO: Actually implement a separate method for this.
+        self.intersect(ray).is_some()
     }
 }
 

@@ -20,7 +20,7 @@ struct TriangleMeshData {
 }
 
 #[derive(Debug)]
-struct Triangle {
+pub struct Triangle {
     mesh: Rc<TriangleMeshData>,
     indices: TriangleIndices,
 }
@@ -82,6 +82,7 @@ impl Geometry for Triangle {
             location: ray.at(t),
             normal,
             uv: (0f64, 0f64),
+            material: None,
         })
     }
 }

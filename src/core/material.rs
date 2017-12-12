@@ -25,7 +25,7 @@ pub struct Material {
 }
 
 pub trait Texture: Debug {
-    fn get_material(&self, intersection: &Intersection) -> Material;
+    fn get_material(&self, uv: Uv) -> Material;
 }
 
 #[derive(Debug)]
@@ -34,7 +34,7 @@ pub struct ConstantTexture {
 }
 
 impl Texture for ConstantTexture {
-    fn get_material(&self, _intersection: &Intersection) -> Material {
+    fn get_material(&self, _uv: Uv) -> Material {
         self.material
     }
 }
@@ -47,10 +47,10 @@ pub struct CheckerboardTexture {
 }
 
 impl Texture for CheckerboardTexture {
-    fn get_material(&self, intersection: &Intersection) -> Material {
+    fn get_material(&self, uv: Uv) -> Material {
         let check_size = 1f64 / self.checks_per_unit as f64;
         let color =
-            if (intersection.uv.0 / check_size) as u32 % 2 == (intersection.uv.1 / check_size) as u32 % 2 {
+            if (uv.0 / check_size) as u32 % 2 == (uv.1 / check_size) as u32 % 2 {
                 self.color_a
             } else {
                 self.color_b

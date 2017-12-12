@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use math::*;
 use core::*;
 use color::Color;
@@ -29,36 +28,15 @@ impl Scene {
         if depth > self.depth_limit {
             self.background_color
         } else {
-            match self.get_closest_hit(ray.clone()) {
-                Some(ref object_hit) => self.get_color(&ray, object_hit, depth),
+            match self.objects.intersect(&ray) {
+                Some(object_hit) => self.get_color(&ray, object_hit, depth),
                 None => self.background_color,
             }
         }
     }
 
-    fn get_closest_hit(&self, ray: Ray) -> Option<TexturedIntersection> {
-        let mut closest: Option<TexturedIntersection> = None;
-        let mut r = ray;
-
-        for o in self.objects.intersect(&r) {
-            match o.intersect(&r) {
-                Some(intersection) => {
-                    closest = Some(TexturedIntersection {
-                        intersection,
-                        texture: Rc::clone(&o.texture),
-                    });
-                    r = r.with_max(intersection.distance);
-                }
-                None => {}
-            }
-        }
-
-        closest
-    }
-
-    fn get_color(&self, ray: &Ray, i: &TexturedIntersection, depth: u32) -> Color {
-        let intersection = i.intersection;
-        let material = i.texture.get_material(&intersection);
+    fn get_color(&self, ray: &Ray, intersection: Intersection, depth: u32) -> Color {
+        let material = intersection.material.expect("scene intersections should always have a material");
         let mut reflection_fraction = material.reflectivity;
         let mut transmission_fraction = material.transmission.as_ref().map(|transmission| transmission.transmissivity).unwrap_or(0f64);
 
@@ -139,7 +117,7 @@ impl Scene {
             .filter(|light| {
                 let light_direction = (light.position - point).as_normalized();
                 let ray = Ray::half_infinite(point, light_direction);
-                self.get_closest_hit(ray).is_none()
+                !self.objects.does_intersect(&ray)
             })
             .collect::<Vec<&Light>>()
     }

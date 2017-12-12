@@ -32,6 +32,7 @@ impl Sphere {
             location: intersection_point,
             normal: intersection_point.as_normal().as_normalized(),
             uv: (phi / PI_2, theta / PI),
+            material: None,
         }
     }
 }

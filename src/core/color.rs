@@ -35,7 +35,7 @@ impl Color {
     }
 
     pub fn average(&self) -> f64 {
-        return (self.r + self.g + self.b) / 3f64;
+        (self.r + self.g + self.b) / 3f64
     }
 }
 
