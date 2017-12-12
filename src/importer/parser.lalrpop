@@ -17,7 +17,7 @@ pub SceneFile: () = {
 Statement: () = {
     "camera" <CameraBuilder> => builder.camera(<>),
     "animation" <Animation> => builder.animation(<>),
-    "image_dimensions" <Tuple2<U32, U32>> => builder.image_dimensions(<>),
+    "image_dimensions" <Tuple2<U32>> => builder.image_dimensions(<>),
     "antialias" <U32> => builder.antialias(<>),
     "depth_limit" <U32> => builder.depth_limit(<>),
     "background_color" <Color> => builder.background_color(<>),
@@ -43,7 +43,7 @@ CameraCommon: CameraCommon = {
     "position" <Point>
     "look_at" <Point>
     "up" <Vec3>
-    <("screen_size" <Tuple2<F64, F64>>)?>
+    <("screen_size" <Tuple2<F64>>)?>
 };
 
 Animation: (u32, Vec<Mat4>) = "{"
@@ -136,8 +136,8 @@ Geometry: Box<Geometry> = {
     "}" => Box::new(RectPrism::new(min, max)),
     "triangle_mesh" "{"
         "positions" <positions:List<Point>>
-        <uvs:("uvs" <List<Tuple2<F64, F64>>>)?>
-        "indices" <indices:List<Tuple3<Usize, Usize, Usize>>>
+        <uvs:("uvs" <List<Tuple2<F64>>>)?>
+        "indices" <indices:List<Tuple3<Usize>>>
         <smoothing:("smoothing" <Smoothing>)?>
         <is_closed:("is_closed" <Bool>)?>
     "}" => Box::new(TriangleMesh::new(
@@ -188,8 +188,8 @@ List<T>: Vec<T> = {
     }
 };
 
-Tuple2<T1, T2>: (T1, T2) = <T1> <T2>;
-Tuple3<T1, T2, T3>: (T1, T2, T3) = <T1> <T2> <T3>;
+Tuple2<T>: (T, T) = <T> <T>;
+Tuple3<T>: (T, T, T) = <T> <T> <T>;
 
 Point: Point = <f1:F64> <f2:F64> <f3:F64> => Point { x: f1, y: f2, z: f3 };
 Vec3: Vec3 = <f1:F64> <f2:F64> <f3:F64> => Vec3 { x: f1, y: f2, z: f3 };
@@ -210,10 +210,10 @@ Color: Color = {
 
 Curve: Box<Curve> = {
     "cubic_bezier" "{"
-        "p0" <p0: Point>
-        "p1" <p1: Point>
-        "p2" <p2: Point>
-        "p3" <p3: Point>
+        "p0" <p0:Point>
+        "p1" <p1:Point>
+        "p2" <p2:Point>
+        "p3" <p3:Point>
     "}" => Box::new(CubicBezier { p0, p1, p2, p3 }),
 };
 
@@ -225,7 +225,7 @@ Bool: bool = {
 Smoothing: Smoothing = {
     "none" => Smoothing::None,
     "implicit" => Smoothing::Implicit,
-    "explicit" <normals:List<Normal>> => Smoothing::Explicit(normals),
+    "explicit" <List<Normal>> => Smoothing::Explicit(<>),
 };
 
 Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
