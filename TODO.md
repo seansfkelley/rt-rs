@@ -18,7 +18,6 @@
 - use any geometry as a light source
 - water
 - named objects, geometries in scenes
-- Gouraud shading
 
 ## performance/quality
 - spatial indexing (kd-tree, r-tree?) - K

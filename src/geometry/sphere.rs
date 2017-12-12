@@ -9,6 +9,8 @@ pub struct Sphere {
     radius: f64,
 }
 
+const PI_2: f64 = PI * 2f64;
+
 impl Sphere {
     pub fn new(radius: f64) -> Sphere {
         Sphere {
@@ -20,9 +22,9 @@ impl Sphere {
         let intersection_point = ray.at(t);
 
         // pbrt pg. 119
-        let mut phi = intersection_point.y.atan2(intersection_point.x);
+        let mut phi = intersection_point.x.atan2(intersection_point.y);
         if phi < 0f64 {
-            phi += 2f64 * PI;
+            phi += PI_2;
         }
         let theta = (intersection_point.z / self.radius).acos();
 
@@ -30,7 +32,7 @@ impl Sphere {
             distance: t,
             location: intersection_point,
             normal: intersection_point.as_normal().as_normalized(),
-            uv: (phi / (2f64 * PI), theta / PI),
+            uv: (phi / PI_2, theta / PI),
         }
     }
 }

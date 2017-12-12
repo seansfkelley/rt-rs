@@ -53,8 +53,6 @@ impl ImageTexture {
             Ok(img) => { img.to_rgb() }
             Err(reason) => { panic!("could not open image at {:?}: {:?}", p, reason); }
         };
-        let (width, height) = image.dimensions();
-        assert_eq!(width, height);
         ImageTexture {
             image,
             reflectivity,
