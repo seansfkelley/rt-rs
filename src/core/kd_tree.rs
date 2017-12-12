@@ -160,8 +160,7 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Rc<T>, BoundingBox)>) -> Node
                     .min_by_key(|&(_, cost)| cost)
                     .map(|(distance, cost)| (axis, distance, cost))
             })
-            .filter(|o| o.is_some())
-            .map(|o| o.unwrap())
+            .filter_map(|o| o)
             .min_by_key(|&(_, _, cost)| cost)
             .map(|(axis, distance, _)| (*axis, distance));
 
