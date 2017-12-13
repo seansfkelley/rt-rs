@@ -7,6 +7,7 @@ extern crate lalrpop_util;
 extern crate terminal_size;
 extern crate ordered_float;
 extern crate rayon;
+extern crate noise;
 
 mod core;
 mod geometry;
@@ -15,6 +16,7 @@ mod util;
 mod math;
 mod importer;
 mod progress_bar;
+mod material;
 
 use std::fs::{ File, create_dir_all };
 use std::path::{ Path, PathBuf };

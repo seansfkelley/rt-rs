@@ -1,5 +1,5 @@
 use math::*;
-use core::*;
+use material::*;
 
 pub type Uv = (f64, f64);
 

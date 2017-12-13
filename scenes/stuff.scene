@@ -70,11 +70,9 @@ texture glass constant transmissive {
   reflectivity 0.95
 }
 
-texture earth image {
-  diffuse "textures/earth.png"
-  ambient 0.2 * diffuse
-  specular "textures/earth-specular.png"
-  reflectivity 1 * specular
+texture wood_texture wood {
+  color_one #96643c
+  color_two #55280f
 }
 
 transform translate -4 -4 2
@@ -180,7 +178,7 @@ object {
       transform translate 3 -3.5 -.5
     }
   }
-  texture earth
+  texture wood_texture
 }
 
 transform scale 2 5 2

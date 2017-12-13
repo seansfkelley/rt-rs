@@ -1,5 +1,6 @@
 use std::sync::Arc;
 use core::*;
+use material::*;
 
 #[derive(Debug)]
 pub struct SceneObject {
@@ -14,7 +15,7 @@ impl Geometry for SceneObject {
 
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         self.shape.intersect(ray).map(|i| {
-            let material = self.texture.get_material(i.uv);
+            let material = self.texture.get_material(&i);
             i.with_material(material)
         })
     }

@@ -2,6 +2,7 @@ use std::path::Path;
 use image::{RgbImage, Pixel, open as openImage};
 use color::{Color};
 use core::*;
+use material::*;
 
 #[derive(Debug, Clone)]
 pub enum LightingFacet {
@@ -73,15 +74,15 @@ impl ImageTexture {
 }
 
 impl Texture for ImageTexture {
-    fn get_material(&self, uv: Uv) -> Material {
+    fn get_material(&self, intersection: &Intersection) -> Material {
         Material {
-            ambient: self.ambient.get_color(uv, self),
-            diffuse: self.diffuse.get_color(uv, self),
+            ambient: self.ambient.get_color(intersection.uv, self),
+            diffuse: self.diffuse.get_color(intersection.uv, self),
             // TODO: How to do more properly??
-            specular: SpecularLighting(self.specular.get_color(uv, self), 20f64),
+            specular: SpecularLighting(self.specular.get_color(intersection.uv, self), 20f64),
             transmission: None,
             // TODO: How to do more properly??
-            reflectivity: self.reflectivity.get_color(uv, self).average(),
+            reflectivity: self.reflectivity.get_color(intersection.uv, self).average(),
         }
     }
 }

@@ -5,6 +5,7 @@ use std::path::{ Path, PathBuf };
 use math::*;
 use core::*;
 use geometry::*;
+use material::*;
 use importer::scene_builder::*;
 use color::{ Color, BLACK, WHITE };
 
@@ -100,6 +101,21 @@ Texture: Box<Texture> = {
         color_a: color_a.unwrap_or(WHITE),
         color_b: color_b.unwrap_or(BLACK),
     }),
+    "wood" "{"
+        "color_one" <color_one:Color>
+        "color_two" <color_two:Color>
+        <scale:("scale" <F64>)?>
+        <reflectivity:("reflectivity" <F64>)?>
+        <specular_exponent:("specular_exponent" <F64>)?>
+        <seed:("seed" <Usize>)?>
+    "}" => Box::new(Wood::new(
+        seed.unwrap_or(0usize),
+        color_one,
+        color_two,
+        scale.unwrap_or(0.2f64),
+        reflectivity.unwrap_or(0.1f64),
+        specular_exponent.unwrap_or(20f64),
+    )),
 };
 
 LightingFacet: LightingFacet = {
