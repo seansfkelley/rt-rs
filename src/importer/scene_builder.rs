@@ -4,6 +4,8 @@ use std::sync::Arc;
 use core::*;
 use math::*;
 use material::*;
+use builder::Parameter;
+use builder::Parameter::*;
 
 #[derive(Debug, Default)]
 pub struct SceneBuilder {
@@ -21,6 +23,13 @@ pub struct SceneBuilder {
 }
 
 pub type CameraCommon = (Point, Point, Vec3, Option<ScreenSize>);
+
+builder!(OrthographicCameraBuilder => OrthographicCamera {
+    position: Point = Required,
+    look_at: Point = Required,
+    up: Point = Required,
+    screen_size: Option<ScreenSize> = Optional(None),
+});
 
 #[derive(Debug, Clone, Copy)]
 pub enum CameraBuilder {

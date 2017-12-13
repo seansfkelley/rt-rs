@@ -30,14 +30,24 @@ Statement: () = {
     "light" <Light> => builder.add_light(<>),
 };
 
-CameraBuilder: CameraBuilder = {
+Camera: () = {
     "orthographic" "{"
-        <common:CameraCommon>
-    "}" => CameraBuilder::Orthographic(common),
-    "perspective" "{"
-        <common:CameraCommon>
-        <fov:("field_of_view" <F64>)?>
-    "}" => CameraBuilder::Perspective(common, fov.unwrap_or(90f64)),
+        <CameraClause*>
+    "}" => {},
+};
+
+CameraClauseCommon: () = {
+    "position" <Point> => builder.camera_position(<>),
+    "look_at" <Point>
+    "up" <Vec3>
+    <("screen_size" <Tuple2<F64>>)?>
+};
+
+CameraClause: () = {
+    "position" <Point>
+    "look_at" <Point>
+    "up" <Vec3>
+    <("screen_size" <Tuple2<F64>>)?>
 };
 
 CameraCommon: CameraCommon = {

@@ -9,6 +9,8 @@ extern crate ordered_float;
 extern crate rayon;
 extern crate noise;
 
+#[macro_use]
+mod builder;
 mod core;
 mod geometry;
 mod scene;
