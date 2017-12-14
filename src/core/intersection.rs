@@ -8,6 +8,7 @@ pub struct Intersection {
     pub distance: f64,
     pub location: Point,
     pub normal: Normal,
+    pub shading_normal: Option<Normal>,
     pub uv: Uv,
     pub material: Option<Material>,
 }
@@ -18,6 +19,7 @@ impl Intersection {
             distance: self.distance,
             location: self.location,
             normal: self.normal,
+            shading_normal: self.shading_normal,
             uv: self.uv,
             material: Some(material),
         }

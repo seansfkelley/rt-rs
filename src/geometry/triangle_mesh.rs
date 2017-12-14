@@ -64,24 +64,24 @@ impl Geometry for Triangle {
             return None;
         }
 
-        let mut normal = match self.mesh.normals {
-            Some(ref normals) => {
-                let b0 = 1f64 - b2 - b1;
-                let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
-                n0 * b0 + n1 * b1 + n2 * b2
-            },
-            // prbt pg. 143
-            None => e2.cross(e1).as_normalized().as_normal(),
-        };
+        let mut shading_normal = self.mesh.normals.as_ref().map(|normals| {
+            let b0 = 1f64 - b2 - b1;
+            let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
+            n0 * b0 + n1 * b1 + n2 * b2
+        });
+
+        let mut normal = e2.cross(e1).as_normalized().as_normal();
 
         if !self.mesh.closed && normal.dot(&ray.direction) > 0f64 {
             normal = -normal;
-        }
+            shading_normal = shading_normal.map(|n| -n);
+        };
 
         Some(Intersection {
             distance: t,
             location: ray.at(t),
             normal,
+            shading_normal,
             uv: (0f64, 0f64),
             material: None,
         })
@@ -97,7 +97,7 @@ impl TriangleMesh {
             Smoothing::Explicit(normals) => {
                 assert_eq!(positions.len(), normals.len());
                 Some(normals)
-            },
+            }
             Smoothing::Implicit => Some(TriangleMesh::compute_implicit_normals(&positions, &indices)),
             Smoothing::None => None,
         };

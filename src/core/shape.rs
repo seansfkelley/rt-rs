@@ -31,6 +31,7 @@ impl Geometry for Shape {
                 distance: object_space_intersection.distance,
                 location: object_space_intersection.location.transform(&self.object_to_world),
                 normal: object_space_intersection.normal.transform(&self.object_to_world),
+                shading_normal: object_space_intersection.shading_normal.map(|n| n.transform(&self.object_to_world)),
                 uv: object_space_intersection.uv,
                 material: None,
             }),
