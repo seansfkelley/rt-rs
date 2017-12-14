@@ -23,6 +23,7 @@ fn flip_normal(i: Intersection) -> Intersection {
         distance: i.distance,
         location: i.location,
         normal: -i.normal,
+        shading_normal: i.shading_normal.map(|n| -n),
         uv: i.uv,
         material: i.material,
     }

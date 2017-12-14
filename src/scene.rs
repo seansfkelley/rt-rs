@@ -44,6 +44,7 @@ impl Scene {
 
         let is_inside = intersection.normal.dot(&ray.direction) > 0f64;
         let normal = if is_inside { -intersection.normal.as_normalized() } else { intersection.normal.as_normalized() };
+        let shading_normal = intersection.shading_normal.unwrap_or(normal);
         let location = intersection.location;
 
         let nudged_location = |normal: Normal| location + (normal * NUDGE_FACTOR).as_vector();
@@ -59,7 +60,7 @@ impl Scene {
             };
             eta = eta_i / eta_t;
             let fresnel_reflection_fraction =
-                self.get_fresnel_reflection_percentage(ray, &normal, eta_i, eta_t);
+                self.get_fresnel_reflection_percentage(ray, &shading_normal, eta_i, eta_t);
             reflection_fraction *= fresnel_reflection_fraction;
             transmission_fraction *= 1f64 - fresnel_reflection_fraction;
         }
@@ -73,24 +74,24 @@ impl Scene {
                 .iter()
                 .fold(material.ambient, |color, light| {
                     let light_direction = (light.position - location).as_normalized();
-                    let diffuse_illumination = material.diffuse * light.color * normal.dot(&light_direction).max(0f64);
+                    let diffuse_illumination = material.diffuse * light.color * shading_normal.dot(&light_direction).max(0f64);
                     let specular_illumination = material.specular.0 * light.color
-                        * normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(material.specular.1);
+                        * shading_normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(material.specular.1);
                     color + diffuse_illumination + specular_illumination
                 });
         }
 
         if reflection_fraction > 0f64 {
-            let new_direction = ray.direction.reflect(normal.as_vector());
+            let new_direction = ray.direction.reflect(shading_normal.as_vector());
             let new_ray = Ray::half_infinite(nudged_location(normal), new_direction);
             color += reflection_fraction * self.cast_ray(new_ray, depth + 1)
         }
 
         if transmission_fraction > 0f64 {
-            let cos_i = -ray.direction.dot(&normal).clamp(-1f64, 1f64);
+            let cos_i = -ray.direction.dot(&shading_normal).clamp(-1f64, 1f64);
             let k = 1f64 - eta * eta * (1f64 - cos_i * cos_i);
             if k >= 0f64 {
-                let direction = ray.direction * eta + (normal * (eta * cos_i - k.sqrt())).as_vector();
+                let direction = ray.direction * eta + (shading_normal * (eta * cos_i - k.sqrt())).as_vector();
                 let origin = nudged_location(-normal);
                 let new_ray = Ray::half_infinite(origin, direction.as_normalized());
                 color += transmission_fraction * self.cast_ray(new_ray, depth + 1)
