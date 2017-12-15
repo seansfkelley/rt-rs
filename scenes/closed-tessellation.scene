@@ -1,0 +1,114 @@
+depth_limit 10
+background_color #111
+
+camera perspective {
+  position 0 3 -10
+  look_at 0 1 0
+  up 0 1 0
+  field_of_view 30
+}
+
+// for pretty
+
+// image_dimensions 1024 1024
+// antialias 3
+
+// for animation
+
+image_dimensions 512 512
+antialias 1
+
+animation {
+  frames 18
+  camera_transforms [
+    rotate 20 0 1 0
+  ]
+}
+
+texture purple_plastic constant flat {
+  color #f0f
+}
+
+object {
+  geometry cloth {
+    curves [
+      cubic_bezier {
+        p0 -1 0 -1
+        p1 -1.5 1 -1.5
+        p2 0 2 0
+        p3 0 3 0
+      },
+      cubic_bezier {
+        p0 -1 0 1
+        p1 0 1 0
+        p2 -2 2 2
+        p3 0 3 0
+      },
+      cubic_bezier {
+        p0 1 0 1
+        p1 1.5 1 1.5
+        p2 0 2 0
+        p3 0 3 0
+      },
+      cubic_bezier {
+        p0 1 0 -1
+        p1 0 1 0
+        p2 2 2 -2
+        p3 0 3 0
+      },
+    ]
+    tessellation_factor 100
+    closure join
+  }
+  texture purple_plastic
+}
+transform rotate 180 1 0 0
+object {
+  geometry cloth {
+    curves [
+      cubic_bezier {
+        p0 -1 0 -1
+        p1 -1.5 1 -1.5
+        p2 0 2 0
+        p3 0 3 0
+      },
+      cubic_bezier {
+        p0 -1 0 1
+        p1 0 1 0
+        p2 -2 2 2
+        p3 0 3 0
+      },
+      cubic_bezier {
+        p0 1 0 1
+        p1 1.5 1 1.5
+        p2 0 2 0
+        p3 0 3 0
+      },
+      cubic_bezier {
+        p0 1 0 -1
+        p1 0 1 0
+        p2 2 2 -2
+        p3 0 3 0
+      },
+    ]
+    tessellation_factor 100
+    closure join
+  }
+  texture purple_plastic
+}
+transform pop
+
+light {
+  position 5 2 5
+  color #777
+}
+
+light {
+  position -5 2 5
+  color #777
+}
+
+light {
+  position 5 2 -5
+  color #777
+}

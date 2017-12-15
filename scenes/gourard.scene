@@ -29,6 +29,16 @@ texture purple_plastic constant flat {
   color #f0f
 }
 
+light {
+  position 4 10 -40
+  color 0.4 0.4 0.4
+}
+
+light {
+  position 4 10 40
+  color 0.4 0.4 0.4
+}
+
 transform translate 0 0 -0.5
 
 transform translate -3 0 0
@@ -54,7 +64,7 @@ object {
       -1 1 -1,
       1 1 -1,
     ]
-    is_closed true
+    is_closed false
   }
   texture purple_plastic
 }
@@ -75,7 +85,7 @@ object {
       0 3 1,
       0 4 3,
     ]
-    is_closed true
+    is_closed false
   }
   texture purple_plastic
 }
@@ -97,15 +107,10 @@ object {
       0 4 3,
     ]
     smoothing none
-    is_closed true
+    is_closed false
   }
   texture purple_plastic
 }
 transform pop
 
 transform pop
-
-light {
-  position 4 10 -40
-  color 0.4 0.4 0.4
-}

@@ -179,11 +179,19 @@ Geometry: Box<Geometry> = {
     "cloth" "{"
         "curves" <curves:List<Curve>>
         <tessellation_factor:("tessellation_factor" <Usize>)?>
+        <closure:("closure" <ClothClosure>)?>
     "}" => Box::new(create_cloth(
         curves,
         tessellation_factor.unwrap_or(100usize),
+        closure.unwrap_or(ClothClosure::None),
     )),
+};
 
+ClothClosure: ClothClosure = {
+    "none" => ClothClosure::None,
+    "cap" => ClothClosure::Cap,
+    "join" => ClothClosure::Join,
+    "closed" => ClothClosure::Closed,
 };
 
 Light: Light = "{"
