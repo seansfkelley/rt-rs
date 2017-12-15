@@ -34,16 +34,16 @@ object {
   geometry cloth {
     curves [
       cubic_bezier {
-        p0 -1 0 0
-        p1 -2 2 2
-        p2 3 4 2
-        p3 2 6 0
+        -1 0 0
+        -2 2 2
+        3 4 2
+        2 6 0
       },
       cubic_bezier {
-        p0 1 0 0
-        p1 2 2 -2
-        p2 -3 4 -2
-        p3 -2 6 0
+        1 0 0
+        2 2 -2
+        -3 4 -2
+        -2 6 0
       },
     ]
     tessellation_factor 20
@@ -57,16 +57,16 @@ object {
   geometry cloth {
     curves [
       cubic_bezier {
-        p0 -1 0 0
-        p1 -2 2 2
-        p2 3 4 2
-        p3 2 6 0
+        -1 0 0
+        -2 2 2
+        3 4 2
+        2 6 0
       },
       cubic_bezier {
-        p0 1 0 0
-        p1 2 2 -2
-        p2 -3 4 -2
-        p3 -2 6 0
+        1 0 0
+        2 2 -2
+        -3 4 -2
+        -2 6 0
       },
     ]
     tessellation_factor 100

@@ -234,12 +234,20 @@ Color: Color = {
 
 Curve: Box<Curve> = {
     "cubic_bezier" "{"
-        "p0" <p0:Point>
-        "p1" <p1:Point>
-        "p2" <p2:Point>
-        "p3" <p3:Point>
+        <p0:Point>
+        <p1:Point>
+        <p2:Point>
+        <p3:Point>
     "}" => Box::new(CubicBezier { p0, p1, p2, p3 }),
+    "cubic_bezier_path" <CubicBezierPath> => Box::new(<>),
 };
+
+CubicBezierFragment: (Point, Point, Point) = <p0:Point> <p1:Point> <p2:Point> => (p0, p1, p2);
+
+CubicBezierPath: CurvePath = "{"
+    <fragments:(<CubicBezierFragment>)+>
+    <end_point:Point>
+"}" => CurvePath::from_cubic_bezier_fragments(fragments, end_point);
 
 Bool: bool = {
     "true" => true,

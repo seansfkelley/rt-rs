@@ -21,17 +21,42 @@ impl Curve for CubicBezier {
     }
 }
 
-#[allow(dead_code)]
-pub struct Path {
-    curves: Vec<Box<Curve>>,
+pub struct CurvePath {
+    pub curves: Vec<Box<Curve>>,
 }
 
-impl Curve for Path {
+impl Curve for CurvePath {
     fn at(&self, t: f64) -> Point {
-        let scaled_t = t * self.curves.len() as f64;
-        let floor_t = scaled_t.floor();
+        let number_of_curves = self.curves.len() as f64;
+        let scaled_t = t * number_of_curves;
+        let floor_t = scaled_t.floor().min(number_of_curves - 1f64);
         let curve = &self.curves[floor_t as usize];
         let curve_t = scaled_t - floor_t;
         curve.at(curve_t)
+    }
+}
+
+impl CurvePath {
+    pub fn from_cubic_bezier_fragments(fragments: Vec<(Point, Point, Point)>, end_point: Point) -> CurvePath {
+        let number_of_fragments = fragments.len();
+        let mut beziers = Vec::<Box<Curve>>::with_capacity(number_of_fragments);
+        for i in 0..(number_of_fragments - 1) {
+            let fragment = fragments[i];
+            beziers.push(Box::new(CubicBezier {
+                p0: fragment.0,
+                p1: fragment.1,
+                p2: fragment.2,
+                p3: fragments[i+1].0,
+            }));
+        }
+        let last_fragment = fragments[number_of_fragments - 1];
+        beziers.push(Box::new(CubicBezier {
+            p0: last_fragment.0,
+            p1: last_fragment.1,
+            p2: last_fragment.2,
+            p3: end_point,
+        }));
+
+        CurvePath { curves: beziers }
     }
 }
