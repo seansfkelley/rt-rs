@@ -32,18 +32,18 @@ texture purple_plastic constant flat {
 object {
   geometry cloth {
     curves [
-      cubic_bezier {
-        -1 0 -1
-        -1 0 -1
-        -1 2 1
-        -1 2 1
-      },
-      cubic_bezier {
-        1 0 1
-        1 0 1
-        1 2 -1
-        1 2 -1
-      },
+      cubic_bezier (
+        -1 0 -1,
+        -1 0 -1,
+        -1 2 1,
+        -1 2 1,
+      ),
+      cubic_bezier (
+        1 0 1,
+        1 0 1,
+        1 2 -1,
+        1 2 -1,
+      ),
     ]
     tessellation_factor 3
   }

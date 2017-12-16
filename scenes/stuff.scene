@@ -187,18 +187,18 @@ transform translate -8 -15 30
 object {
   geometry cloth {
     curves [
-      cubic_bezier {
-        -1 0 0
-        -2 2 2
-        3 4 2
-        2 6 0
-      },
-      cubic_bezier {
-        1 0 0
-        2 2 -2
-        -3 4 -2
-        -2 6 0
-      },
+      cubic_bezier (
+        -1 0 0,
+        -2 2 2,
+        3 4 2,
+        2 6 0,
+      ),
+      cubic_bezier (
+        1 0 0,
+        2 2 -2,
+        -3 4 -2,
+        -2 6 0,
+      ),
     ]
     tessellation_factor 100
   }
