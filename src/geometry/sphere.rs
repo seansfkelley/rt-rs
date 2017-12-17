@@ -21,11 +21,11 @@ impl Sphere {
         let intersection_point = ray.at(t);
 
         // pbrt pg. 119
-        let mut phi = intersection_point.x.atan2(intersection_point.y);
+        let mut phi = intersection_point.z.atan2(intersection_point.x);
         if phi < 0f64 {
             phi += PI_2;
         }
-        let theta = (intersection_point.z / self.radius).acos();
+        let theta = (intersection_point.y / self.radius).acos();
 
         Intersection {
             distance: t,

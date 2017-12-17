@@ -39,8 +39,7 @@ texture moon image {
   reflectivity constant #555
 }
 
-transform rotate -90 1 0 0
-transform rotate 120 0 1 0
+transform rotate 210 0 1 0
 transform translate -1 0 0
 object {
   geometry sphere {
@@ -50,8 +49,7 @@ object {
 }
 transform pop all
 
-transform rotate -90 1 0 0
-transform rotate 180 0 1 0
+transform rotate 270 0 1 0
 transform translate 3 3 -1
 object {
   geometry sphere {
