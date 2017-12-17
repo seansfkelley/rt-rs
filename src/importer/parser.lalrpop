@@ -6,6 +6,7 @@ use math::*;
 use core::*;
 use geometry::*;
 use material::*;
+use tessellation::*;
 use importer::scene_builder::*;
 use color::{ Color, BLACK, WHITE };
 

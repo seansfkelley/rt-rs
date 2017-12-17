@@ -17,6 +17,7 @@ mod math;
 mod importer;
 mod progress_bar;
 mod material;
+mod tessellation;
 
 use std::fs::{ File, create_dir_all };
 use std::path::{ Path, PathBuf };

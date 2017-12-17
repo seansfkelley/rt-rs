@@ -210,6 +210,7 @@ xyz_cross!(Vec3, Vec3, Vec3);
 // xyz_cross!(Vec3, Normal, Vec3);
 xyz_normalizable!(Vec3);
 xyz_convertible!(Vec3, Normal, as_normal);
+xyz_convertible!(Vec3, Point, as_point);
 
 xyz_base!(Point);
 xyz_neg!(Point);
