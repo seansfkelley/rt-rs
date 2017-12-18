@@ -1,13 +1,6 @@
 use math::*;
 use geometry::*;
-use image::RgbImage;
 use std::collections::HashMap;
-
-pub struct DisplacementMap {
-    map: RgbImage,
-    min: f64,
-    max: f64,
-}
 
 pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
     const P0: Point = Point { x:  0f64, y:  0f64, z:  1f64 };
