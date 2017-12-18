@@ -9,14 +9,14 @@ pub struct DisplacementMap {
     max: f64,
 }
 
-const P0: Point = Point { x: 0f64, y: 0f64, z: 1f64 };
-const P1: Point = Point { x: 1f64, y: 0f64, z: 0f64 };
-const P2: Point = Point { x: 0f64, y: 1f64, z: 0f64 };
-const P3: Point = Point { x: -1f64, y: 0f64, z: 0f64 };
-const P4: Point = Point { x: 0f64, y: -1f64, z: 0f64 };
-const P5: Point = Point { x: 0f64, y: 0f64, z: -1f64 };
-
 pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
+    const P0: Point = Point { x:  0f64, y:  0f64, z:  1f64 };
+    const P1: Point = Point { x:  1f64, y:  0f64, z:  0f64 };
+    const P2: Point = Point { x:  0f64, y:  1f64, z:  0f64 };
+    const P3: Point = Point { x: -1f64, y:  0f64, z:  0f64 };
+    const P4: Point = Point { x:  0f64, y: -1f64, z:  0f64 };
+    const P5: Point = Point { x:  0f64, y:  0f64, z: -1f64 };
+
     let (positions, indices) = combine_and_offset(vec![
         divide_triangle((P2, P5, P1), 0, depth),
         divide_triangle((P2, P1, P0), 0, depth),

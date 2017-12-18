@@ -16,8 +16,6 @@ impl Difference {
     }
 }
 
-const EPSILON: f64 = 1e-10f64;
-
 fn flip_normal(i: Intersection) -> Intersection {
     Intersection {
         distance: i.distance,
@@ -65,6 +63,8 @@ impl Difference {
     }
 
     fn internal_intersect_nontrivial(&self, ray: Ray, lhs_intersection: Intersection, rhs_intersection: Intersection) -> Option<Intersection> {
+        const EPSILON: f64 = 1e-10f64;
+
         let inside_lhs = lhs_intersection.normal.dot(&ray.direction) > 0f64;
         let inside_rhs = rhs_intersection.normal.dot(&ray.direction) > 0f64;
         if inside_lhs && inside_rhs {

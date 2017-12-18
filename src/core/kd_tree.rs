@@ -106,17 +106,17 @@ pub struct KdTree<T: Geometry> {
     bound: BoundingBox,
 }
 
-const LEAF_THRESHOLD: usize = 5;
-const TRAVERSAL_COST: f64 = 1f64;
-const INTERSECTION_COST: f64 = 20f64;
-const EMPTY_BONUS: f64 = 0.5;
-
 fn surface_area(bound: &BoundingBox) -> f64 {
     let dimensions = bound.max - bound.min;
     2f64 * (dimensions.x * dimensions.y + dimensions.y * dimensions.z + dimensions.z * dimensions.x)
 }
 
 fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Node<T> {
+    const LEAF_THRESHOLD: usize = 5;
+    const TRAVERSAL_COST: f64 = 1f64;
+    const INTERSECTION_COST: f64 = 20f64;
+    const EMPTY_BONUS: f64 = 0.5;
+
     if items.len() < LEAF_THRESHOLD {
         Node::Leaf(items.into_iter().map(|(i, _)| Arc::clone(&i)).collect())
     } else {

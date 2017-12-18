@@ -8,8 +8,6 @@ pub struct Sphere {
     radius: f64,
 }
 
-const PI_2: f64 = PI * 2f64;
-
 impl Sphere {
     pub fn new(radius: f64) -> Sphere {
         Sphere {
@@ -18,6 +16,8 @@ impl Sphere {
     }
 
     fn get_intersection(&self, t: f64, ray: &Ray) -> Intersection {
+        const PI_2: f64 = PI * 2f64;
+
         let intersection_point = ray.at(t);
 
         // pbrt pg. 119
