@@ -151,19 +151,6 @@ Geometry: Box<Geometry> = {
         "min" <min:Point>
         "max" <max:Point>
     "}" => Box::new(RectPrism::new(min, max)),
-    "triangle_mesh" "{"
-        "positions" <positions:List<Point>>
-        <uvs:("uvs" <List<Tuple2<F64>>>)?>
-        "indices" <indices:List<Tuple3<Usize>>>
-        <smoothing:("smoothing" <Smoothing>)?>
-        <is_closed:("is_closed" <Bool>)?>
-    "}" => Box::new(TriangleMesh::new(
-        positions,
-        smoothing.unwrap_or(Smoothing::Implicit),
-        uvs,
-        indices,
-        is_closed.unwrap_or(true),
-    )),
     "difference" "{"
         "positive" "{"
             "geometry" <positive_geometry:Geometry>
@@ -177,22 +164,7 @@ Geometry: Box<Geometry> = {
         Arc::new(Shape::new(Arc::from(positive_geometry), positive_transform.map(Transform::new).unwrap_or(IDENTITY_TRANSFORM.clone()))),
         Arc::new(Shape::new(Arc::from(negative_geometry), negative_transform.map(Transform::new).unwrap_or(IDENTITY_TRANSFORM.clone()))),
     )),
-    "cloth" "{"
-        "curves" <curves:List<Curve>>
-        <tessellation_factor:("tessellation_factor" <Usize>)?>
-        <closure:("closure" <ClothClosure>)?>
-    "}" => Box::new(create_cloth(
-        curves,
-        tessellation_factor.unwrap_or(100usize),
-        closure.unwrap_or(ClothClosure::None),
-    )),
-    "tessellated_sphere" "{"
-        "depth" <depth:U32>
-        <smoothing:("smoothing" <Smoothing>)?>
-    "}" => Box::new(tessellate_sphere(
-        depth,
-        smoothing.unwrap_or(Smoothing::Implicit),
-    )),
+    <TriangleMesh> => Box::new(<>),
 };
 
 ClothClosure: ClothClosure = {
@@ -200,6 +172,49 @@ ClothClosure: ClothClosure = {
     "cap" => ClothClosure::Cap,
     "join" => ClothClosure::Join,
     "closed" => ClothClosure::Closed,
+};
+
+TriangleMesh: TriangleMesh = {
+    "triangle_mesh" "{"
+        "positions" <positions:List<Point>>
+        <uvs:("uvs" <List<Tuple2<F64>>>)?>
+        "indices" <indices:List<Tuple3<Usize>>>
+        <smoothing:("smoothing" <Smoothing>)?>
+        <is_closed:("is_closed" <Bool>)?>
+    "}" => TriangleMesh::new(
+        positions,
+        smoothing.unwrap_or(Smoothing::Implicit),
+        uvs,
+        indices,
+        is_closed.unwrap_or(true),
+    ),
+    "cloth" "{"
+        "curves" <curves:List<Curve>>
+        <tessellation_factor:("tessellation_factor" <Usize>)?>
+        <closure:("closure" <ClothClosure>)?>
+    "}" => create_cloth(
+        curves,
+        tessellation_factor.unwrap_or(100usize),
+        closure.unwrap_or(ClothClosure::None),
+    ),
+    "tessellated_sphere" "{"
+        "depth" <depth:U32>
+        <smoothing:("smoothing" <Smoothing>)?>
+    "}" => tessellate_sphere(
+        depth,
+        smoothing.unwrap_or(Smoothing::Implicit),
+    ),
+    "displace_sphere" "{"
+        "map" <path:Path>
+        "min" <min:F64>
+        "max" <max:F64>
+        "mesh" <mesh:TriangleMesh>
+        <smoothing:("smoothing" <Smoothing>)?>
+    "}" => displace_sphere(
+        DisplacementMap::from_path(path.as_ref(), min, max),
+        mesh,
+        smoothing.unwrap_or(Smoothing::Implicit),
+    ),
 };
 
 Light: Light = "{"

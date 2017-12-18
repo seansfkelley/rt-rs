@@ -1,8 +1,9 @@
 use std::path::Path;
-use image::{RgbImage, Pixel, open as openImage};
+use image::{RgbImage, open as openImage};
 use color::{Color};
 use core::*;
 use material::*;
+use util::UvMap;
 
 #[derive(Debug, Clone)]
 pub enum LightingFacet {
@@ -34,12 +35,7 @@ impl ImageTextureFacet {
     pub fn get_color(&self, uv: Uv, image_texture: &ImageTexture) -> Color {
         match self {
             &ImageTextureFacet::Constant(color) => color,
-            &ImageTextureFacet::Image(ref image) => {
-                let (width, height) = image.dimensions();
-                let pixel = image.get_pixel((width as f64 * uv.0) as u32, (height as f64 * uv.1) as u32);
-                let rgb = pixel.channels();
-                Color::new(rgb[0] as f64 / 255f64, rgb[1] as f64 / 255f64, rgb[2] as f64 / 255f64)
-            }
+            &ImageTextureFacet::Image(ref image) => image.get_color(uv),
             &ImageTextureFacet::Reference(ref facet, fraction) =>
                 fraction * facet.get_facet(image_texture).get_color(uv, image_texture),
         }

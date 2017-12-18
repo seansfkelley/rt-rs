@@ -12,11 +12,12 @@ pub enum Smoothing {
 }
 
 #[derive(Debug)]
-struct TriangleMeshData {
-    positions: Vec<Point>,
-    normals: Option<Vec<Normal>>,
-    uvs: Option<Vec<Uv>>,
-    closed: bool,
+pub struct TriangleMeshData {
+    pub positions: Vec<Point>,
+    pub indices: Vec<TriangleIndices>,
+    pub normals: Option<Vec<Normal>>,
+    pub uvs: Option<Vec<Uv>>,
+    pub closed: bool,
 }
 
 #[derive(Debug)]
@@ -88,7 +89,11 @@ impl Geometry for Triangle {
     }
 }
 
-pub type TriangleMesh = KdTree<Triangle>;
+#[derive(Debug)]
+pub struct TriangleMesh {
+    index: KdTree<Triangle>,
+    mesh: Arc<TriangleMeshData>,
+}
 
 impl TriangleMesh {
     // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
@@ -106,15 +111,22 @@ impl TriangleMesh {
             assert_eq!(positions.len(), uvs.as_ref().unwrap().len());
         }
 
-        let mesh = Arc::new(TriangleMeshData { positions, normals, uvs, closed });
+        let mesh = Arc::new(TriangleMeshData { positions, indices: indices.clone(), normals, uvs, closed });
 
-        KdTree::from(indices
-            .into_iter()
-            .map(|indices| Triangle {
-                mesh: Arc::clone(&mesh),
-                indices,
-            })
-            .collect())
+        TriangleMesh {
+            index: KdTree::from(indices
+                .into_iter()
+                .map(|indices| Triangle {
+                    mesh: Arc::clone(&mesh),
+                    indices,
+                })
+                .collect()),
+            mesh,
+        }
+    }
+
+    pub fn get_data(&self) -> Arc<TriangleMeshData> {
+        Arc::clone(&self.mesh)
     }
 
     fn compute_implicit_normals(positions: &Vec<Point>, indices: &Vec<TriangleIndices>) -> Vec<Normal> {
@@ -126,6 +138,20 @@ impl TriangleMesh {
             normals[i2] = normals[i2] + normal;
         }
         normals.into_iter().map(|n| n.into_normalized()).collect()
+    }
+}
+
+impl Geometry for TriangleMesh {
+    fn bound(&self) -> BoundingBox {
+        self.index.bound()
+    }
+
+    fn intersect(&self, ray: &Ray) -> Option<Intersection> {
+        self.index.intersect(ray)
+    }
+
+    fn does_intersect(&self, ray: &Ray) -> bool {
+        self.index.does_intersect(ray)
     }
 }
 
