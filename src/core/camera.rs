@@ -62,7 +62,7 @@ impl Camera {
             ),
             CameraKind::Perspective => Ray::half_infinite(
                 Point::uniform(0f64),
-                Point::new(image_x, image_y, 0f64).transform(&self.raster_to_camera).as_vector().as_normalized(),
+                Point::new(image_x, image_y, 0f64).transform(&self.raster_to_camera).into_vector().into_normalized(),
             )
         };
         ray.transform(&self.camera_to_world)

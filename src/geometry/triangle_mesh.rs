@@ -70,7 +70,7 @@ impl Geometry for Triangle {
             n0 * b0 + n1 * b1 + n2 * b2
         });
 
-        let mut normal = e2.cross(e1).as_normalized().as_normal();
+        let mut normal = e2.cross(e1).into_normalized().into_normal();
 
         if !self.mesh.closed && normal.dot(&ray.direction) > 0f64 {
             normal = -normal;
@@ -120,12 +120,12 @@ impl TriangleMesh {
     fn compute_implicit_normals(positions: &Vec<Point>, indices: &Vec<TriangleIndices>) -> Vec<Normal> {
         let mut normals = vec![Normal::uniform(0f64); positions.len()];
         for &(i0, i1, i2) in indices {
-            let normal = (positions[i2] - positions[i0]).cross(positions[i1] - positions[i0]).as_normal();
+            let normal = (positions[i2] - positions[i0]).cross(positions[i1] - positions[i0]).into_normal();
             normals[i0] = normals[i0] + normal;
             normals[i1] = normals[i1] + normal;
             normals[i2] = normals[i2] + normal;
         }
-        normals.iter().map(|n| n.as_normalized()).collect()
+        normals.into_iter().map(|n| n.into_normalized()).collect()
     }
 }
 

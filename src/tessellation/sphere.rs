@@ -34,9 +34,9 @@ fn divide_triangle(triangle: (Point, Point, Point), current_depth: u32, depth_li
         (vec![triangle.0, triangle.1, triangle.2], vec![(0, 1, 2)])
     } else {
         let midpoints = (
-            (triangle.0 + triangle.1).as_vector().as_normalized().as_point(),
-            (triangle.1 + triangle.2).as_vector().as_normalized().as_point(),
-            (triangle.2 + triangle.0).as_vector().as_normalized().as_point(),
+            (triangle.0 + triangle.1).into_vector().into_normalized().into_point(),
+            (triangle.1 + triangle.2).into_vector().into_normalized().into_point(),
+            (triangle.2 + triangle.0).into_vector().into_normalized().into_point(),
         );
         let next_depth = current_depth + 1;
         combine_and_offset(vec![

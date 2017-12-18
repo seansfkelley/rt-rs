@@ -172,6 +172,11 @@ macro_rules! xyz_normalizable {
                 *self / self.magnitude()
             }
 
+            pub fn into_normalized(self) -> $name {
+                let magnitude = self.magnitude();
+                self / magnitude
+            }
+
             pub fn magnitude2(&self) -> f64 {
                 self.dot(self)
             }
@@ -185,9 +190,17 @@ macro_rules! xyz_normalizable {
 }
 
 macro_rules! xyz_convertible {
-    ($name:ident, $result:ident, $fnname: ident) => {
+    ($name:ident, $result:ident, $as_name:ident, $into_name:ident) => {
         impl $name {
-            pub fn $fnname(&self) -> $result {
+            pub fn $as_name(&self) -> $result {
+                $result {
+                    x: self.x,
+                    y: self.y,
+                    z: self.z,
+                }
+            }
+
+            pub fn $into_name(self) -> $result {
                 $result {
                     x: self.x,
                     y: self.y,
@@ -209,8 +222,8 @@ xyz_cross!(Vec3, Vec3, Vec3);
 // TODO: Function overloading!
 // xyz_cross!(Vec3, Normal, Vec3);
 xyz_normalizable!(Vec3);
-xyz_convertible!(Vec3, Normal, as_normal);
-xyz_convertible!(Vec3, Point, as_point);
+xyz_convertible!(Vec3, Normal, as_normal, into_normal);
+xyz_convertible!(Vec3, Point, as_point, into_point);
 
 xyz_base!(Point);
 xyz_neg!(Point);
@@ -223,8 +236,8 @@ xyz_sub!(Point, Normal, Point);
 xyz_mul!(Point);
 xyz_div!(Point);
 xyz_dot!(Point);
-xyz_convertible!(Point, Vec3, as_vector);
-xyz_convertible!(Point, Normal, as_normal);
+xyz_convertible!(Point, Vec3, as_vector, into_vector);
+xyz_convertible!(Point, Normal, as_normal, into_normal);
 
 xyz_base!(Normal);
 xyz_neg!(Normal);
@@ -235,7 +248,7 @@ xyz_div!(Normal);
 xyz_dot!(Normal);
 xyz_cross!(Normal, Vec3, Vec3);
 xyz_normalizable!(Normal);
-xyz_convertible!(Normal, Vec3, as_vector);
+xyz_convertible!(Normal, Vec3, as_vector, into_vector);
 
 impl Vec3 {
     pub const X_AXIS: Vec3 = Vec3 { x: 1f64, y: 0f64, z: 0f64 };

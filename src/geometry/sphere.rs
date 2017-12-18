@@ -29,8 +29,8 @@ impl Sphere {
 
         Intersection {
             distance: t,
-            location: intersection_point,
-            normal: intersection_point.as_normal().as_normalized(),
+            location: intersection_point.clone(),
+            normal: intersection_point.into_normal().into_normalized(),
             shading_normal: None,
             uv: (phi / PI_2, theta / PI),
             material: None,

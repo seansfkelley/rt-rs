@@ -47,7 +47,7 @@ impl Scene {
         let shading_normal = intersection.shading_normal.unwrap_or(normal);
         let location = intersection.location;
 
-        let nudged_location = |normal: Normal| location + (normal * NUDGE_FACTOR).as_vector();
+        let nudged_location = |normal: Normal| location + (normal * NUDGE_FACTOR).into_vector();
 
         let mut eta = 0f64;
 
@@ -73,10 +73,10 @@ impl Scene {
             color += phong_fraction * self.get_visible_lights(nudged_location(normal))
                 .iter()
                 .fold(material.ambient, |color, light| {
-                    let light_direction = (light.position - location).as_normalized();
+                    let light_direction = (light.position - location).into_normalized();
                     let diffuse_illumination = material.diffuse * light.color * shading_normal.dot(&light_direction).max(0f64);
                     let specular_illumination = material.specular.0 * light.color
-                        * shading_normal.dot(&(light_direction - ray.direction).as_normalized()).max(0f64).powf(material.specular.1);
+                        * shading_normal.dot(&(light_direction - ray.direction).into_normalized()).max(0f64).powf(material.specular.1);
                     color + diffuse_illumination + specular_illumination
                 });
         }
@@ -91,7 +91,7 @@ impl Scene {
             let cos_i = -ray.direction.dot(&shading_normal).clamp(-1f64, 1f64);
             let k = 1f64 - eta * eta * (1f64 - cos_i * cos_i);
             if k >= 0f64 {
-                let direction = ray.direction * eta + (shading_normal * (eta * cos_i - k.sqrt())).as_vector();
+                let direction = ray.direction * eta + (shading_normal * (eta * cos_i - k.sqrt())).into_vector();
                 let origin = nudged_location(-normal);
                 let new_ray = Ray::half_infinite(origin, direction.as_normalized());
                 color += transmission_fraction * self.cast_ray(new_ray, depth + 1)
@@ -122,7 +122,7 @@ impl Scene {
         self.lights
             .iter()
             .filter(|light| {
-                let light_direction = (light.position - point).as_normalized();
+                let light_direction = (light.position - point).into_normalized();
                 let ray = Ray::half_infinite(point, light_direction);
                 !self.objects.does_intersect(&ray)
             })
