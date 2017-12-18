@@ -186,6 +186,13 @@ Geometry: Box<Geometry> = {
         tessellation_factor.unwrap_or(100usize),
         closure.unwrap_or(ClothClosure::None),
     )),
+    "tessellated_sphere" "{"
+        "depth" <depth:U32>
+        <smoothing:("smoothing" <Smoothing>)?>
+    "}" => Box::new(tessellate_sphere(
+        depth,
+        smoothing.unwrap_or(Smoothing::Implicit),
+    )),
 };
 
 ClothClosure: ClothClosure = {
@@ -260,6 +267,7 @@ Color: Color = {
         g: u32::from_str_radix(&<>[3..5], 16).unwrap() as f64 / 255f64,
         b: u32::from_str_radix(&<>[5..7], 16).unwrap() as f64 / 255f64,
     },
+    <scale:F64> "*" <color:Color> => scale * color,
 };
 Bool: bool = {
     "true" => true,

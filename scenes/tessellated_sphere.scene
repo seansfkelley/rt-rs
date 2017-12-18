@@ -1,0 +1,124 @@
+depth_limit 10
+background_color #111
+
+camera perspective {
+  position 0 0 -15
+  look_at 0 0 0
+  up 0 1 0
+  field_of_view 30
+}
+
+// for pretty
+
+image_dimensions 1200 800
+antialias 3
+
+// for animation
+
+// image_dimensions 600 400
+// antialias 1
+//
+// animation {
+//   frames 18
+//   camera_transforms [
+//     rotate 10 0 1 0
+//   ]
+// }
+
+texture plain constant flat {
+  color #ddd
+}
+
+transform translate -4.5 -1.5 0
+
+object {
+  geometry tessellated_sphere {
+    depth 0
+    smoothing none
+  }
+  texture plain
+}
+
+transform translate 3 0 0
+object {
+  geometry tessellated_sphere {
+    depth 2
+    smoothing none
+  }
+  texture plain
+}
+
+transform translate 3 0 0
+object {
+  geometry tessellated_sphere {
+    depth 4
+    smoothing none
+  }
+  texture plain
+}
+
+transform translate 3 0 0
+object {
+  geometry tessellated_sphere {
+    depth 6
+    smoothing none
+  }
+  texture plain
+}
+
+transform pop all
+
+transform translate -4.5 1.5 0
+
+object {
+  geometry tessellated_sphere {
+    depth 0
+  }
+  texture plain
+}
+
+transform translate 3 0 0
+object {
+  geometry tessellated_sphere {
+    depth 2
+  }
+  texture plain
+}
+
+transform translate 3 0 0
+object {
+  geometry tessellated_sphere {
+    depth 4
+  }
+  texture plain
+}
+
+transform translate 3 0 0
+object {
+  geometry tessellated_sphere {
+    depth 6
+  }
+  texture plain
+}
+
+transform pop all
+
+light {
+  position 20 20 -50
+  color #333
+}
+
+light {
+  position -20 20 -50
+  color #333
+}
+
+light {
+  position 0 -20 -50
+  color #333
+}
+
+light {
+  position -20 20 50
+  color #333
+}
