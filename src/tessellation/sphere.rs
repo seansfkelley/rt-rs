@@ -15,7 +15,7 @@ pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
     let expected_positions = 6usize * 3usize.pow(depth);
     let expected_triangles = 8usize * 4usize.pow(depth);
     let hash_precision = 1f64 + 2f64.powi(depth as i32);
-    let ref mut builder = TriangleMeshBuilder::new_with_expected_size(hash_precision, expected_positions, expected_triangles);
+    let mut builder = TriangleMeshBuilder::new_with_expected_size(hash_precision, expected_positions, expected_triangles);
     // TODO: move to lazy static
     let starting_triangles = vec![
         (P2, P5, P1),
@@ -28,7 +28,7 @@ pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
         (P4, P1, P5),
     ];
     for triangle in starting_triangles {
-        divide_triangle(triangle, builder, 0, depth);
+        divide_triangle(triangle, &mut builder, 0, depth);
     }
 
     let (positions, uvs, indices) = builder.build();
@@ -139,9 +139,8 @@ impl TriangleMeshBuilder {
         }
     }
 
-    pub fn build(&self) -> (Vec<Point>, Vec<Uv>, Vec<TriangleIndices>) {
-        // TODO: Try to consume self instead of cloning
-        (self.positions.clone(), self.uvs.clone(), self.indices.clone())
+    pub fn build(self) -> (Vec<Point>, Vec<Uv>, Vec<TriangleIndices>) {
+        (self.positions, self.uvs, self.indices)
     }
 }
 

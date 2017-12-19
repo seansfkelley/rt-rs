@@ -22,6 +22,7 @@
 ## performance/quality
 - r-tree/bvh (would these be better than the kd-tree?)
 - profile
+- parallelize kd-tree construction
 - audit usages of Clone/Copy derivations and reference parameters to see if we're too copy-happy (or will rustc automatically optimize extraneous copies into moves?)
 - bounding boxes should maybe always be computed relative to the world for better bounds?
 - display image as it is being created
