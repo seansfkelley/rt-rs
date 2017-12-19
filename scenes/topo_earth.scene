@@ -30,7 +30,7 @@ texture plain constant flat {
 }
 
 object {
-  geometry displace_sphere {
+  geometry displace {
     map "textures/earth-displacement.png"
     min 9
     max 10

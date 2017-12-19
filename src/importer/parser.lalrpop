@@ -204,13 +204,13 @@ TriangleMesh: TriangleMesh = {
         depth,
         smoothing.unwrap_or(Smoothing::Implicit),
     ),
-    "displace_sphere" "{"
+    "displace" "{"
         "map" <path:Path>
         "min" <min:F64>
         "max" <max:F64>
         "mesh" <mesh:TriangleMesh>
         <smoothing:("smoothing" <Smoothing>)?>
-    "}" => displace_sphere(
+    "}" => displace_triangle_mesh(
         DisplacementMap::from_path(path.as_ref(), min, max),
         mesh,
         smoothing.unwrap_or(Smoothing::Implicit),

@@ -1,11 +1,6 @@
 use std::collections::HashMap;
-use std::f64::consts::PI;
-use std::path::Path;
 use math::*;
-use core::*;
 use geometry::*;
-use image::{RgbImage, open as openImage};
-use util::UvMap;
 
 pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
     const P0: Point = Point { x:  0f64, y:  0f64, z:  1f64 };
@@ -130,32 +125,3 @@ impl TriangleMeshBuilder {
     }
 }
 
-pub struct DisplacementMap {
-    map: RgbImage,
-    min: f64,
-    max: f64,
-}
-
-impl DisplacementMap {
-    pub fn from_path(path: &Path, min: f64, max: f64) -> DisplacementMap {
-        match openImage(path) {
-            Ok(img) => DisplacementMap { map: img.to_rgb(), min, max },
-            Err(reason) => { panic!("could not open image at {:?}: {:?}", path, reason); }
-        }
-    }
-}
-
-const PI_2: f64 = PI * 2f64;
-
-pub fn displace_sphere(map: DisplacementMap, sphere: TriangleMesh, smoothing: Smoothing) -> TriangleMesh {
-    let data = sphere.get_data();
-    let delta = map.max - map.min;
-    let new_positions: Vec<Point> = data.positions.iter().map(|position| {
-        let u = 0.5f64 + position.z.atan2(position.x) / PI_2;
-        let v = 0.5f64 - position.y.asin() / PI;
-        let scale = map.map.get_color(Uv(u, v)).average() * delta + map.min;
-        (position.into_vector() * scale).into_point()
-    }).collect();
-
-    TriangleMesh::new(new_positions, smoothing, None, data.indices.clone(), true)
-}
