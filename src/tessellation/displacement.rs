@@ -19,8 +19,7 @@ impl DisplacementMap {
     }
 }
 
-pub fn displace_triangle_mesh(map: DisplacementMap, mesh: TriangleMesh, smoothing: Smoothing) -> TriangleMesh {
-    let data = mesh.get_data();
+pub fn displace_triangle_mesh(map: DisplacementMap, data: TriangleMeshData, smoothing: Smoothing) -> TriangleMeshData {
     let map_extent = map.max - map.min;
     match data.uvs {
         Some(ref uvs) => {
@@ -33,7 +32,7 @@ pub fn displace_triangle_mesh(map: DisplacementMap, mesh: TriangleMesh, smoothin
                 })
                 .collect();
 
-            TriangleMesh::new(new_positions, smoothing, Some(uvs.clone()), data.indices.clone(), true)
+            TriangleMeshData::new(new_positions, smoothing, Some(uvs.clone()), data.indices.clone(), true)
         }
         None => { panic!("cannot displace a mesh without uvs"); }
     }

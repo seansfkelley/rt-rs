@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use std::ops::{ Mul, Add };
+use std::ops::{Mul, Add};
 use core::*;
 use math::*;
 
@@ -35,6 +35,30 @@ pub struct TriangleMeshData {
     pub normals: Option<Vec<Normal>>,
     pub uvs: Option<Vec<Uv>>,
     pub closed: bool,
+}
+
+impl TriangleMeshData {
+    // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
+    pub fn new(positions: Vec<Point>, smoothing: Smoothing, uvs: Option<Vec<Uv>>, indices: Vec<TriangleIndices>, closed: bool) -> TriangleMeshData {
+        let normals = match smoothing {
+            Smoothing::Explicit(normals) => {
+                assert_eq!(positions.len(), normals.len());
+                Some(normals)
+            }
+            Smoothing::Implicit => Some(TriangleMesh::compute_implicit_normals(&positions, &indices)),
+            Smoothing::None => None,
+        };
+
+        if uvs.is_some() {
+            assert_eq!(positions.len(), uvs.as_ref().unwrap().len());
+        }
+
+        TriangleMeshData { positions, indices: indices.clone(), normals, uvs, closed }
+    }
+
+    pub fn into_triangle_mesh(self) -> TriangleMesh {
+        TriangleMesh::from_data(self)
+    }
 }
 
 #[derive(Debug)]
@@ -112,45 +136,19 @@ impl Geometry for Triangle {
     }
 }
 
-#[derive(Debug)]
-pub struct TriangleMesh {
-    index: KdTree<Triangle>,
-    mesh: Arc<TriangleMeshData>,
-}
+pub type TriangleMesh = KdTree<Triangle>;
 
 impl TriangleMesh {
-    // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
-    pub fn new(positions: Vec<Point>, smoothing: Smoothing, uvs: Option<Vec<Uv>>, indices: Vec<TriangleIndices>, closed: bool) -> TriangleMesh {
-        let normals = match smoothing {
-            Smoothing::Explicit(normals) => {
-                assert_eq!(positions.len(), normals.len());
-                Some(normals)
-            }
-            Smoothing::Implicit => Some(TriangleMesh::compute_implicit_normals(&positions, &indices)),
-            Smoothing::None => None,
-        };
+    pub fn from_data(data: TriangleMeshData) -> TriangleMesh {
+        let mesh = Arc::new(data);
 
-        if uvs.is_some() {
-            assert_eq!(positions.len(), uvs.as_ref().unwrap().len());
-        }
-
-        let mesh = Arc::new(TriangleMeshData { positions, indices: indices.clone(), normals, uvs, closed });
-
-        TriangleMesh {
-            index: KdTree::from(indices
-                .into_iter()
-                .map(|indices| Triangle {
-                    mesh: Arc::clone(&mesh),
-                    indices,
-                })
-                .collect()),
-            mesh,
-        }
-    }
-
-    // TODO: I don't like having to punch holes in the API for this. How else to do it?
-    pub fn get_data(&self) -> Arc<TriangleMeshData> {
-        Arc::clone(&self.mesh)
+        KdTree::from((&mesh.indices)
+            .into_iter()
+            .map(|t| Triangle {
+                mesh: Arc::clone(&mesh),
+                indices: *t,
+            })
+            .collect())
     }
 
     fn compute_implicit_normals(positions: &Vec<Point>, indices: &Vec<TriangleIndices>) -> Vec<Normal> {
@@ -162,20 +160,6 @@ impl TriangleMesh {
             normals[i2] = normals[i2] + normal;
         }
         normals.into_iter().map(|n| n.into_normalized()).collect()
-    }
-}
-
-impl Geometry for TriangleMesh {
-    fn bound(&self) -> BoundingBox {
-        self.index.bound()
-    }
-
-    fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-        self.index.intersect(ray)
-    }
-
-    fn does_intersect(&self, ray: &Ray) -> bool {
-        self.index.does_intersect(ray)
     }
 }
 

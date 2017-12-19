@@ -20,7 +20,9 @@ impl ClothClosure {
     }
 }
 
-pub fn create_cloth(curves: Vec<Box<Curve>>, tessellation_factor: usize, closure: ClothClosure) -> TriangleMesh {
+// TODO: Switch to TriangleMeshBuilder?
+// Would be slower but much simpler
+pub fn create_cloth(curves: Vec<Box<Curve>>, tessellation_factor: usize, closure: ClothClosure) -> TriangleMeshData {
     let number_of_curves = curves.len();
     if closure.should_cap() || closure.should_join() {
         assert!(number_of_curves > 2);
@@ -83,5 +85,5 @@ pub fn create_cloth(curves: Vec<Box<Curve>>, tessellation_factor: usize, closure
         }
     }
 
-    TriangleMesh::new(positions, Smoothing::Implicit, None, indices.to_owned(), closure == ClothClosure::Closed)
+    TriangleMeshData::new(positions, Smoothing::Implicit, None, indices.to_owned(), closure == ClothClosure::Closed)
 }

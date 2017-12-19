@@ -4,7 +4,7 @@ use math::*;
 use core::*;
 use geometry::*;
 
-pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
+pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMeshData {
     const P0: Point = Point { x:  0f64, y:  0f64, z:  1f64 };
     const P1: Point = Point { x:  1f64, y:  0f64, z:  0f64 };
     const P2: Point = Point { x:  0f64, y:  1f64, z:  0f64 };
@@ -31,9 +31,7 @@ pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
         divide_triangle(triangle, &mut builder, 0, depth);
     }
 
-    let (positions, uvs, indices) = builder.build();
-
-    TriangleMesh::new(positions, smoothing, Some(uvs), indices, true)
+    builder.build(smoothing, true)
 }
 
 fn uv_for_point(point: Point) -> Uv {
@@ -139,8 +137,8 @@ impl TriangleMeshBuilder {
         }
     }
 
-    pub fn build(self) -> (Vec<Point>, Vec<Uv>, Vec<TriangleIndices>) {
-        (self.positions, self.uvs, self.indices)
+    pub fn build(self, smoothing: Smoothing, closed: bool) -> TriangleMeshData {
+        TriangleMeshData::new(self.positions, smoothing, Some(self.uvs), self.indices, closed)
     }
 }
 
