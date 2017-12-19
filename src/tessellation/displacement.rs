@@ -21,17 +21,19 @@ impl DisplacementMap {
 
 pub fn displace_triangle_mesh(map: DisplacementMap, mesh: TriangleMesh, smoothing: Smoothing) -> TriangleMesh {
     let data = mesh.get_data();
+    let map_extent = map.max - map.min;
     match data.uvs {
         Some(ref uvs) => {
-            let delta = map.max - map.min;
-            let new_positions: Vec<Point> = (0..data.positions.len())
-                .map(|i| {
-                    let scale = map.map.get_color(uvs[i]).average() * delta + map.min;
-                    (data.positions[i].into_vector() * scale).into_point()
+            let new_positions: Vec<Point> = data.positions
+                .iter()
+                .enumerate()
+                .map(|(i, position)| {
+                    let scale = map.map.get_color(uvs[i]).average() * map_extent + map.min;
+                    position.clone() * scale
                 })
                 .collect();
 
-            TriangleMesh::new(new_positions, smoothing, None, data.indices.clone(), true)
+            TriangleMesh::new(new_positions, smoothing, Some(uvs.clone()), data.indices.clone(), true)
         }
         None => { panic!("cannot displace a mesh without uvs"); }
     }

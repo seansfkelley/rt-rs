@@ -148,6 +148,7 @@ impl TriangleMesh {
         }
     }
 
+    // TODO: I don't like having to punch holes in the API for this. How else to do it?
     pub fn get_data(&self) -> Arc<TriangleMeshData> {
         Arc::clone(&self.mesh)
     }
