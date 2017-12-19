@@ -29,13 +29,13 @@ impl Scene {
             self.background_color
         } else {
             match self.objects.intersect(&ray) {
-                Some(object_hit) => self.get_color(&ray, object_hit, depth),
+                Some(object_hit) => self.get_color(ray, object_hit, depth),
                 None => self.background_color,
             }
         }
     }
 
-    fn get_color(&self, ray: &Ray, intersection: Intersection, depth: u32) -> Color {
+    fn get_color(&self, ray: Ray, intersection: Intersection, depth: u32) -> Color {
         const NUDGE_FACTOR: f64 = 1e-10f64;
 
         let material = intersection.material.expect("scene intersections should always have a material");
@@ -43,8 +43,8 @@ impl Scene {
         let mut transmission_fraction = material.transmission.as_ref().map(|transmission| transmission.transmissivity).unwrap_or(0f64);
 
         let is_inside = intersection.normal.dot(&ray.direction) > 0f64;
-        let normal = if is_inside { -intersection.normal.as_normalized() } else { intersection.normal.as_normalized() };
-        let shading_normal = intersection.shading_normal.unwrap_or(normal);
+        let normal = (if is_inside { -intersection.normal } else { intersection.normal }).into_normalized();
+        let shading_normal = intersection.shading_normal.map(|n| n.into_normalized()).unwrap_or(normal);
         let location = intersection.location;
 
         let nudged_location = |normal: Normal| location + (normal * NUDGE_FACTOR).into_vector();
@@ -60,7 +60,7 @@ impl Scene {
             };
             eta = eta_i / eta_t;
             let fresnel_reflection_fraction =
-                self.get_fresnel_reflection_percentage(ray, &shading_normal, eta_i, eta_t);
+                self.get_fresnel_reflection_percentage(&ray, &shading_normal, eta_i, eta_t);
             reflection_fraction *= fresnel_reflection_fraction;
             transmission_fraction *= 1f64 - fresnel_reflection_fraction;
         }
