@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+use std::f64::consts::PI;
 use math::*;
+use core::*;
 use geometry::*;
 
 pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
@@ -29,14 +31,29 @@ pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
         divide_triangle(triangle, builder, 0, depth);
     }
 
-    let (positions, indices) = builder.build();
+    let (positions, uvs, indices) = builder.build();
 
-    TriangleMesh::new(positions, smoothing, None, indices, true)
+    TriangleMesh::new(positions, smoothing, Some(uvs), indices, true)
+}
+
+fn uv_for_point(point: Point) -> Uv {
+    const TWO_PI: f64 = PI * 2f64;
+
+    // TODO: This only looks a little bit like the math from geometry/sphere.rs. Do they need
+    // to be resolved with each other?
+    Uv(
+        0.5f64 + point.z.atan2(point.x) / TWO_PI,
+        0.5f64 - point.y.asin() / PI,
+    )
 }
 
 fn divide_triangle(triangle: (Point, Point, Point), builder: &mut TriangleMeshBuilder, current_depth: u32, depth_limit: u32) {
     if current_depth >= depth_limit {
-        builder.add_triangles(&vec![triangle.0, triangle.1, triangle.2], &vec![(0, 1, 2)]);
+        builder.add_triangles(
+            &vec![triangle.0, triangle.1, triangle.2],
+            &vec![uv_for_point(triangle.0), uv_for_point(triangle.1), uv_for_point(triangle.2)],
+            &vec![(0, 1, 2)],
+        );
     } else {
         let midpoints = (
             (triangle.0 + triangle.1).into_vector().into_normalized().into_point(),
@@ -77,6 +94,7 @@ fn as_hashable<T: Xyz>(xyz: &T, precision: f64) -> HashableXyz {
 struct TriangleMeshBuilder {
     precision: f64,
     positions: Vec<Point>,
+    uvs: Vec<Uv>,
     indices: Vec<TriangleIndices>,
     point_mapping: HashMap<HashableXyz, usize>,
 }
@@ -86,12 +104,13 @@ impl TriangleMeshBuilder {
         TriangleMeshBuilder {
             precision,
             positions: Vec::with_capacity(expected_positions),
+            uvs: Vec::with_capacity(expected_positions),
             indices: Vec::with_capacity(expected_triangles),
             point_mapping: HashMap::with_capacity(expected_positions),
         }
     }
 
-    pub fn add_triangles(&mut self, positions: &[Point], indices: &[TriangleIndices]) {
+    pub fn add_triangles(&mut self, positions: &[Point], uvs: &[Uv], indices: &[TriangleIndices]) {
         let mut local_points_mapping = HashMap::<usize, usize>::new();
 
         for (local_index, position) in positions.iter().enumerate() {
@@ -103,6 +122,7 @@ impl TriangleMeshBuilder {
                 None => {
                     let i = self.positions.len();
                     self.positions.push(*position);
+                    self.uvs.push(uvs[local_index]);
                     self.point_mapping.insert(hashed_position, i);
                     i
                 }
@@ -119,9 +139,9 @@ impl TriangleMeshBuilder {
         }
     }
 
-    pub fn build(&self) -> (Vec<Point>, Vec<TriangleIndices>) {
+    pub fn build(&self) -> (Vec<Point>, Vec<Uv>, Vec<TriangleIndices>) {
         // TODO: Try to consume self instead of cloning
-        (self.positions.clone(), self.indices.clone())
+        (self.positions.clone(), self.uvs.clone(), self.indices.clone())
     }
 }
 

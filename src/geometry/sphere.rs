@@ -16,14 +16,14 @@ impl Sphere {
     }
 
     fn get_intersection(&self, t: f64, ray: &Ray) -> Intersection {
-        const PI_2: f64 = PI * 2f64;
+        const TWO_PI: f64 = PI * 2f64;
 
         let intersection_point = ray.at(t);
 
         // pbrt pg. 119
         let mut phi = intersection_point.z.atan2(intersection_point.x);
         if phi < 0f64 {
-            phi += PI_2;
+            phi += TWO_PI;
         }
         let theta = (intersection_point.y / self.radius).acos();
 
@@ -32,7 +32,7 @@ impl Sphere {
             location: intersection_point.clone(),
             normal: intersection_point.into_normal().into_normalized(),
             shading_normal: None,
-            uv: Some(Uv(phi / PI_2, theta / PI)),
+            uv: Some(Uv(phi / TWO_PI, theta / PI)),
             material: None,
         }
     }
