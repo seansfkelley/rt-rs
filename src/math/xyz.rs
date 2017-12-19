@@ -257,7 +257,9 @@ impl Vec3 {
 
     // TODO: Remove this?
     pub fn assert_normalized(&self) {
-        assert!((self.magnitude() - 1f64).abs() < 1e-10);
+        const EPSILON: f64 = 1e-10;
+        let magnitude = (self.magnitude() - 1f64).abs();
+        assert!(magnitude < EPSILON, "magnitude {} >= epsilon {}", magnitude, EPSILON);
     }
 
     pub fn reflect(&self, axis: Vec3) -> Vec3 {
