@@ -44,7 +44,8 @@ impl Scene {
 
         let is_inside = intersection.normal.dot(&ray.direction) > 0f64;
         let normal = (if is_inside { -intersection.normal } else { intersection.normal }).into_normalized();
-        let shading_normal = intersection.shading_normal.map(|n| n.into_normalized()).unwrap_or(normal);
+        let shading_normal = intersection.shading_normal
+            .map(|n| (if is_inside { -n } else { n }).into_normalized()).unwrap_or(normal);
         let location = intersection.location;
 
         let nudged_location = |normal: Normal| location + (normal * NUDGE_FACTOR).into_vector();

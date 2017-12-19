@@ -1,9 +1,9 @@
 image_dimensions 1024 1024
 background_color #666
-antialias 1
+antialias 3
 
 camera perspective {
-  position 0 0 -200
+  position 0 50 -200
   look_at 0 0 0
   up 0 1 0
 }
