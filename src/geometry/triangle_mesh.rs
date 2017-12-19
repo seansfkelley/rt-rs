@@ -134,12 +134,12 @@ impl Geometry for Triangle {
             uv0 * b0 + uv1 * b1 + uv2 * b2
         });
 
+        let mut normal = e2.cross(e1).into_normalized().into_normal();
+
         let mut shading_normal = self.mesh.normals.as_ref().map(|normals| {
             let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
-            n0 * b0 + n1 * b1 + n2 * b2
+            (n0 * b0 + n1 * b1 + n2 * b2).into_normalized()
         });
-
-        let mut normal = e2.cross(e1).into_normalized().into_normal();
 
         if !self.mesh.closed && normal.dot(&ray.direction) > 0f64 {
             normal = -normal;
