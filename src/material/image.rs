@@ -71,14 +71,19 @@ impl ImageTexture {
 
 impl Texture for ImageTexture {
     fn get_material(&self, intersection: &Intersection) -> Material {
-        Material {
-            ambient: self.ambient.get_color(intersection.uv, self),
-            diffuse: self.diffuse.get_color(intersection.uv, self),
-            // TODO: How to do more properly??
-            specular: SpecularLighting(self.specular.get_color(intersection.uv, self), 20f64),
-            transmission: None,
-            // TODO: How to do more properly??
-            reflectivity: self.reflectivity.get_color(intersection.uv, self).average(),
+        match intersection.uv {
+            Some(uv) => {
+                Material {
+                    ambient: self.ambient.get_color(uv, self),
+                    diffuse: self.diffuse.get_color(uv, self),
+                    // TODO: How to do more properly??
+                    specular: SpecularLighting(self.specular.get_color(uv, self), 20f64),
+                    transmission: None,
+                    // TODO: How to do more properly??
+                    reflectivity: self.reflectivity.get_color(uv, self).average(),
+                }
+            }
+            None => { panic!("cannot compute image texture for intersection without uv"); },
         }
     }
 }

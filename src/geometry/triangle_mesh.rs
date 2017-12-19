@@ -1,8 +1,25 @@
 use std::sync::Arc;
+use std::ops::{ Mul, Add };
 use core::*;
 use math::*;
 
 pub type TriangleIndices = (usize, usize, usize);
+
+impl Mul<f64> for Uv {
+    type Output = Uv;
+
+    fn mul(self, other: f64) -> Uv {
+        Uv(self.0 * other, self.1 * other)
+    }
+}
+
+impl Add for Uv {
+    type Output = Uv;
+
+    fn add(self, other: Uv) -> Uv {
+        Uv(self.0 * other.0, self.1 * other.1)
+    }
+}
 
 #[derive(Debug)]
 pub enum Smoothing {
@@ -65,8 +82,14 @@ impl Geometry for Triangle {
             return None;
         }
 
+        let b0 = 1f64 - b2 - b1;
+
+        let uv = self.mesh.uvs.as_ref().map(|uv| {
+            let (uv0, uv1, uv2) = (uv[i0], uv[i1], uv[i2]);
+            uv0 * b0 + uv1 * b1 + uv2 * b2
+        });
+
         let mut shading_normal = self.mesh.normals.as_ref().map(|normals| {
-            let b0 = 1f64 - b2 - b1;
             let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
             n0 * b0 + n1 * b1 + n2 * b2
         });
@@ -83,7 +106,7 @@ impl Geometry for Triangle {
             location: ray.at(t),
             normal,
             shading_normal,
-            uv: (0f64, 0f64),
+            uv,
             material: None,
         })
     }

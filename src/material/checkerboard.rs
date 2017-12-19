@@ -12,12 +12,16 @@ pub struct CheckerboardTexture {
 impl Texture for CheckerboardTexture {
     fn get_material(&self, intersection: &Intersection) -> Material {
         let check_size = 1f64 / self.checks_per_unit as f64;
-        let color =
-            if (intersection.uv.0 / check_size) as u32 % 2 == (intersection.uv.1 / check_size) as u32 % 2 {
-                self.color_a
-            } else {
-                self.color_b
-            };
+        let color = match intersection.uv {
+            Some(Uv(u, v)) => {
+                if (u / check_size) as u32 % 2 == (v / check_size) as u32 % 2 {
+                    self.color_a
+                } else {
+                    self.color_b
+                }
+            },
+            None => { panic!("cannot compute checkerboard texture for intersection without uv"); },
+        };
         // TODO: How to do more properly??
         Material {
             ambient: color * 0.1f64,

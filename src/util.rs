@@ -1,6 +1,6 @@
 use core::intersection::{Uv};
 use core::color::{Color};
-use image::{RgbImage, Pixel};
+use image::{ RgbImage, Pixel };
 
 pub trait Clamp {
     fn clamp(self, min: Self, max: Self) -> Self;

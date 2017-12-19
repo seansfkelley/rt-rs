@@ -1,7 +1,8 @@
 use math::*;
 use material::*;
 
-pub type Uv = (f64, f64);
+#[derive(Debug, Clone, Copy)]
+pub struct Uv(pub f64, pub f64);
 
 #[derive(Debug, Clone)]
 pub struct Intersection {
@@ -9,7 +10,7 @@ pub struct Intersection {
     pub location: Point,
     pub normal: Normal,
     pub shading_normal: Option<Normal>,
-    pub uv: Uv,
+    pub uv: Option<Uv>,
     pub material: Option<Material>,
 }
 

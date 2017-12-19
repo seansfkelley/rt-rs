@@ -46,7 +46,7 @@ impl RectPrism {
             location,
             normal,
             shading_normal: None,
-            uv: (0f64, 0f64), // TODO
+            uv: None, // TODO
             material: None,
         }
     }

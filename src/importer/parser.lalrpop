@@ -177,7 +177,7 @@ ClothClosure: ClothClosure = {
 TriangleMesh: TriangleMesh = {
     "triangle_mesh" "{"
         "positions" <positions:List<Point>>
-        <uvs:("uvs" <List<Tuple2<F64>>>)?>
+        <uvs:("uvs" <List<Uv>>)?>
         "indices" <indices:List<Tuple3<Usize>>>
         <smoothing:("smoothing" <Smoothing>)?>
         <is_closed:("is_closed" <Bool>)?>
@@ -249,6 +249,10 @@ Smoothing: Smoothing = {
     "none" => Smoothing::None,
     "implicit" => Smoothing::Implicit,
     "explicit" <List<Normal>> => Smoothing::Explicit(<>),
+};
+
+Uv: Uv = {
+    <F64> <F64> => Uv(<>),
 };
 
 // Handily adapted from the tutorial!

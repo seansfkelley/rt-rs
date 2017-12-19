@@ -1,10 +1,11 @@
-use math::*;
-use geometry::*;
-use image::{RgbImage, open as openImage};
 use std::collections::HashMap;
 use std::f64::consts::PI;
-use util::UvMap;
 use std::path::Path;
+use math::*;
+use core::*;
+use geometry::*;
+use image::{RgbImage, open as openImage};
+use util::UvMap;
 
 pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMesh {
     const P0: Point = Point { x:  0f64, y:  0f64, z:  1f64 };
@@ -152,7 +153,7 @@ pub fn displace_sphere(map: DisplacementMap, sphere: TriangleMesh, smoothing: Sm
     let new_positions: Vec<Point> = data.positions.iter().map(|position| {
         let u = 0.5f64 + position.z.atan2(position.x) / PI_2;
         let v = 0.5f64 - position.y.asin() / PI;
-        let scale = map.map.get_color((u, v)).average() * delta + map.min;
+        let scale = map.map.get_color(Uv(u, v)).average() * delta + map.min;
         (position.into_vector() * scale).into_point()
     }).collect();
 
