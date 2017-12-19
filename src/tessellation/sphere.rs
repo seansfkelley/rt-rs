@@ -153,7 +153,7 @@ pub fn displace_sphere(map: DisplacementMap, sphere: TriangleMesh, smoothing: Sm
         let u = 0.5f64 + position.z.atan2(position.x) / PI_2;
         let v = 0.5f64 - position.y.asin() / PI;
         let scale = map.map.get_color((u, v)).average() * delta + map.min;
-        (position.as_vector() * scale).as_point()
+        (position.into_vector() * scale).into_point()
     }).collect();
 
     TriangleMesh::new(new_positions, smoothing, None, data.indices.clone(), true)

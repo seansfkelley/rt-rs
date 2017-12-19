@@ -1,0 +1,38 @@
+depth_limit 10
+background_color #111
+
+camera perspective {
+  position 0 0 -5
+  look_at 0 0 0
+  up 0 1 0
+  field_of_view 30
+}
+
+image_dimensions 256 256
+antialias 1
+
+texture plain constant flat {
+  color #ddd
+}
+
+object {
+  geometry tessellated_sphere {
+    depth 7
+  }
+  texture plain
+}
+
+light {
+  position 20 20 -50
+  color #333
+}
+
+light {
+  position -20 20 -50
+  color #333
+}
+
+light {
+  position 0 -20 -50
+  color #333
+}
