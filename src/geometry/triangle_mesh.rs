@@ -1,25 +1,9 @@
 use std::sync::Arc;
-use std::ops::{Mul, Add};
+use std::ops::{ Mul, Add };
 use core::*;
 use math::*;
 
 pub type TriangleIndices = (usize, usize, usize);
-
-impl Mul<f64> for Uv {
-    type Output = Uv;
-
-    fn mul(self, other: f64) -> Uv {
-        Uv(self.0 * other, self.1 * other)
-    }
-}
-
-impl Add for Uv {
-    type Output = Uv;
-
-    fn add(self, other: Uv) -> Uv {
-        Uv(self.0 * other.0, self.1 * other.1)
-    }
-}
 
 #[derive(Debug)]
 pub enum Smoothing {
@@ -37,6 +21,8 @@ pub struct TriangleMeshData {
     pub closed: bool,
 }
 
+pub type TriangleMesh = KdTree<Triangle>;
+
 impl TriangleMeshData {
     // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
     pub fn new(positions: Vec<Point>, smoothing: Smoothing, uvs: Option<Vec<Uv>>, indices: Vec<TriangleIndices>, closed: bool) -> TriangleMeshData {
@@ -45,7 +31,7 @@ impl TriangleMeshData {
                 assert_eq!(positions.len(), normals.len());
                 Some(normals)
             }
-            Smoothing::Implicit => Some(TriangleMesh::compute_implicit_normals(&positions, &indices)),
+            Smoothing::Implicit => Some(TriangleMeshData::compute_implicit_normals(&positions, &indices)),
             Smoothing::None => None,
         };
 
@@ -57,7 +43,42 @@ impl TriangleMeshData {
     }
 
     pub fn into_triangle_mesh(self) -> TriangleMesh {
-        TriangleMesh::from_data(self)
+        let mesh = Arc::new(self);
+
+        KdTree::from(mesh.indices
+            .iter()
+            .map(|indices| Triangle {
+                mesh: Arc::clone(&mesh),
+                indices: *indices,
+            })
+            .collect())
+    }
+
+    fn compute_implicit_normals(positions: &Vec<Point>, indices: &Vec<TriangleIndices>) -> Vec<Normal> {
+        let mut normals = vec![Normal::uniform(0f64); positions.len()];
+        for &(i0, i1, i2) in indices {
+            let normal = (positions[i2] - positions[i0]).cross(positions[i1] - positions[i0]).into_normal();
+            normals[i0] = normals[i0] + normal;
+            normals[i1] = normals[i1] + normal;
+            normals[i2] = normals[i2] + normal;
+        }
+        normals.into_iter().map(|n| n.into_normalized()).collect()
+    }
+}
+
+impl Mul<f64> for Uv {
+    type Output = Uv;
+
+    fn mul(self, other: f64) -> Uv {
+        Uv(self.0 * other, self.1 * other)
+    }
+}
+
+impl Add for Uv {
+    type Output = Uv;
+
+    fn add(self, other: Uv) -> Uv {
+        Uv(self.0 * other.0, self.1 * other.1)
     }
 }
 
@@ -133,33 +154,6 @@ impl Geometry for Triangle {
             uv,
             material: None,
         })
-    }
-}
-
-pub type TriangleMesh = KdTree<Triangle>;
-
-impl TriangleMesh {
-    pub fn from_data(data: TriangleMeshData) -> TriangleMesh {
-        let mesh = Arc::new(data);
-
-        KdTree::from((&mesh.indices)
-            .into_iter()
-            .map(|t| Triangle {
-                mesh: Arc::clone(&mesh),
-                indices: *t,
-            })
-            .collect())
-    }
-
-    fn compute_implicit_normals(positions: &Vec<Point>, indices: &Vec<TriangleIndices>) -> Vec<Normal> {
-        let mut normals = vec![Normal::uniform(0f64); positions.len()];
-        for &(i0, i1, i2) in indices {
-            let normal = (positions[i2] - positions[i0]).cross(positions[i1] - positions[i0]).into_normal();
-            normals[i0] = normals[i0] + normal;
-            normals[i1] = normals[i1] + normal;
-            normals[i2] = normals[i2] + normal;
-        }
-        normals.into_iter().map(|n| n.into_normalized()).collect()
     }
 }
 
