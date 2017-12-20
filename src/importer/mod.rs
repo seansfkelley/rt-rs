@@ -58,7 +58,7 @@ pub fn parse(path: &Path) -> SceneFile {
         (line + 1, index + 1)
     };
 
-    match parser::parse_SceneFile(&mut builder, file_source.as_str()) {
+    match parser::parse_SceneFile(&mut builder, &path, file_source.as_str()) {
         Ok(_) => {},
         Err(reason) => {
             match reason {

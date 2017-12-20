@@ -29,6 +29,13 @@ texture plain constant flat {
   color #ddd
 }
 
+texture earth image {
+  diffuse "textures/earth.png"
+  ambient 0.2 * diffuse
+  specular "textures/earth-specular.png"
+  reflectivity 1 * specular
+}
+
 object {
   geometry displace {
     map "textures/earth-displacement.png"
@@ -38,7 +45,7 @@ object {
       depth 7
     }
   }
-  texture plain
+  texture earth
 }
 
 light {

@@ -10,7 +10,7 @@ use tessellation::*;
 use importer::scene_builder::*;
 use color::{ Color, BLACK, WHITE };
 
-grammar(builder: &mut SceneBuilder);
+grammar(builder: &mut SceneBuilder, scene_file_path: &Path);
 
 pub SceneFile: () = {
     Statement* => {},
@@ -293,7 +293,7 @@ Bool: bool = {
     "false" => false,
 };
 Identifier = r"[a-zA-Z_][a-zA-Z0-9_]*";
-Path: Box<Path> = r#""[-a-zA-Z0-9./_]+""# => PathBuf::from(<>[1..<>.len() - 1].to_owned()).into_boxed_path();
+Path: Box<Path> = r#""[-a-zA-Z0-9./_]+""# => scene_file_path.parent().unwrap().join(PathBuf::from(<>[1..<>.len() - 1].to_owned())).into_boxed_path();
 RawNumber = r"[-+]?[0-9]*\.?[0-9]+"; // Ripped from https://www.regular-expressions.info/floatingpoint.html
 F64: f64 = RawNumber => f64::from_str(<>).unwrap();
 U32: u32 = RawNumber => u32::from_str(<>).unwrap();
