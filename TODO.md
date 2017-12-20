@@ -1,11 +1,11 @@
 ## features
-- triangle mesh texture mapping
 - animate objects in scenes
 - procedural textures - K
 - procedural shapes - K
 - procedural scenes - K
 - 3D FRACTALS - K
 - BRDF
+- use any geometry as a light source
 - global illumination (photon mapping?) - K
 - depth of field
 - caustics
@@ -13,11 +13,10 @@
 - normal mapping
 - attenuation
 - interactivity
-- displacement mapping
 - revolving beziers
-- use any geometry as a light source
 - water
 - named objects, geometries in scenes
+- refraction: attenuation over distance (think: dark but not opaque liquid)
 
 ## performance/quality
 - r-tree/bvh (would these be better than the kd-tree?)
