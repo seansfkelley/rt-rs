@@ -2,7 +2,7 @@ depth_limit 10
 background_color #111
 
 camera perspective {
-  position 0 0 -40
+  position 0 5 -40
   look_at 0 0 0
   up 0 1 0
   field_of_view 30
@@ -33,7 +33,7 @@ texture earth image {
   diffuse "textures/earth.png"
   ambient 0.2 * diffuse
   specular "textures/earth-specular.png"
-  reflectivity 1 * specular
+  // reflectivity 1 * specular
 }
 
 object {
@@ -42,7 +42,7 @@ object {
     min 9
     max 10
     mesh tessellated_sphere {
-      depth 7
+      depth 9
     }
   }
   texture earth
