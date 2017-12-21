@@ -165,8 +165,8 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
                     .into_iter()
                     .map(|p| {
                         let (distance, edge_type) = (p.0.into_inner(), p.1);
-                        if edge_type == EdgeType::End {
-                            right_count -= 1;
+                        if edge_type == EdgeType::Start {
+                            left_count += 1;
                         }
                         // Note that this should be strict equality, since the case where distance == bounds is
                         // degenerate and useless (one partition will be zero-width and get scored well for it).
@@ -184,8 +184,8 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
                         } else {
                             None
                         };
-                        if edge_type == EdgeType::Start {
-                            left_count += 1;
+                        if edge_type == EdgeType::End {
+                            right_count -= 1;
                         }
                         candidate
                     })
