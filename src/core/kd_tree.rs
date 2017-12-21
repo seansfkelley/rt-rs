@@ -11,8 +11,7 @@ enum Axis {
     Z = 2,
 }
 
-// Note that (Partial)Ord are are derived to follow declaration order, which is what we want: start before end.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq)]
 enum EdgeType {
     Start,
     End,
@@ -150,24 +149,32 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
 
                 assert_eq!(partition_candidates.len(), items.len() * 2);
 
-                partition_candidates.sort_unstable_by(|ref p1, ref p2| {
-                    if p1.0 == p2.0 {
-                        p1.1.cmp(&p2.1)
-                    } else {
-                        p1.0.cmp(&p2.0)
-                    }
-                });
+                partition_candidates.sort_unstable_by(|ref p1, ref p2| p1.0.cmp(&p2.0));
 
                 let mut left_count = 0;
                 let mut right_count = items.len();
 
                 let best_candidate = partition_candidates
                     .into_iter()
-                    .map(|p| {
-                        let (distance, edge_type) = (p.0.into_inner(), p.1);
-                        if edge_type == EdgeType::Start {
-                            left_count += 1;
+                    .map(|p| (p.0.into_inner(), p.1))
+                    .fold(vec![], |mut coalesced: Vec<(f64, usize, usize)>, candidate| {
+                        let (start_increment, end_increment): (usize, usize) = if candidate.1 == EdgeType::Start { (1, 0) } else { (0, 1) };
+                        if coalesced.len() == 0 {
+                            vec![(candidate.0, start_increment, end_increment)]
+                        } else {
+                            let last_index = coalesced.len() - 1;
+                            let last = coalesced[last_index];
+                            if last.0 == candidate.0 {
+                                coalesced[last_index] = (last.0, last.1 + start_increment, last.2 + end_increment);
+                            } else {
+                                coalesced.push((candidate.0, start_increment, end_increment));
+                            }
+                            coalesced
                         }
+                    })
+                    .into_iter()
+                    .map(|(distance, start_count, end_count)| {
+                        left_count += start_count;
                         // Note that this should be strict equality, since the case where distance == bounds is
                         // degenerate and useless (one partition will be zero-width and get scored well for it).
                         let candidate = if node_min < distance && distance < node_max {
@@ -184,9 +191,7 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
                         } else {
                             None
                         };
-                        if edge_type == EdgeType::End {
-                            right_count -= 1;
-                        }
+                        right_count -= end_count;
                         candidate
                     })
                     .filter_map(|o| o)
