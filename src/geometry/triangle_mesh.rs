@@ -78,7 +78,7 @@ impl Add for Uv {
     type Output = Uv;
 
     fn add(self, other: Uv) -> Uv {
-        Uv(self.0 * other.0, self.1 * other.1)
+        Uv(self.0 + other.0, self.1 + other.1)
     }
 }
 
