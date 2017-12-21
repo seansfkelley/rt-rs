@@ -22,7 +22,7 @@
 ## performance/quality
 - r-tree/bvh (would these be better than the kd-tree?)
 - profile
-- optimize & parallelize kd-tree construction
+- optimize & parallelize kd-tree construction (how does pbrt assign things to left/right, specifically, things that are on the splitting plane??)
 - audit usages of Clone/Copy derivations and reference parameters to see if we're too copy-happy (or will rustc automatically optimize extraneous copies into moves?)
 - bounding boxes should maybe always be computed relative to the world for better bounds?
 - display image as it is being created
