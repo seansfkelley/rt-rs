@@ -16,6 +16,7 @@
 - revolving beziers
 - water
 - named objects, geometries in scenes
+- subdivision surfaces
 - refraction: attenuation over distance (think: dark but not opaque liquid)
 
 ## performance/quality

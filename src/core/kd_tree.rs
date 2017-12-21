@@ -1,6 +1,5 @@
 use std::f64;
 use std::sync::Arc;
-use std::collections::HashSet;
 use std::fmt::{ Debug, Formatter, Result };
 use ordered_float::NotNaN;
 use core::*;
@@ -10,6 +9,13 @@ enum Axis {
     X = 0,
     Y = 1,
     Z = 2,
+}
+
+// Note that (Partial)Ord are are derived to follow declaration order, which is what we want: start before end.
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum EdgeType {
+    Start,
+    End,
 }
 
 enum Node<T: Geometry> {
@@ -32,12 +38,12 @@ impl <T: Geometry> Node<T> {
     fn fmt_indented(&self, f: &mut Formatter, indent_level: usize) -> Result {
         match self {
             &Node::Internal(ref axis, ref distance, ref left, ref right) => {
-                write!(f, "{}{} nodes, split {:?} at {}\n",  " ".repeat(indent_level * 2), self.size(), *axis, distance)?;
+                write!(f, "{}{} objects, split {:?} at {}\n",  " ".repeat(indent_level * 2), self.size(), *axis, distance)?;
                 left.fmt_indented(f, indent_level + 1)?;
                 right.fmt_indented(f, indent_level + 1)
             },
             &Node::Leaf(ref items) => {
-                write!(f, "{}{} nodes\n", " ".repeat(indent_level * 2), items.len())
+                write!(f, "{}{} objects\n", " ".repeat(indent_level * 2), items.len())
             },
         }
     }
@@ -125,40 +131,72 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
             .fold(BoundingBox::empty(), |unioned_bounds, &(_, ref bound)| BoundingBox::union(&unioned_bounds, bound));
         let node_surface_area = surface_area(&node_bounds);
 
-        // TODO: This algorithm is n^2! There are papers on this topic to read.
         let best_partition: Option<(Axis, f64)> = [Axis::X, Axis::Y, Axis::Z]
             .into_iter()
             .map(|axis| {
                 let axis_index = *axis as usize;
 
-                let mut partition_candidates: HashSet<NotNaN<f64>> = HashSet::new();
-                for &(_, ref bound) in &items {
-                    let (candidate0, candidate1) = (bound.min[axis_index], bound.max[axis_index]);
-                    partition_candidates.insert(NotNaN::new(candidate0).unwrap());
-                    partition_candidates.insert(NotNaN::new(candidate1).unwrap());
-                }
-
                 let (node_min, node_max) = (node_bounds.min[axis_index], node_bounds.max[axis_index]);
-                partition_candidates
-                    .into_iter()
-                    .map(|d| d.into_inner())
-                    .filter(|&d| node_min <= d && d <= node_max)
-                    .map(|d| {
-                        let left_count = items.iter().filter(|&&(_, ref bound)| bound.min[axis_index] <= d).count();
-                        let right_count = items.iter().filter(|&&(_, ref bound)| bound.max[axis_index] >= d).count();
-                        let mut left_bounds = node_bounds.clone();
-                        left_bounds.max[axis_index] = d;
-                        let mut right_bounds = node_bounds.clone();
-                        right_bounds.min[axis_index] = d;
-                        let bonus_multiplier = 1f64 - (if left_count == 0 || right_count == 0 { EMPTY_BONUS } else { 0f64 });
-                        let cost = TRAVERSAL_COST + INTERSECTION_COST * bonus_multiplier * (
-                            surface_area(&left_bounds) * left_count as f64 / node_surface_area +
-                            surface_area(&right_bounds) * right_count  as f64 / node_surface_area
-                        );
-                        (d, NotNaN::new(cost).unwrap())
+
+                let mut partition_candidates: Vec<(NotNaN<f64>, EdgeType)> = items
+                    .iter()
+                    .flat_map(|&(_, ref bound)| {
+                        vec![
+                            (NotNaN::new(bound.min[axis_index]).unwrap(), EdgeType::Start),
+                            (NotNaN::new(bound.max[axis_index]).unwrap(), EdgeType::End),
+                        ].into_iter()
                     })
+                    .collect();
+
+                assert_eq!(partition_candidates.len(), items.len() * 2);
+
+                partition_candidates.sort_unstable_by(|ref p1, ref p2| {
+                    if p1.0 == p2.0 {
+                        p1.1.cmp(&p2.1)
+                    } else {
+                        p1.0.cmp(&p2.0)
+                    }
+                });
+
+                let mut left_count = 0;
+                let mut right_count = items.len();
+
+                let best_candidate = partition_candidates
+                    .into_iter()
+                    .map(|p| {
+                        let (distance, edge_type) = (p.0.into_inner(), p.1);
+                        if edge_type == EdgeType::End {
+                            right_count -= 1;
+                        }
+                        // Note that this should be strict equality, since the case where distance == bounds is
+                        // degenerate and useless (one partition will be zero-width and get scored well for it).
+                        let candidate = if node_min < distance && distance < node_max {
+                            let mut left_bounds = node_bounds.clone();
+                            left_bounds.max[axis_index] = distance;
+                            let mut right_bounds = node_bounds.clone();
+                            right_bounds.min[axis_index] = distance;
+                            let bonus_multiplier = 1f64 - (if left_count == 0 || right_count == 0 { EMPTY_BONUS } else { 0f64 });
+                            let cost = TRAVERSAL_COST + INTERSECTION_COST * bonus_multiplier * (
+                                surface_area(&left_bounds) * left_count as f64 / node_surface_area +
+                                surface_area(&right_bounds) * right_count  as f64 / node_surface_area
+                            );
+                            Some((distance, NotNaN::new(cost).unwrap()))
+                        } else {
+                            None
+                        };
+                        if edge_type == EdgeType::Start {
+                            left_count += 1;
+                        }
+                        candidate
+                    })
+                    .filter_map(|o| o)
                     .min_by_key(|&(_, cost)| cost)
-                    .map(|(distance, cost)| (axis, distance, cost))
+                    .map(|(distance, cost)| (axis, distance, cost));
+
+                assert_eq!(left_count, items.len());
+                assert_eq!(right_count, 0);
+
+                best_candidate
             })
             .filter_map(|o| o)
             .min_by_key(|&(_, _, cost)| cost)
@@ -169,7 +207,7 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
                 let axis_index = axis as usize;
                 let mut left_items: Vec<(Arc<T>, BoundingBox)> = vec![];
                 let mut right_items: Vec<(Arc<T>, BoundingBox)> = vec![];
-                // TODO: Putting a reference in each side means that we might try to intersect the same object twice sometimes!
+                // TODO: If something lines on the splitting plane, should it be in both or neither?
                 for &(ref item, ref bound) in &items {
                     if bound.min[axis_index] <= distance {
                         left_items.push((Arc::clone(item), bound.clone()));
@@ -180,7 +218,7 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
                 }
                 let (left, right, total) = (left_items.len(), right_items.len(), items.len());
                 // TODO: This is the kind of thing that should never be generated by the heuristic, perhaps?
-                if left == total || right == total || (left + right) as f64 / total as f64 > 1.8 {
+                if (left == total && right > 0) || (right == total && left > 0) || (left + right) as f64 / total as f64 > 1.8 {
                     Node::Leaf(items.into_iter().map(|(i, _)| Arc::clone(&i)).collect())
                 } else {
                     Node::Internal(axis, distance, Box::new(recursively_build_tree(left_items)), Box::new(recursively_build_tree(right_items)))
