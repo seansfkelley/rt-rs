@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::f64::consts::PI;
 use math::*;
 use core::*;
 use geometry::*;
@@ -34,22 +33,15 @@ pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMeshData {
     builder.build(smoothing, true)
 }
 
-fn uv_for_point(point: Point) -> Uv {
-    const TWO_PI: f64 = PI * 2f64;
-
-    // TODO: This only looks a little bit like the math from geometry/sphere.rs. Do they need
-    // to be resolved with each other?
-    Uv(
-        0.5f64 + point.z.atan2(point.x) / TWO_PI,
-        0.5f64 - point.y.asin() / PI,
-    )
-}
-
 fn divide_triangle(triangle: (Point, Point, Point), builder: &mut TriangleMeshBuilder, current_depth: u32, depth_limit: u32) {
     if current_depth >= depth_limit {
         builder.add_triangles(
             &vec![triangle.0, triangle.1, triangle.2],
-            &vec![uv_for_point(triangle.0), uv_for_point(triangle.1), uv_for_point(triangle.2)],
+            &vec![
+                sphere_uv_for_normalized_point(triangle.0),
+                sphere_uv_for_normalized_point(triangle.1),
+                sphere_uv_for_normalized_point(triangle.2),
+            ],
             &vec![(0, 1, 2)],
         );
     } else {

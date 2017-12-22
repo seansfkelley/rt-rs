@@ -175,8 +175,8 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
                     .into_iter()
                     .map(|(distance, start_count, end_count)| {
                         right_count -= end_count;
-                        // Note that this should be strict equality, since the case where distance == bounds is
-                        // degenerate and useless (one partition will be zero-width and get scored well for it).
+                        // Note that these are strict comparisons, since the case where distance == bounds is
+                        // degenerate and useless (one partition will be zero-width which doesn't actually save work).
                         let candidate = if node_min < distance && distance < node_max {
                             let mut left_bounds = node_bounds.clone();
                             left_bounds.max[axis_index] = distance;

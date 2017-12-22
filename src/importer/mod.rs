@@ -70,13 +70,14 @@ pub fn parse(path: &Path) -> SceneFile {
                     panic!("invalid token {} at {}:{}", character, line, column);
                 },
                 ParseError::UnrecognizedToken { token, expected } => {
+                    let formatted_expected = expected.join(", ").replace("\\\"", "");
                     match token {
                         Some(t) => {
                             let (line, column) = get_line_and_column(t.0);
-                            panic!("unexpected token {:?} at {}:{}; expected one of {:?}", (t.1).1, line, column, expected);
+                            panic!("unexpected token {:?} at {}:{}; expected one of {:?}", (t.1).1, line, column, formatted_expected);
                         },
                         None => {
-                            panic!("unexpected EOF; expected one of {:?}", expected);
+                            panic!("unexpected EOF; expected one of {:?}", formatted_expected);
                         }
                     }
                 },
