@@ -30,6 +30,5 @@
 - possible optimization heuristic: on each pixel, check intersection with the nearest object from the previous pixel, if any. if some, then chop down the ray range before running it through the spatial index. this may make performance worse if you have a small number of very complex objects (i.e. topo-earth) unless you can punch an analogous optimization through to them as well, or otherwise skip them during the normal collision checking (since you already checked it).
 
 ## misc
-- add "include" directive for scene files for copy-pasting purposes
 - make matrix a typedef of [[f64; 4]; 4] and then implement things for it?
 - update rayon to 0.9.0 (version compatibility issues?)
