@@ -1,0 +1,50 @@
+inline "common/common.scene"
+
+image_dimensions 1000 1000
+antialias 4
+
+camera perspective {
+  position 0 0 -8
+  look_at 0 0 0
+  up 0 1 0
+  field_of_view 60
+}
+
+light {
+  position 0 0 -5
+  color #ddd
+}
+
+texture dark constant flat {
+  color #111
+}
+
+object {
+  geometry triangle_mesh {
+    positions [
+      5 0 0,
+      5 -5 0,
+      -5 -5 0,
+    ]
+    indices [
+      0 2 1,
+    ]
+  }
+  texture flat_purple
+}
+
+transform rotate 180 0 0 1
+object {
+  geometry triangle_mesh {
+    positions [
+      5 0 0,
+      5 -5 0,
+      -5 -5 0,
+    ]
+    indices [
+      0 2 1,
+    ]
+  }
+  texture dark
+}
+transform pop

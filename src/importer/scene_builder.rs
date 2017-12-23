@@ -11,6 +11,7 @@ pub struct SceneBuilder {
     animation: Option<(u32, Vec<Mat4>)>,
     image_dimensions: Option<(u32, u32)>,
     antialias: Option<u32>,
+    antialias_tolerance: Option<f64>,
     depth_limit: Option<u32>,
     background_color: Option<Color>,
     textures: HashMap<String, Arc<Texture>>,
@@ -59,6 +60,7 @@ impl SceneBuilder {
     optional_setter!(animation, (u32, Vec<Mat4>));
     optional_setter!(image_dimensions, (u32, u32));
     optional_setter!(antialias, u32);
+    optional_setter!(antialias_tolerance, f64);
     optional_setter!(depth_limit, u32);
     optional_setter!(background_color, Color);
 
@@ -121,6 +123,7 @@ impl SceneBuilder {
         RenderParamaters {
             image_dimensions: require_optional!(self, image_dimensions),
             antialias: self.antialias.unwrap_or(1),
+            antialias_tolerance: self.antialias_tolerance.unwrap_or(0.01f64),
             depth_limit: self.depth_limit.unwrap_or(3),
             background_color: self.background_color.unwrap_or(BLACK),
         }

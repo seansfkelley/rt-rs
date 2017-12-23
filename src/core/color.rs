@@ -1,6 +1,7 @@
 use std::ops::{ Add, Sub, Div, Mul, AddAssign, SubAssign, DivAssign, MulAssign };
 use util::Clamp;
 use std::fmt::{ Debug, Formatter, Result };
+use std::f64::{INFINITY, NEG_INFINITY};
 
 #[derive(Clone, Copy)]
 pub struct Color {
@@ -151,4 +152,22 @@ impl Debug for Color {
     fn fmt(&self, f: &mut Formatter) -> Result {
         write!(f, "Color<{}, {}, {}>", self.r, self.g, self.b)
     }
+}
+
+pub fn min_vs_max(colors: &[Color]) -> f64 {
+    let mut min_r = INFINITY;
+    let mut max_r = NEG_INFINITY;
+    let mut min_g = INFINITY;
+    let mut max_g = NEG_INFINITY;
+    let mut min_b = INFINITY;
+    let mut max_b = NEG_INFINITY;
+    for color in colors {
+        min_r = min_r.min(color.r);
+        max_r = max_r.max(color.r);
+        min_g = min_g.min(color.g);
+        max_g = max_g.max(color.g);
+        min_b = min_b.min(color.b);
+        max_b = max_b.max(color.b);
+    }
+    max_r - min_r + max_g - min_g + max_b - min_b
 }

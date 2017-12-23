@@ -19,16 +19,17 @@ mod progress_bar;
 mod material;
 mod tessellation;
 
-use std::fs::{ File, create_dir_all };
-use std::path::{ Path, PathBuf };
+use std::collections::HashSet;
+use std::fs::{File, create_dir_all};
+use std::path::{Path, PathBuf};
 use std::env;
 use std::thread;
-use std::time::{ Duration, SystemTime };
-use std::sync::{ Arc, Mutex };
-use std::io::{ stderr, Write };
+use std::time::{Duration, SystemTime};
+use std::sync::{Arc, Mutex};
+use std::io::{stderr, Write};
 
 use rayon::prelude::*;
-use image::{ RgbImage, Rgb, Pixel };
+use image::{RgbImage, Rgb, Pixel};
 
 use core::*;
 use rand::Rng;
@@ -74,15 +75,17 @@ fn main() {
         object_tree,
         scene_file.lights,
         scene_file.parameters.background_color,
-        scene_file.parameters.depth_limit
+        scene_file.parameters.depth_limit,
     );
 
     let (width, height) = scene_file.parameters.image_dimensions;
     let antialias = scene_file.parameters.antialias;
+    let antialias_tolerance = scene_file.parameters.antialias_tolerance;
     let mut camera = scene_file.camera;
     let frame_count = scene_file.animation.0;
+    let samples_per_pixel = antialias * antialias;
 
-    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * antialias * antialias * frame_count, frame_count)));
+    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * samples_per_pixel * frame_count, frame_count)));
     let progress_render = progress_main.clone();
     thread::spawn(move || {
         loop {
@@ -104,6 +107,20 @@ fn main() {
         }
     });
 
+    let sample = |image_x: u32, image_y: u32, sample_x: u32, sample_y: u32, rng: &mut rand::ThreadRng, camera: &Camera| {
+        let (x_min, x_max, y_min, y_max) = (
+            sample_x as f64 / antialias as f64,
+            (1f64 + sample_x as f64) / antialias as f64,
+            sample_y as f64 / antialias as f64,
+            (1f64 + sample_y as f64) / antialias as f64
+        );
+
+        let x_jitter = rng.next_f64() * (x_max - x_min) + x_min;
+        let y_jitter = rng.next_f64() * (y_max - y_min) + y_min;
+
+        scene.raytrace(camera.get_ray(image_x as f64 + x_jitter, image_y as f64 + y_jitter))
+    };
+
     for frame_number in 0..frame_count {
         progress_main.lock().unwrap().increment_frame();
 
@@ -114,32 +131,43 @@ fn main() {
             .collect::<Vec<(u32, u32)>>()
             .into_par_iter()
             .map(|(image_x, image_y)| {
-                let mut rng = rand::thread_rng();
+                let color = if antialias == 1u32 {
+                    scene.raytrace(camera.get_ray(image_x as f64, image_y as f64))
+                } else {
+                    let mut rng = rand::thread_rng();
+                    let mut samples = 4f64;
+                    let max = antialias - 1;
+                    let test_points = vec![
+                        (0u32, 0u32),
+                        (0u32, max),
+                        (max, 0u32),
+                        (max, max),
+                    ];
 
-                let mut color = color::BLACK.clone();
-                for sample_x in 0..antialias {
-                    for sample_y in 0..antialias {
-                        let (x_jitter, y_jitter) =
-                            if antialias == 1 {
-                                (0.5f64, 0.5f64)
-                            } else {
-                                let (x_min, x_max, y_min, y_max) = (
-                                    sample_x as f64 / antialias as f64,
-                                    (1f64 + sample_x as f64) / antialias as f64,
-                                    sample_y as f64 / antialias as f64,
-                                    (1f64 + sample_y as f64) / antialias as f64
-                                );
+                    let test_colors = test_points
+                        .iter()
+                        .map(|&(sample_x, sample_y)| sample(image_x, image_y, sample_x, sample_y, &mut rng, &camera))
+                        .collect::<Vec<Color>>();
 
-                                (
-                                    rng.next_f64() * (x_max - x_min) + x_min,
-                                    rng.next_f64() * (y_max - y_min) + y_min,
-                                )
-                            };
-                        color = color + scene.raytrace(camera.get_ray(image_x as f64 + x_jitter, image_y as f64 + y_jitter));
+                    let mut color: Color = test_colors.iter().fold(color::BLACK.clone(),
+                                                                   |result, &color| result + color);
+
+                    if min_vs_max(&test_colors) > antialias_tolerance {
+                        let test_point_set: HashSet<&(u32, u32)> = test_points.iter().collect();
+                        for sample_x in 0..antialias {
+                            for sample_y in 0..antialias {
+                                if !test_point_set.contains(&(sample_x, sample_y)) {
+                                    color = color + sample(image_x, image_y, sample_x, sample_y, &mut rng, &camera);
+                                }
+                            }
+                        }
+                        samples = samples_per_pixel as f64;
                     }
-                }
-                progress_main.lock().unwrap().increment_operations(antialias * antialias);
-                (image_x, image_y, color / (antialias * antialias) as f64)
+                    color / samples
+
+                };
+                progress_main.lock().unwrap().increment_operations(samples_per_pixel);
+                (image_x, image_y, color)
             })
             .collect::<Vec<(u32, u32, Color)>>()
             .into_iter()

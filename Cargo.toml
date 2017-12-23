@@ -2,7 +2,7 @@
 name = "rt-rs"
 version = "0.1.0"
 authors = ["Sean Kelley <seansfkelley@gmail.com>", "Kevin Verdieck <kevinverdieck@gmail.com>"]
-exclude = [ "/scenes/*", "/scripts/*", "out/*" ]
+include = ["src/**/*", "Cargo.toml", "build.rs"]
 
 [profile.release]
 debug = true
