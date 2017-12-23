@@ -36,6 +36,9 @@ fn camera_to_world(common: CameraCommon) -> Mat4 {
 macro_rules! optional_setter {
     ($name:ident, $type:ty) => {
         pub fn $name(&mut self, input: $type) {
+            if self.$name.is_some() {
+                eprintln!("warning: scene file overrode already-set value for \"{}\"", stringify!($name));
+            }
             self.$name = Some(input);
         }
     };
@@ -46,7 +49,7 @@ macro_rules! require_optional {
         if $self_.$name.is_some() {
             $self_.$name.unwrap()
         } else {
-            panic!("scene file didn't set '{}' property", stringify!($name))
+            panic!("scene file didn't set \"{}\" property", stringify!($name))
         }
     }
 }
@@ -99,7 +102,7 @@ impl SceneBuilder {
         let texture_name = partial_object.1.to_owned();
         self.objects.push(SceneObject {
             shape: Shape::new(Arc::from(partial_object.0), transform),
-            texture: Arc::clone(self.textures.get(&texture_name).expect(format!("no texture named '{}' defined", texture_name).as_str())),
+            texture: Arc::clone(self.textures.get(&texture_name).expect(format!("no texture named \"{}\" defined", texture_name).as_str())),
         });
     }
 
