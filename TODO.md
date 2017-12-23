@@ -27,6 +27,7 @@
 - audit usages of Clone/Copy derivations and reference parameters to see if we're too copy-happy (or will rustc automatically optimize extraneous copies into moves?)
 - bounding boxes should maybe always be computed relative to the world for better bounds?
 - display image as it is being created
+- possible optimization heuristic: on each pixel, check intersection with the nearest object from the previous pixel, if any. if some, then chop down the ray range before running it through the spatial index. this may make performance worse if you have a small number of very complex objects (i.e. topo-earth) unless you can punch an analogous optimization through to them as well, or otherwise skip them during the normal collision checking (since you already checked it).
 
 ## misc
 - add "include" directive for scene files for copy-pasting purposes
