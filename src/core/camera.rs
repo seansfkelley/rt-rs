@@ -15,7 +15,7 @@ pub enum CameraKind {
     Perspective,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Camera {
     raster_to_camera: Transform,
     camera_to_world: Transform,

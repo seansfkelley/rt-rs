@@ -17,9 +17,9 @@ mod math;
 mod importer;
 mod progress_bar;
 mod material;
+mod sampler;
 mod tessellation;
 
-use std::collections::HashSet;
 use std::fs::{ File, create_dir_all };
 use std::path::{ Path, PathBuf };
 use std::env;
@@ -32,8 +32,8 @@ use rayon::prelude::*;
 use image::{ RgbImage, Rgb, Pixel };
 
 use core::*;
-use rand::Rng;
 use scene::Scene;
+use sampler::Sampler;
 use progress_bar::ProgressBar;
 
 fn seconds_since(t: SystemTime) -> f64 {
@@ -71,19 +71,8 @@ fn main() {
         p.into_boxed_path()
     };
 
-    let scene = Scene::new(
-        object_tree,
-        scene_file.lights,
-        scene_file.parameters.background_color,
-        scene_file.parameters.depth_limit,
-    );
-
     let (width, height) = scene_file.parameters.image_dimensions;
-    let antialias = scene_file.parameters.antialias;
-    let antialias_tolerance = scene_file.parameters.antialias_tolerance;
-    let mut camera = scene_file.camera;
     let frame_count = scene_file.animation.0;
-    let samples_per_pixel = antialias * antialias;
 
     let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * frame_count, frame_count)));
     let progress_render = progress_main.clone();
@@ -107,19 +96,16 @@ fn main() {
         }
     });
 
-    let sample = |image_x: u32, image_y: u32, sample_x: u32, sample_y: u32, rng: &mut rand::ThreadRng, camera: &Camera| {
-        let (x_min, x_max, y_min, y_max) = (
-            sample_x as f64 / antialias as f64,
-            (1f64 + sample_x as f64) / antialias as f64,
-            sample_y as f64 / antialias as f64,
-            (1f64 + sample_y as f64) / antialias as f64
-        );
-
-        let x_jitter = rng.next_f64() * (x_max - x_min) + x_min;
-        let y_jitter = rng.next_f64() * (y_max - y_min) + y_min;
-
-        scene.raytrace(camera.get_ray(image_x as f64 + x_jitter, image_y as f64 + y_jitter))
-    };
+    let mut moving_camera = scene_file.camera;
+    let mut sampler = Sampler::new(
+        Scene::new(
+            object_tree,
+            scene_file.lights,
+            scene_file.parameters.background_color,
+            scene_file.parameters.depth_limit,
+        ),
+        scene_file.parameters,
+        moving_camera.clone());
 
     for frame_number in 0..frame_count {
         progress_main.lock().unwrap().increment_frame();
@@ -131,43 +117,7 @@ fn main() {
             .collect::<Vec<(u32, u32)>>()
             .into_par_iter()
             .map(|(image_x, image_y)| {
-                let color = if antialias == 1u32 {
-                    scene.raytrace(camera.get_ray(image_x as f64, image_y as f64))
-                } else {
-                    let mut rng = rand::thread_rng();
-
-                    let test_points = {
-                        let max = antialias - 1;
-                        vec![
-                            (0u32, 0u32),
-                            (0u32, max),
-                            (max, 0u32),
-                            (max, max),
-                        ]
-                    };
-
-                    let test_colors = test_points
-                        .iter()
-                        .map(|&(sample_x, sample_y)| sample(image_x, image_y, sample_x, sample_y, &mut rng, &camera))
-                        .collect::<Vec<Color>>();
-
-                    let mut color: Color = test_colors.iter().fold(color::BLACK.clone(), |result, &color| result + color);
-
-                    if min_vs_max(&test_colors) > antialias_tolerance {
-                        let test_point_set: HashSet<&(u32, u32)> = test_points.iter().collect();
-                        for sample_x in 0..antialias {
-                            for sample_y in 0..antialias {
-                                if !test_point_set.contains(&(sample_x, sample_y)) {
-                                    color += sample(image_x, image_y, sample_x, sample_y, &mut rng, &camera);
-                                }
-                            }
-                        }
-                        color / samples_per_pixel as f64
-                    } else {
-                        color / 4f64
-                    }
-
-                };
+                let color = sampler.sample(image_x, image_y);
                 progress_main.lock().unwrap().increment_operations(1);
                 (image_x, image_y, color)
             })
@@ -181,6 +131,7 @@ fn main() {
         let ref mut output_file = File::create(&get_output_filename(frame_number)).expect("error creating output file");
         image::ImageRgb8(img).save(output_file, image::PNG).expect("error saving image");
 
-        camera = camera.transform(&scene_file.animation.1);
+        moving_camera = moving_camera.transform(&scene_file.animation.1);
+        sampler = sampler.with_camera(moving_camera.clone());
     }
 }
