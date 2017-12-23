@@ -72,23 +72,24 @@ pub fn parse_into_builder(path: &Path, builder: &mut SceneBuilder) {
     match parser::parse_SceneFile(builder, path, file_source.as_str()) {
         Ok(_) => {},
         Err(reason) => {
+            let formatted_file_name = path.to_str().expect("could not convert path to string");
             match reason {
                 ParseError::InvalidToken { location } => {
                     let (line, column) = get_line_and_column(location);
                     // Do we want the nth character or nth byte?
                     // https://stackoverflow.com/questions/30811107/getting-a-single-character-out-of-a-string
                     let character: String = file_source[location..location + 1].to_owned();
-                    panic!("invalid token {} at {}:{}", character, line, column);
+                    panic!("invalid token \"{}\" at {}:{}:{}", character, formatted_file_name, line, column);
                 },
                 ParseError::UnrecognizedToken { token, expected } => {
-                    let formatted_expected = expected.join(", ").replace("\\\"", "");
+                    let formatted_expected = expected.join(", ");
                     match token {
                         Some(t) => {
                             let (line, column) = get_line_and_column(t.0);
-                            panic!("unexpected token {:?} at {}:{}; expected one of {:?}", (t.1).1, line, column, formatted_expected);
+                            panic!("unexpected token \"{}\" at {}:{}:{}; expected one of {}", (t.1).1, formatted_file_name, line, column, formatted_expected);
                         },
                         None => {
-                            panic!("unexpected EOF; expected one of {:?}", formatted_expected);
+                            panic!("unexpected EOF in {}; expected one of {}", formatted_file_name, formatted_expected);
                         }
                     }
                 },
