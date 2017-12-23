@@ -198,4 +198,18 @@ mod tests {
         let r = Ray::finite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS, 0f64, 1f64);
         assert!(SINGLE_TRIANGLE.intersect(&r).is_none());
     }
+
+    #[test]
+    fn it_should_add_uv() {
+        let sum = Uv(1f64, 2f64) + Uv(10f64, 20f64);
+        assert_eq!(sum.0, 11f64);
+        assert_eq!(sum.1, 22f64);
+    }
+
+    #[test]
+    fn it_should_multiply_uv() {
+        let product = Uv(1f64, 2f64) * 10f64;
+        assert_eq!(product.0, 10f64);
+        assert_eq!(product.1, 20f64);
+    }
 }
