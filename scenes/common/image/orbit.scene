@@ -1,0 +1,9 @@
+image_dimensions 512 512
+antialias 1
+
+animation {
+  frames 18
+  camera_transforms [
+    rotate 10 0 1 0
+  ]
+}

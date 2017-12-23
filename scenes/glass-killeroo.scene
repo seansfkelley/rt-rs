@@ -1,23 +1,14 @@
-image_dimensions 1024 1024
+inline "common/common.scene"
+
+inline "common/image/standard.scene"
+// inline "common/image/orbit.scene"
+
 background_color #666
-antialias 3
 
 camera perspective {
   position 0 50 -200
   look_at 0 0 0
   up 0 1 0
-}
-
-texture glass constant transmissive {
-  color 0.9 0.9 0.9
-  specular_exponent 7
-  index_of_refraction 1.5
-  transmissivity 0.95
-  reflectivity 0.95
-}
-
-texture off_white constant flat {
-  color #ddd
 }
 
 light {
@@ -37,7 +28,7 @@ object {
     min -1 -1 -1
     max 1 1 0
   }
-  texture off_white
+  texture flat_off_white
 }
 transform pop all
 

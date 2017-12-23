@@ -1,5 +1,4 @@
-depth_limit 10
-background_color #111
+inline "common/common.scene"
 
 camera perspective {
   position 0 0 -10
@@ -7,13 +6,6 @@ camera perspective {
   up 0 1 0
   field_of_view 15
 }
-
-// for pretty
-
-// image_dimensions 1024 1024
-// antialias 3
-
-// for animation
 
 image_dimensions 1536 512
 antialias 1
@@ -23,10 +15,6 @@ animation {
   camera_transforms [
     rotate 10 1 0 0
   ]
-}
-
-texture purple_plastic constant flat {
-  color #f0f
 }
 
 light {
@@ -66,7 +54,7 @@ object {
     ]
     is_closed false
   }
-  texture purple_plastic
+  texture flat_purple
 }
 transform pop
 
@@ -87,7 +75,7 @@ object {
     ]
     is_closed false
   }
-  texture purple_plastic
+  texture flat_purple
 }
 
 transform translate 3 0 0
@@ -109,7 +97,7 @@ object {
     smoothing none
     is_closed false
   }
-  texture purple_plastic
+  texture flat_purple
 }
 transform pop
 

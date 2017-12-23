@@ -1,6 +1,7 @@
-image_dimensions 250 250
-antialias 1
-background_color .1 .1 .1
+inline "common/common.scene"
+
+// inline "common/image/standard.scene"
+inline "common/image/orbit.scene"
 
 camera perspective {
   position 0 0 -10
@@ -8,21 +9,9 @@ camera perspective {
   up 0 1 0
 }
 
-animation {
-  frames 5
-  camera_transforms [
-    rotate 15 0 1 0
-  ]
-}
-
 light {
   position 0 0 -25
   color 0.4 0.4 0.4
-}
-
-texture white constant flat {
-  color .9 .9 .9
-  specular_exponent 2
 }
 
 transform rotate -60 1 0 0
@@ -990,6 +979,6 @@ object {
       169 125 124,
     ]
   }
-  texture white
+  texture flat_off_white
 }
 

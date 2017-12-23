@@ -1,15 +1,12 @@
-image_dimensions 1024 1024
-background_color #111
-antialias 3
+inline "common/common.scene"
+
+inline "common/image/standard.scene"
+// inline "common/image/orbit.scene"
 
 camera perspective {
   position 0 80 -200
   look_at -30 -50 0
   up 0 1 0
-}
-
-texture white constant flat {
-  color #ccc
 }
 
 light {
@@ -12637,5 +12634,5 @@ object {
       3522 3414 3429,
     ]
   }
-  texture white
+  texture flat_off_white
 }

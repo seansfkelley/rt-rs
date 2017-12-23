@@ -1,0 +1,19 @@
+light {
+  position 20 20 -50
+  color #333
+}
+
+light {
+  position -20 20 -50
+  color #333
+}
+
+light {
+  position 0 -20 -50
+  color #333
+}
+
+light {
+  position -20 20 50
+  color #333
+}

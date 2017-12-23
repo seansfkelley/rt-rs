@@ -42,6 +42,17 @@ pub struct SceneFile {
 
 pub fn parse(path: &Path) -> SceneFile {
     let mut builder = SceneBuilder::new();
+    parse_into_builder(path, &mut builder);
+    SceneFile {
+        camera: builder.build_camera(),
+        animation: builder.build_animation(),
+        parameters: builder.build_render_parameters(),
+        objects: builder.objects,
+        lights: builder.lights,
+    }
+}
+
+pub fn parse_into_builder(path: &Path, builder: &mut SceneBuilder) {
     let file_source = strip_comments(read_file_contents(path));
     let line_lengths: Vec<usize> = NEWLINE_REGEX
         .split(file_source.as_str())
@@ -58,7 +69,7 @@ pub fn parse(path: &Path) -> SceneFile {
         (line + 1, index + 1)
     };
 
-    match parser::parse_SceneFile(&mut builder, &path, file_source.as_str()) {
+    match parser::parse_SceneFile(builder, path, file_source.as_str()) {
         Ok(_) => {},
         Err(reason) => {
             match reason {
@@ -84,12 +95,5 @@ pub fn parse(path: &Path) -> SceneFile {
                 _ => { panic!("{:?}", reason); }
             };
         },
-    };
-    SceneFile {
-        camera: builder.build_camera(),
-        animation: builder.build_animation(),
-        parameters: builder.build_render_parameters(),
-        objects: builder.objects,
-        lights: builder.lights,
     }
 }

@@ -1,4 +1,8 @@
-depth_limit 10
+inline "common/common.scene"
+
+inline "common/image/standard.scene"
+// inline "common/image/orbit.scene"
+
 background_color #000
 
 camera perspective {
@@ -8,36 +12,7 @@ camera perspective {
   field_of_view 25
 }
 
-// for pretty
-
 image_dimensions 1024 768
-antialias 3
-
-// for animation
-
-// image_dimensions 512 512
-// antialias 1
-//
-// animation {
-//   frames 18
-//   camera_transforms [
-//     rotate 10 0 1 0
-//   ]
-// }
-
-texture earth image {
-  diffuse "textures/earth.png"
-  ambient 0.2 * diffuse
-  specular "textures/earth-specular.png"
-  reflectivity 1 * specular
-}
-
-texture moon image {
-  diffuse "textures/moon.png"
-  ambient 0.2 * diffuse
-  specular 0.7 * diffuse
-  reflectivity constant #555
-}
 
 transform rotate 210 0 1 0
 transform translate -1 0 0

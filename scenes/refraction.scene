@@ -1,24 +1,13 @@
-image_dimensions 1024 1024
-depth_limit 3
-background_color #111
+inline "common/common.scene"
+
+inline "common/image/standard.scene"
+// inline "common/image/orbit.scene"
 
 camera perspective {
   position 0 5 -10
   look_at 0 0 0
   up 0 1 0
   field_of_view 60
-}
-
-texture blue constant flat {
-  color #00f
-}
-
-texture glass constant transmissive {
-  color 0.9 0.9 0.9
-  specular_exponent 7
-  index_of_refraction 1.5
-  transmissivity 0.95
-  reflectivity 0.95
 }
 
 object {
@@ -36,7 +25,7 @@ object {
     min -5 -0.25 -0.25
     max  5  0.25  0.25
   }
-  texture blue
+  texture flat_blue
 }
 
 

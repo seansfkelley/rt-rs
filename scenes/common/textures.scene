@@ -1,0 +1,72 @@
+texture flat_off_white constant flat {
+  color #ddd
+}
+
+texture flat_white constant flat {
+  color #fff
+}
+
+texture flat_red constant flat {
+  color #f00
+}
+
+texture flat_green constant flat {
+  color #0f0
+}
+
+texture flat_blue constant flat {
+  color #00f
+}
+
+texture flat_purple constant flat {
+  color #f0f
+}
+
+texture cyan_plastic constant flat {
+  color 0 .7 .7
+  specular_exponent 1
+  reflectivity .1
+}
+
+texture yellow_matte constant flat {
+  color .7 .7 0
+  specular_exponent 0
+}
+
+texture mirror constant flat {
+  color 0.9 0.9 0.9
+  specular_exponent 7
+  reflectivity 0.95
+}
+
+texture bw_checkerboard checkerboard {
+  checks_per_unit 32
+}
+
+texture wood_texture wood {
+  color_one #96643c
+  color_two #55280f
+}
+
+texture glass constant transmissive {
+  color 0.9 0.9 0.9
+  specular_exponent 7
+  index_of_refraction 1.5
+  transmissivity 0.95
+  reflectivity 0.95
+}
+
+texture earth image {
+  diffuse "textures/earth.png"
+  ambient 0.2 * diffuse
+  specular "textures/earth-specular.png"
+  reflectivity 1 * specular
+}
+
+texture moon image {
+  diffuse "textures/moon.png"
+  ambient 0.2 * diffuse
+  specular 0.7 * diffuse
+  reflectivity constant #555
+}
+

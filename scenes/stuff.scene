@@ -1,78 +1,13 @@
-depth_limit 5
-background_color .1 .1 .1
+inline "common/common.scene"
+
+inline "common/image/standard.scene"
+// inline "common/image/orbit.scene"
 
 camera perspective {
   position 0 0 -25
   look_at 0 0 0
   up 0 1 0
   field_of_view 60
-}
-
-// for pretty
-
-image_dimensions 1024 1024
-antialias 3
-
-// for animation
-
-// image_dimensions 512 512
-// antialias 1
-//
-// animation {
-//   frames 18
-//   camera_transforms [
-//     rotate 10 0 1 0
-//   ]
-// }
-
-texture red constant flat {
-  color #f00
-}
-
-texture green constant flat {
-  color #0f0
-}
-
-texture blue constant flat {
-  color #00f
-}
-
-texture purple constant flat {
-  color #a0a
-}
-
-texture cyan_plastic constant flat {
-  color 0 .7 .7
-  specular_exponent 1
-  reflectivity .1
-}
-
-texture mirror constant flat {
-  color 0.9 0.9 0.9
-  specular_exponent 7
-  reflectivity 0.95
-}
-
-texture yellow_matte constant flat {
-  color .7 .7 0
-  specular_exponent 0
-}
-
-texture bw_checkerboard checkerboard {
-  checks_per_unit 32
-}
-
-texture glass constant transmissive {
-  color 0.9 0.9 0.9
-  specular_exponent 7
-  index_of_refraction 1.5
-  transmissivity 0.95
-  reflectivity 0.95
-}
-
-texture wood_texture wood {
-  color_one #96643c
-  color_two #55280f
 }
 
 transform translate -4 -4 2
@@ -141,7 +76,7 @@ object {
   geometry sphere {
     radius 0.5
   }
-  texture red
+  texture flat_red
 }
 transform pop
 
@@ -150,7 +85,7 @@ object {
   geometry sphere {
     radius 0.5
   }
-  texture green
+  texture flat_green
 }
 transform pop
 
@@ -159,7 +94,7 @@ object {
   geometry sphere {
     radius 0.5
   }
-  texture blue
+  texture flat_blue
 }
 transform pop
 
@@ -202,7 +137,7 @@ object {
     ]
     tessellation_factor 100
   }
-  texture purple
+  texture flat_purple
 }
 transform pop 2
 

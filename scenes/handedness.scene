@@ -1,9 +1,11 @@
-// You should see a white triangle, animated in rotation to a dark triangle.
+// You should see a flat_white triangle, animated in rotation to a dark triangle.
 // This is because the winding order of the vertices as seen from the camera
 // starts counterclockwise (i.e., the front), and then as the camera rotates
 // we see the backside (clockwise winding order), and the normals are then
 // facing _away_ from the camera so we're "inside" the mesh in some sense and
 // it's dark, even though there's a light on that side.
+
+inline "common/common.scene"
 
 image_dimensions 100 100
 background_color #222
@@ -32,22 +34,6 @@ light {
   color #fff
 }
 
-texture red constant flat {
-  color #f00
-}
-
-texture green constant flat {
-  color #0f0
-}
-
-texture blue constant flat {
-  color #00f
-}
-
-texture white constant flat {
-  color #fff
-}
-
 object {
   geometry triangle_mesh {
     positions [
@@ -59,7 +45,7 @@ object {
       0 1 2
     ]
   }
-  texture white
+  texture flat_white
 }
 
 transform translate -3  -3 1
@@ -67,7 +53,7 @@ object {
   geometry sphere {
     radius 0.25
   }
-  texture red
+  texture flat_red
 }
 transform pop
 
@@ -76,7 +62,7 @@ object {
   geometry sphere {
     radius 0.25
   }
-  texture green
+  texture flat_green
 }
 transform pop
 
@@ -85,6 +71,6 @@ object {
   geometry sphere {
     radius 0.25
   }
-  texture blue
+  texture flat_blue
 }
 transform pop

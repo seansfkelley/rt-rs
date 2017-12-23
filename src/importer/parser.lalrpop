@@ -8,6 +8,7 @@ use geometry::*;
 use material::*;
 use tessellation::*;
 use importer::scene_builder::*;
+use importer::parse_into_builder;
 use color::{ Color, BLACK, WHITE };
 
 grammar(builder: &mut SceneBuilder, scene_file_path: &Path);
@@ -29,6 +30,7 @@ Statement: () = {
     "transform" <Transform> => builder.push_transform(<>),
     "object" <Object> => builder.add_object(<>),
     "light" <Light> => builder.add_light(<>),
+    "inline" <Path> => parse_into_builder(<>.as_ref(), builder),
 };
 
 CameraBuilder: CameraBuilder = {

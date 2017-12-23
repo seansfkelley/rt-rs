@@ -1,5 +1,8 @@
-depth_limit 10
-background_color #111
+inline "common/common.scene"
+inline "common/lighting/3_front_1_back.scene"
+
+inline "common/image/standard.scene"
+// inline "common/image/orbit.scene"
 
 camera perspective {
   position 0 5 -40
@@ -8,62 +11,24 @@ camera perspective {
   field_of_view 30
 }
 
-// for pretty
-
-image_dimensions 1024 1024
-antialias 3
-
-// for animation
-
-// image_dimensions 512 512
-// antialias 1
-//
-// animation {
-//   frames 18
-//   camera_transforms [
-//     rotate 10 0 1 0
-//   ]
-// }
-
-texture plain constant flat {
-  color #ddd
-}
-
-texture earth image {
-  diffuse "textures/earth.png"
+texture flat_earth image {
+  diffuse "common/textures/earth.png"
   ambient 0.2 * diffuse
-  specular "textures/earth-specular.png"
+  specular "common/textures/earth-specular.png"
   // reflectivity 1 * specular
 }
 
+transform rotate 180 0 1 0
+transform rotate -10 1 0 0
 object {
   geometry displace {
-    map "textures/earth-displacement.png"
+    map "common/textures/earth-displacement.png"
     min 9
     max 10
     mesh tessellated_sphere {
       depth 9
     }
   }
-  texture earth
+  texture flat_earth
 }
-
-light {
-  position 20 20 -50
-  color #333
-}
-
-light {
-  position -20 20 -50
-  color #333
-}
-
-light {
-  position 0 -20 -50
-  color #333
-}
-
-light {
-  position -20 20 50
-  color #333
-}
+transform pop 2
