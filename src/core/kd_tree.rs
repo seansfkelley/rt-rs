@@ -116,7 +116,7 @@ fn surface_area(bound: &BoundingBox) -> f64 {
     2f64 * (dimensions.x * dimensions.y + dimensions.y * dimensions.z + dimensions.z * dimensions.x)
 }
 
-fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Node<T> {
+fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_bounds: BoundingBox) -> Node<T> {
     const LEAF_THRESHOLD: usize = 5;
     const TRAVERSAL_COST: f64 = 1f64;
     const INTERSECTION_COST: f64 = 20f64;
@@ -125,9 +125,6 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
     if items.len() < LEAF_THRESHOLD {
         Node::Leaf(items.into_iter().map(|(i, _)| Arc::clone(&i)).collect())
     } else {
-        let node_bounds = items
-            .iter()
-            .fold(BoundingBox::empty(), |unioned_bounds, &(_, ref bound)| BoundingBox::union(&unioned_bounds, bound));
         let node_surface_area = surface_area(&node_bounds);
 
         let best_partition: Option<(Axis, f64)> = [Axis::X, Axis::Y, Axis::Z]
@@ -230,7 +227,16 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>) -> Nod
                 if (left == total && right > 0) || (right == total && left > 0) || (left + right) as f64 / total as f64 > 1.8 {
                     Node::Leaf(items.into_iter().map(|(i, _)| Arc::clone(&i)).collect())
                 } else {
-                    Node::Internal(axis, distance, Box::new(recursively_build_tree(left_items)), Box::new(recursively_build_tree(right_items)))
+                    let mut left_bounds = node_bounds.clone();
+                    left_bounds.max[axis_index] = distance;
+                    let mut right_bounds = node_bounds.clone();
+                    right_bounds.min[axis_index] = distance;
+                    Node::Internal(
+                        axis,
+                        distance,
+                        Box::new(recursively_build_tree(left_items, left_bounds)),
+                        Box::new(recursively_build_tree(right_items, right_bounds)),
+                    )
                 }
             },
             None => {
@@ -250,7 +256,7 @@ impl <T: Geometry> KdTree<T> {
             .iter()
             .fold(BoundingBox::empty(), |unioned_bounds, &(_, ref bound)| BoundingBox::union(&unioned_bounds, bound));
         KdTree {
-            root: recursively_build_tree(pairs),
+            root: recursively_build_tree(pairs, tree_bound.clone()),
             bound: tree_bound,
         }
     }
