@@ -20,16 +20,16 @@ mod material;
 mod tessellation;
 
 use std::collections::HashSet;
-use std::fs::{File, create_dir_all};
-use std::path::{Path, PathBuf};
+use std::fs::{ File, create_dir_all };
+use std::path::{ Path, PathBuf };
 use std::env;
 use std::thread;
-use std::time::{Duration, SystemTime};
-use std::sync::{Arc, Mutex};
-use std::io::{stderr, Write};
+use std::time::{ Duration, SystemTime };
+use std::sync::{ Arc, Mutex };
+use std::io::{ stderr, Write };
 
 use rayon::prelude::*;
-use image::{RgbImage, Rgb, Pixel};
+use image::{ RgbImage, Rgb, Pixel };
 
 use core::*;
 use rand::Rng;
@@ -85,7 +85,7 @@ fn main() {
     let frame_count = scene_file.animation.0;
     let samples_per_pixel = antialias * antialias;
 
-    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * samples_per_pixel * frame_count, frame_count)));
+    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * frame_count, frame_count)));
     let progress_render = progress_main.clone();
     thread::spawn(move || {
         loop {
@@ -135,38 +135,40 @@ fn main() {
                     scene.raytrace(camera.get_ray(image_x as f64, image_y as f64))
                 } else {
                     let mut rng = rand::thread_rng();
-                    let mut samples = 4f64;
-                    let max = antialias - 1;
-                    let test_points = vec![
-                        (0u32, 0u32),
-                        (0u32, max),
-                        (max, 0u32),
-                        (max, max),
-                    ];
+
+                    let test_points = {
+                        let max = antialias - 1;
+                        vec![
+                            (0u32, 0u32),
+                            (0u32, max),
+                            (max, 0u32),
+                            (max, max),
+                        ]
+                    };
 
                     let test_colors = test_points
                         .iter()
                         .map(|&(sample_x, sample_y)| sample(image_x, image_y, sample_x, sample_y, &mut rng, &camera))
                         .collect::<Vec<Color>>();
 
-                    let mut color: Color = test_colors.iter().fold(color::BLACK.clone(),
-                                                                   |result, &color| result + color);
+                    let mut color: Color = test_colors.iter().fold(color::BLACK.clone(), |result, &color| result + color);
 
                     if min_vs_max(&test_colors) > antialias_tolerance {
                         let test_point_set: HashSet<&(u32, u32)> = test_points.iter().collect();
                         for sample_x in 0..antialias {
                             for sample_y in 0..antialias {
                                 if !test_point_set.contains(&(sample_x, sample_y)) {
-                                    color = color + sample(image_x, image_y, sample_x, sample_y, &mut rng, &camera);
+                                    color += sample(image_x, image_y, sample_x, sample_y, &mut rng, &camera);
                                 }
                             }
                         }
-                        samples = samples_per_pixel as f64;
+                        color / samples_per_pixel as f64
+                    } else {
+                        color / 4f64
                     }
-                    color / samples
 
                 };
-                progress_main.lock().unwrap().increment_operations(samples_per_pixel);
+                progress_main.lock().unwrap().increment_operations(1);
                 (image_x, image_y, color)
             })
             .collect::<Vec<(u32, u32, Color)>>()

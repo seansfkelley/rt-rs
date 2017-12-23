@@ -1,7 +1,7 @@
 use std::ops::{ Add, Sub, Div, Mul, AddAssign, SubAssign, DivAssign, MulAssign };
 use util::Clamp;
 use std::fmt::{ Debug, Formatter, Result };
-use std::f64::{INFINITY, NEG_INFINITY};
+use std::f64::{ INFINITY, NEG_INFINITY };
 
 #[derive(Clone, Copy)]
 pub struct Color {
