@@ -157,7 +157,7 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
                     .fold(vec![], |mut coalesced: Vec<(f64, usize, usize)>, candidate| {
                         let (start_increment, end_increment): (usize, usize) = if candidate.1 == EdgeType::Start { (1, 0) } else { (0, 1) };
                         if coalesced.len() == 0 {
-                            vec![(candidate.0, start_increment, end_increment)]
+                            coalesced.push((candidate.0, start_increment, end_increment));
                         } else {
                             let last_index = coalesced.len() - 1;
                             let last = coalesced[last_index];
@@ -166,8 +166,8 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
                             } else {
                                 coalesced.push((candidate.0, start_increment, end_increment));
                             }
-                            coalesced
                         }
+                        coalesced
                     })
                     .into_iter()
                     .map(|(distance, start_count, end_count)| {
