@@ -81,6 +81,14 @@ impl Transformable for Ray {
 mod tests {
     use super::*;
 
+    macro_rules! assert_xyz_eq {
+        ($left:expr, $right:expr) => {
+            assert_eq!($left.x, $right.x);
+            assert_eq!($left.y, $right.y);
+            assert_eq!($left.z, $right.z);
+        };
+    }
+
     #[test]
     fn it_should_create_a_half_infinitely_long_ray() {
         let r = Ray::half_infinite(Point::uniform(0f64), Vec3::X_AXIS);
@@ -106,5 +114,23 @@ mod tests {
     fn it_should_throw_if_calling_at_with_out_of_bounds_t() {
         let r = Ray::half_infinite(Point::uniform(0f64), Vec3::X_AXIS);
         r.at(-1f64);
+    }
+
+    #[test]
+    fn it_should_set_t_min_only() {
+        let r = Ray::half_infinite(Point::uniform(0f64), Vec3::X_AXIS).with_min(10f64);
+        assert_xyz_eq!(r.origin, Point::uniform(0f64));
+        assert_xyz_eq!(r.direction, Vec3::X_AXIS);
+        assert_eq!(r.t_min, 10f64);
+        assert_eq!(r.t_max, f64::INFINITY);
+    }
+
+    #[test]
+    fn it_should_set_t_max_only() {
+        let r = Ray::half_infinite(Point::uniform(0f64), Vec3::X_AXIS).with_max(10f64);
+        assert_xyz_eq!(r.origin, Point::uniform(0f64));
+        assert_xyz_eq!(r.direction, Vec3::X_AXIS);
+        assert_eq!(r.t_min, 0f64);
+        assert_eq!(r.t_max, 10f64);
     }
 }
