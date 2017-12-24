@@ -37,14 +37,13 @@ object {
 }
 transform pop 2
 
-// object {
-//   geometry rect_prism {
-//     min -20 -20 11
-//     max 20 20 11.1
-//   }
-// TODO: Implement UVs for rect_prisms
-//   texture bw_checkerboard
-// }
+object {
+  geometry rect_prism {
+    min -40 -40 11
+    max 40 40 11.1
+  }
+  texture bw_checkerboard
+}
 
 light {
   position 5 3 -20
