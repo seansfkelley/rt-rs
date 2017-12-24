@@ -20,16 +20,16 @@ mod material;
 mod sampler;
 mod tessellation;
 
-use std::fs::{ File, create_dir_all };
-use std::path::{ Path, PathBuf };
+use std::fs::{File, create_dir_all};
+use std::path::{Path, PathBuf};
 use std::env;
 use std::thread;
-use std::time::{ Duration, SystemTime };
-use std::sync::{ Arc, Mutex };
-use std::io::{ stderr, Write };
+use std::time::{Duration, SystemTime};
+use std::sync::{Arc, Mutex};
+use std::io::{stderr, Write};
 
 use rayon::prelude::*;
-use image::{ RgbImage, Rgb, Pixel };
+use image::{RgbImage, Rgb, Pixel};
 
 use core::*;
 use scene::Scene;
@@ -113,16 +113,18 @@ fn main() {
         let mut img = RgbImage::new(width, height);
 
         (0..width)
-            .flat_map(|x| (0..height).map(|y| (x, y)).collect::<Vec<(u32, u32)>>().into_iter())
-            .collect::<Vec<(u32, u32)>>()
             .into_par_iter()
-            .map(|(image_x, image_y)| {
-                let color = sampler.sample(image_x, image_y);
-                progress_main.lock().unwrap().increment_operations(1);
-                (image_x, image_y, color)
+            .map(|image_x| {
+                (0..height).map(|image_y| {
+                    let color = sampler.sample(image_x, image_y);
+                    progress_main.lock().unwrap().increment_operations(1);
+                    (image_x, image_y, color)
+                })
+                    .collect::<Vec<(u32, u32, Color)>>()
             })
-            .collect::<Vec<(u32, u32, Color)>>()
+            .collect::<Vec<Vec<(u32, u32, Color)>>>()
             .into_iter()
+            .flat_map(|v| v.into_iter())
             .for_each(|(x, y, color)| {
                 img.put_pixel(x, y, *Rgb::from_slice(&color.as_bytes()));
             });
