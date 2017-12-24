@@ -22,21 +22,53 @@ impl RectPrism {
     }
 
     fn get_intersection(&self, t: f64, ray: &Ray) -> Intersection {
+        const ONE_THIRD: f64 = 1f64 / 3f64;
+        const ONE_FOURTH: f64 = 1f64 / 4f64;
         let location = ray.at(t);
+        let dimensions = self.max - self.min;
+        let (scaled_x, scaled_y, scaled_z) = (
+            (location.x - self.min.x) / dimensions.x,
+            (location.y - self.min.y) / dimensions.y,
+            (location.z - self.min.z) / dimensions.z,
+        );
 
-        let normal =
+        let (normal, u, v) =
                    if location.x.fuzzy_eq(self.min.x) {
-                Normal::new(-1f64, 0f64, 0f64)
+                (
+                    Normal::new(-1f64, 0f64, 0f64),
+                    (1f64 - scaled_z) * ONE_FOURTH,
+                    scaled_y * ONE_THIRD + ONE_THIRD,
+                )
             } else if location.x.fuzzy_eq(self.max.x) {
-                Normal::new(1f64, 0f64, 0f64)
+                (
+                    Normal::new(1f64, 0f64, 0f64),
+                    scaled_z * ONE_FOURTH + 2f64 * ONE_FOURTH,
+                    scaled_y * ONE_THIRD + ONE_THIRD,
+                )
             } else if location.y.fuzzy_eq(self.min.y) {
-                Normal::new(0f64, -1f64, 0f64)
+                (
+                    Normal::new(0f64, -1f64, 0f64),
+                    scaled_x * ONE_FOURTH + ONE_FOURTH,
+                    (1f64 - scaled_z) * ONE_THIRD,
+                )
             } else if location.y.fuzzy_eq(self.max.y) {
-                Normal::new(0f64, 1f64, 0f64)
+                (
+                    Normal::new(0f64, 1f64, 0f64),
+                    scaled_x * ONE_FOURTH + ONE_FOURTH,
+                    scaled_z * ONE_THIRD + 2f64 * ONE_THIRD,
+                )
             } else if location.z.fuzzy_eq(self.min.z) {
-                Normal::new(0f64, 0f64, -1f64)
+                (
+                    Normal::new(0f64, 0f64, -1f64),
+                    scaled_x * ONE_FOURTH + ONE_FOURTH,
+                    scaled_y * ONE_THIRD + ONE_THIRD,
+                )
             } else if location.z.fuzzy_eq(self.max.z) {
-                Normal::new(0f64, 0f64, 1f64)
+                (
+                    Normal::new(0f64, 0f64, 1f64),
+                    (1f64 - scaled_x) * ONE_FOURTH + 3f64 * ONE_FOURTH,
+                    scaled_y * ONE_THIRD + ONE_THIRD,
+                )
             } else {
                 unreachable!();
             };
@@ -46,7 +78,7 @@ impl RectPrism {
             location,
             normal,
             shading_normal: None,
-            uv: None, // TODO
+            uv: Some(Uv(u, v)),
             material: None,
         }
     }

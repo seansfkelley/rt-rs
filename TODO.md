@@ -18,7 +18,6 @@
 - named objects, geometries in scenes
 - subdivision surfaces
 - refraction: attenuation over distance (think: dark but not opaque liquid)
-- rect_prism UVs
 
 ## performance/quality
 - r-tree/bvh (would these be better than the kd-tree?)

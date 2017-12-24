@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use std::ops::{ Mul, Add };
 use core::*;
 use math::*;
 
@@ -63,22 +62,6 @@ impl TriangleMeshData {
             normals[i2] = normals[i2] + normal;
         }
         normals.into_iter().map(|n| n.into_normalized()).collect()
-    }
-}
-
-impl Mul<f64> for Uv {
-    type Output = Uv;
-
-    fn mul(self, other: f64) -> Uv {
-        Uv(self.0 * other, self.1 * other)
-    }
-}
-
-impl Add for Uv {
-    type Output = Uv;
-
-    fn add(self, other: Uv) -> Uv {
-        Uv(self.0 + other.0, self.1 + other.1)
     }
 }
 
@@ -197,19 +180,5 @@ mod tests {
     fn it_should_not_intersect_a_finite_ray() {
         let r = Ray::finite(Point::new(0f64, 0f64, -5f64), Vec3::Z_AXIS, 0f64, 1f64);
         assert!(SINGLE_TRIANGLE.intersect(&r).is_none());
-    }
-
-    #[test]
-    fn it_should_add_uv() {
-        let sum = Uv(1f64, 2f64) + Uv(10f64, 20f64);
-        assert_eq!(sum.0, 11f64);
-        assert_eq!(sum.1, 22f64);
-    }
-
-    #[test]
-    fn it_should_multiply_uv() {
-        let product = Uv(1f64, 2f64) * 10f64;
-        assert_eq!(product.0, 10f64);
-        assert_eq!(product.1, 20f64);
     }
 }

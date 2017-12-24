@@ -1,0 +1,40 @@
+inline "common/common.scene"
+
+image_dimensions 512 512
+antialias 3
+
+camera perspective {
+  position 5 5 -5
+  look_at 0 0 0
+  up 0 1 0
+  field_of_view 60
+}
+
+animation {
+  frames 18
+  camera_transforms [
+    rotate 20 1 1 1
+  ]
+}
+
+texture cubemap image {
+  diffuse "common/textures/cube-map.png"
+}
+
+object {
+  geometry rect_prism {
+    min -1 -1 -1
+    max 1 1 1
+  }
+  texture cubemap
+}
+
+light {
+  position 5 5 -10
+  color #ddd
+}
+
+light {
+  position -5 -5 10
+  color #ddd
+}
