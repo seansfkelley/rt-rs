@@ -1,7 +1,6 @@
 use math::*;
 use core::*;
 use color::Color;
-use util::Clamp;
 
 pub struct Scene {
     objects: KdTree<SceneObject>,

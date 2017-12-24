@@ -10,9 +10,9 @@ extern crate rayon;
 extern crate noise;
 
 mod core;
+mod external_crate_traits;
 mod geometry;
 mod scene;
-mod util;
 mod math;
 mod importer;
 mod progress_bar;

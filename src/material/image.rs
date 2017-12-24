@@ -3,7 +3,6 @@ use image::{RgbImage, open as openImage};
 use color::{Color};
 use core::*;
 use material::*;
-use util::UvMap;
 
 #[derive(Debug, Clone)]
 pub enum LightingFacet {

@@ -1,6 +1,7 @@
 use std::f64::consts::PI;
 use std::ops::{ Mul, Add };
 use math::*;
+use super::color::Color;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Uv(pub f64, pub f64);
@@ -19,6 +20,10 @@ impl Add for Uv {
     fn add(self, other: Uv) -> Uv {
         Uv(self.0 + other.0, self.1 + other.1)
     }
+}
+
+pub trait UvMap {
+    fn get_color(&self, uv: Uv) -> Color;
 }
 
 // Adapted from https://en.wikipedia.org/wiki/UV_mapping#Finding_UV_on_a_sphere.

@@ -2,7 +2,7 @@ use std::path::Path;
 use image::{ RgbImage, open as openImage };
 use math::*;
 use geometry::*;
-use util::*;
+use core::*;
 
 pub struct DisplacementMap {
     map: RgbImage,

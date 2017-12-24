@@ -1,20 +1,6 @@
 use core::*;
 use image::{ RgbImage, Pixel };
 
-pub trait Clamp {
-    fn clamp(self, min: Self, max: Self) -> Self;
-}
-
-impl Clamp for f64 {
-    fn clamp(self, min: f64, max: f64) -> f64 {
-        self.min(max).max(min)
-    }
-}
-
-pub trait UvMap {
-    fn get_color(&self, uv: Uv) -> Color;
-}
-
 impl UvMap for RgbImage {
     fn get_color(&self, uv: Uv) -> Color {
         let (width, height) = self.dimensions();
