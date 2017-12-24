@@ -1,6 +1,25 @@
 use std::f64::consts::PI;
+use std::ops::{ Mul, Add };
 use math::*;
-use core::*;
+
+#[derive(Debug, Clone, Copy)]
+pub struct Uv(pub f64, pub f64);
+
+impl Mul<f64> for Uv {
+    type Output = Uv;
+
+    fn mul(self, other: f64) -> Uv {
+        Uv(self.0 * other, self.1 * other)
+    }
+}
+
+impl Add for Uv {
+    type Output = Uv;
+
+    fn add(self, other: Uv) -> Uv {
+        Uv(self.0 + other.0, self.1 + other.1)
+    }
+}
 
 // Adapted from https://en.wikipedia.org/wiki/UV_mapping#Finding_UV_on_a_sphere.
 // pbrt pg. 119 talks about this as well, but I prefer the branchless, poles-along-y-axis version here.

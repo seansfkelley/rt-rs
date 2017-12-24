@@ -10,6 +10,7 @@ pub mod render_parameters;
 pub mod scene_object;
 pub mod shape;
 pub mod transform;
+pub mod uv;
 
 pub use self::bounding_box::*;
 pub use self::camera::*;
@@ -23,3 +24,4 @@ pub use self::render_parameters::*;
 pub use self::scene_object::*;
 pub use self::shape::*;
 pub use self::transform::*;
+pub use self::uv::*;

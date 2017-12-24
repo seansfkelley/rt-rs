@@ -1,5 +1,4 @@
-use core::intersection::{Uv};
-use core::color::{Color};
+use core::*;
 use image::{ RgbImage, Pixel };
 
 pub trait Clamp {

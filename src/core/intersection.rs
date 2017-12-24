@@ -1,25 +1,6 @@
-use std::ops::{ Mul, Add };
 use math::*;
 use material::*;
-
-#[derive(Debug, Clone, Copy)]
-pub struct Uv(pub f64, pub f64);
-
-impl Mul<f64> for Uv {
-    type Output = Uv;
-
-    fn mul(self, other: f64) -> Uv {
-        Uv(self.0 * other, self.1 * other)
-    }
-}
-
-impl Add for Uv {
-    type Output = Uv;
-
-    fn add(self, other: Uv) -> Uv {
-        Uv(self.0 + other.0, self.1 + other.1)
-    }
-}
+use super::uv::*;
 
 #[derive(Debug, Clone)]
 pub struct Intersection {

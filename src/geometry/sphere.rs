@@ -1,6 +1,5 @@
 use core::*;
 use math::*;
-use super::uv::*;
 
 #[derive(Debug)]
 pub struct Sphere {
