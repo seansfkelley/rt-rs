@@ -1,37 +1,38 @@
 use std::io::{ stderr, Write };
-use std::cmp::min;
 use std::time::SystemTime;
+use std::sync::atomic::{ AtomicUsize, Ordering };
 use terminal_size::{ terminal_size, Width };
 
 pub struct ProgressBar {
-    operations_total: u32,
-    operations_current: u32,
-    frame_total: u32,
-    frame_current: u32,
+    operations_total: usize,
+    operations_current: AtomicUsize,
+    frame_total: usize,
+    frame_current: AtomicUsize,
     start_timestamp: SystemTime,
 }
 
 impl ProgressBar {
-    pub fn new(operations_total: u32, frame_total: u32) -> ProgressBar {
+    pub fn new(operations_total: usize, frame_total: usize) -> ProgressBar {
         ProgressBar {
             operations_total,
-            operations_current: 0,
+            operations_current: AtomicUsize::new(0),
             frame_total,
-            frame_current: 0,
+            frame_current: AtomicUsize::new(0),
             start_timestamp: SystemTime::now(),
         }
     }
 
-    pub fn increment_operations(&mut self, count: u32) {
-        self.operations_current = min(self.operations_current + count, self.operations_total)
+    pub fn increment_operations(&self, count: usize) {
+        self.operations_current.fetch_add(count, Ordering::Relaxed);
     }
 
-    pub fn increment_frame(&mut self) {
-        self.frame_current = min(self.frame_current + 1, self.frame_total)
+    pub fn increment_frame(&self) {
+        self.frame_current.fetch_add(1, Ordering::Relaxed);
     }
 
     pub fn is_complete(&self) -> bool {
-        self.operations_current == self.operations_total && self.frame_current == self.frame_total
+        self.operations_current.load(Ordering::SeqCst) == self.operations_total &&
+        self.frame_current.load(Ordering::SeqCst) == self.frame_total
     }
 
     fn elapsed_time_seconds(&self) -> f64 {
@@ -40,7 +41,7 @@ impl ProgressBar {
     }
 
     pub fn render(&self) {
-        let fraction_complete = self.operations_current as f64 / self.operations_total as f64;
+        let fraction_complete = self.operations_current.load(Ordering::Relaxed) as f64 / self.operations_total as f64;
         let elapsed_time = self.elapsed_time_seconds();
         let eta = {
             let eta = elapsed_time / fraction_complete - elapsed_time;
@@ -48,7 +49,7 @@ impl ProgressBar {
         };
 
         let prefix = format!("frame {}/{} - {:3.1}% - {:.1}s [",
-            self.frame_current,
+            self.frame_current.load(Ordering::Relaxed),
             self.frame_total,
             100f64 * fraction_complete,
             elapsed_time,

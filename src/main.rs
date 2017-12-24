@@ -25,7 +25,7 @@ use std::path::{Path, PathBuf};
 use std::env;
 use std::thread;
 use std::time::{Duration, SystemTime};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::io::{stderr, Write};
 
 use rayon::prelude::*;
@@ -74,20 +74,19 @@ fn main() {
     let (width, height) = scene_file.parameters.image_dimensions;
     let frame_count = scene_file.animation.0;
 
-    let progress_main = Arc::new(Mutex::new(ProgressBar::new(width * height * frame_count, frame_count)));
-    let progress_render = progress_main.clone();
+    let progress = Arc::new(ProgressBar::new((width * height * frame_count) as usize, frame_count as usize));
+    let progress_render = Arc::clone(&progress);
     thread::spawn(move || {
         loop {
             let is_complete = {
-                let p = progress_render.lock().unwrap();
-                p.render();
-                p.is_complete()
+                progress_render.render();
+                progress_render.is_complete()
             };
 
             if !is_complete {
                 thread::sleep(Duration::from_millis(100));
             } else {
-                progress_render.lock().unwrap().render();
+                progress_render.render();
                 eprintln!();
                 stderr().flush().ok().unwrap();
                 thread::sleep(Duration::from_millis(200)); // time to flush the buffers, sometimes
@@ -108,20 +107,20 @@ fn main() {
         moving_camera.clone());
 
     for frame_number in 0..frame_count {
-        progress_main.lock().unwrap().increment_frame();
+        progress.increment_frame();
 
         let mut img = RgbImage::new(width, height);
 
         (0..width)
             .into_par_iter()
             .map(|image_x| {
-                let column = (0..height).map(|image_y| {
-                    let color = sampler.sample(image_x, image_y);
-                    (image_x, image_y, color)
-                })
-                    .collect::<Vec<(u32, u32, Color)>>();
-                progress_main.lock().unwrap().increment_operations(height);
-                column
+                (0..height)
+                    .map(|image_y| {
+                        let color = sampler.sample(image_x, image_y);
+                        progress.increment_operations(1);
+                        (image_x, image_y, color)
+                    })
+                    .collect::<Vec<(u32, u32, Color)>>()
             })
             .collect::<Vec<Vec<(u32, u32, Color)>>>()
             .into_iter()
