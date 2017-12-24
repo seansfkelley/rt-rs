@@ -115,12 +115,13 @@ fn main() {
         (0..width)
             .into_par_iter()
             .map(|image_x| {
-                (0..height).map(|image_y| {
+                let column = (0..height).map(|image_y| {
                     let color = sampler.sample(image_x, image_y);
-                    progress_main.lock().unwrap().increment_operations(1);
                     (image_x, image_y, color)
                 })
-                    .collect::<Vec<(u32, u32, Color)>>()
+                    .collect::<Vec<(u32, u32, Color)>>();
+                progress_main.lock().unwrap().increment_operations(height);
+                column
             })
             .collect::<Vec<Vec<(u32, u32, Color)>>>()
             .into_iter()
