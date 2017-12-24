@@ -42,7 +42,7 @@ object {
   geometry sphere {
     radius 3
   }
-  texture bw_checkerboard
+  texture sphere_default_checkerboard
 }
 transform pop
 

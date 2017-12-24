@@ -39,8 +39,14 @@ texture mirror constant flat {
   reflectivity 0.95
 }
 
-texture bw_checkerboard checkerboard {
-  checks_per_unit 32
+texture sphere_default_checkerboard checkerboard {
+  checks_u 32
+  checks_v 32
+}
+
+texture rect_prism_default_checkerboard checkerboard {
+  checks_u 48
+  checks_v 32
 }
 
 texture wood_texture wood {

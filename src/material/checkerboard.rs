@@ -4,20 +4,20 @@ use material::*;
 
 #[derive(Debug, Clone)]
 pub struct CheckerboardTexture {
-    pub checks_per_unit: u32,
-    pub color_a: Color,
-    pub color_b: Color,
+    pub checks_u: u32,
+    pub checks_v: u32,
+    pub color_one: Color,
+    pub color_two: Color,
 }
 
 impl Texture for CheckerboardTexture {
     fn get_material(&self, intersection: &Intersection) -> Material {
-        let check_size = 1f64 / self.checks_per_unit as f64;
         let color = match intersection.uv {
             Some(Uv(u, v)) => {
-                if (u / check_size) as u32 % 2 == (v / check_size) as u32 % 2 {
-                    self.color_a
+                if (u * self.checks_u as f64) as u32 % 2 == (v * self.checks_v as f64) as u32 % 2 {
+                    self.color_one
                 } else {
-                    self.color_b
+                    self.color_two
                 }
             },
             None => { panic!("cannot compute checkerboard texture for intersection without uv"); },

@@ -97,13 +97,15 @@ Texture: Box<Texture> = {
         reflectivity.unwrap_or(ImageTextureFacet::Constant(BLACK)),
     )),
     "checkerboard" "{"
-        <checks_per_unit:("checks_per_unit" <U32>)?>
-        <color_a:("color_a" <Color>)?>
-        <color_b:("color_b" <Color>)?>
+        <checks_u:("checks_u" <U32>)?>
+        <checks_v:("checks_v" <U32>)?>
+        <color_one:("color_one" <Color>)?>
+        <color_two:("color_two" <Color>)?>
     "}" => Box::new(CheckerboardTexture {
-        checks_per_unit: checks_per_unit.unwrap_or(2u32),
-        color_a: color_a.unwrap_or(WHITE),
-        color_b: color_b.unwrap_or(BLACK),
+        checks_u: checks_u.unwrap_or(2u32),
+        checks_v: checks_v.unwrap_or(2u32),
+        color_one: color_one.unwrap_or(WHITE),
+        color_two: color_two.unwrap_or(BLACK),
     }),
     "wood" "{"
         "color_one" <color_one:Color>

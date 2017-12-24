@@ -42,7 +42,7 @@ object {
     min -40 -40 11
     max 40 40 11.1
   }
-  texture bw_checkerboard
+  texture rect_prism_default_checkerboard
 }
 
 light {
