@@ -1,4 +1,4 @@
-use std::f64::consts::{ PI, PI_4 };
+use std::f64::consts::FRAC_PI_4;
 use rand::Rng;
 use math::*;
 
@@ -12,7 +12,7 @@ use math::*;
 // close together after being mapped. This may come in handy later as we use different
 // methods for generating the (x, y) pairs that might want to e.g. cluster around the
 // center of the distribution.
-fn sample_disk_uniform(rng: Rng) -> (f64, f64) {
+fn sample_disk_uniform(rng: &mut Rng) -> (f64, f64) {
     let x = 2f64 * rng.next_f64() - 1f64;
     let y = 2f64 * rng.next_f64() - 1f64;
 
@@ -20,10 +20,10 @@ fn sample_disk_uniform(rng: Rng) -> (f64, f64) {
         (0f64, 0f64)
     } else {
         // The disk is broken up into four symmetric quadrants, so there are four branches.
-        let mut (r, theta) =
+        let (r, mut theta) =
             if x >= -y {
                 if x > y {
-                    (x, if y > 0 { y / x } else { 8f64 + y / x })
+                    (x, if y > 0f64 { y / x } else { 8f64 + y / x })
                 } else {
                     (y, 2f64 - x / y)
                 }
@@ -35,14 +35,14 @@ fn sample_disk_uniform(rng: Rng) -> (f64, f64) {
                 }
             };
 
-        theta *= PI_4;
+        theta *= FRAC_PI_4;
         (r * theta.cos(), r * theta.cos())
     }
 }
 
 // pbrt pg. 669
-pub fn sample_hemisphere_cosine(rng: Rng) -> Vec3 {
-    let (x, y) = sample_disk_concentric(rng);
+pub fn sample_hemisphere_cosine(rng: &mut Rng) -> Vec3 {
+    let (x, y) = sample_disk_uniform(rng);
     let z = non_nan_max(0f64, 1f64 - x * x - y * y).sqrt();
     Vec3::new(x, y, z)
 }

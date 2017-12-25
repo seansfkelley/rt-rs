@@ -66,7 +66,7 @@ impl Scene {
         }
 
         let phong_fraction = 1f64 - reflection_fraction - transmission_fraction;
-        let mut color = BLACK;
+        let mut color = Color::BLACK;
 
         // TODO: increase other fractions if inside
         if !is_inside && phong_fraction > 0f64 {

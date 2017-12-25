@@ -48,7 +48,7 @@ impl Sampler {
                 .map(|&(sample_x, sample_y)| self.sample_direct(image_x, image_y, sample_x, sample_y, &mut rng))
                 .collect::<Vec<Color>>();
 
-            let mut color: Color = test_colors.iter().fold(color::BLACK.clone(), |result, &color| result + color);
+            let mut color: Color = test_colors.iter().fold(Color::BLACK.clone(), |result, &color| result + color);
 
             if min_vs_max(&test_colors) > self.parameters.antialias_tolerance {
                 let test_point_set: HashSet<&(u32, u32)> = test_points.iter().collect();
