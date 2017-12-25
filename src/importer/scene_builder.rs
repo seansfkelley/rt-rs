@@ -128,7 +128,7 @@ impl SceneBuilder {
             antialias: self.antialias.unwrap_or(1),
             antialias_tolerance: self.antialias_tolerance.unwrap_or(0.01f64),
             depth_limit: self.depth_limit.unwrap_or(3),
-            background_color: self.background_color.unwrap_or(BLACK),
+            background_color: self.background_color.unwrap_or(Color::BLACK),
         }
     }
 

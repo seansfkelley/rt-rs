@@ -1,4 +1,4 @@
-use color::{Color, BLACK};
+use color::Color;
 use core::*;
 use material::*;
 
@@ -26,7 +26,7 @@ impl Texture for CheckerboardTexture {
         Material {
             ambient: color * 0.1f64,
             diffuse: color,
-            specular: SpecularLighting(BLACK, 0f64),
+            specular: SpecularLighting(Color::BLACK, 0f64),
             transmission: None,
             reflectivity: 0f64,
         }
