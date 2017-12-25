@@ -1,11 +1,11 @@
 use std::path::Path;
-use image::{ RgbImage, open as openImage };
+use image::open as openImage;
 use math::*;
 use geometry::*;
 use core::*;
 
 pub struct DisplacementMap {
-    map: RgbImage,
+    map: Box<UvMap>,
     min: f64,
     max: f64,
 }
@@ -13,7 +13,7 @@ pub struct DisplacementMap {
 impl DisplacementMap {
     pub fn from_path(path: &Path, min: f64, max: f64) -> DisplacementMap {
         match openImage(path) {
-            Ok(img) => DisplacementMap { map: img.to_rgb(), min, max },
+            Ok(img) => DisplacementMap { map: Box::new(img.to_rgb()), min, max },
             Err(reason) => { panic!("could not open image at {:?}: {:?}", path, reason); }
         }
     }
