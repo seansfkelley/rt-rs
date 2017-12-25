@@ -41,6 +41,19 @@ fn seconds_since(t: SystemTime) -> f64 {
     (duration.as_secs() as f64 * 1e9f64 + duration.subsec_nanos() as f64) / 1e9f64
 }
 
+macro_rules! log_timing {
+    ($description:expr, $task:expr) => {
+        {
+            eprint!("{}", $description);
+            stderr().flush().ok().unwrap();
+            let start_time = SystemTime::now();
+            let result = $task;
+            eprintln!("done in {:.1}s", seconds_since(start_time));
+            result
+        }
+    };
+}
+
 fn main() {
     let mut args = env::args();
     args.next(); // Skip executable name.
@@ -51,13 +64,13 @@ fn main() {
         panic!("more than one argument provided");
     }
 
-    let parse_start_time = SystemTime::now();
-    let scene_file = importer::parse(Path::new(&scene_file_path));
-    eprintln!("{} parsed and objects constructed in {:.1}s", scene_file_path, seconds_since(parse_start_time));
+    let scene_file = log_timing!(
+        format!("parsing {} and building objects... ", scene_file_path),
+        importer::parse(Path::new(&scene_file_path)));
 
-    let tree_start_time = SystemTime::now();
-    let object_tree = KdTree::from(scene_file.objects);
-    eprintln!("spatial index built in {:.1}s", seconds_since(tree_start_time));
+    let object_tree = log_timing!(
+        "building spatial index... ",
+        KdTree::from(scene_file.objects));
 
     let output_directory: PathBuf = vec![
         "out",
