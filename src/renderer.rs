@@ -3,30 +3,30 @@ use rand::{ Rng, ThreadRng, thread_rng };
 use scene::Scene;
 use core::*;
 
-pub struct Sampler {
+pub struct Renderer {
     scene: Scene,
     parameters: RenderParamaters,
     camera: Camera,
 }
 
-impl Sampler {
-    pub fn new(scene: Scene, parameters: RenderParamaters, camera: Camera) -> Sampler {
-        Sampler {
+impl Renderer {
+    pub fn new(scene: Scene, parameters: RenderParamaters, camera: Camera) -> Renderer {
+        Renderer {
             scene,
             parameters,
             camera,
         }
     }
 
-    pub fn with_camera(self, camera: Camera) -> Sampler {
-        Sampler {
+    pub fn with_camera(self, camera: Camera) -> Renderer {
+        Renderer {
             scene: self.scene,
             parameters: self.parameters,
             camera,
         }
     }
 
-    pub fn sample(&self, image_x: u32, image_y: u32) -> Color {
+    pub fn render_pixel(&self, image_x: u32, image_y: u32) -> Color {
         let antialias = self.parameters.antialias;
         if antialias == 1u32 {
             self.scene.raytrace(self.camera.get_ray(image_x as f64, image_y as f64))
@@ -45,7 +45,7 @@ impl Sampler {
 
             let test_colors = test_points
                 .iter()
-                .map(|&(sample_x, sample_y)| self.sample_direct(image_x, image_y, sample_x, sample_y, &mut rng))
+                .map(|&(sample_x, sample_y)| self.sample_pixel_once(image_x, image_y, sample_x, sample_y, &mut rng))
                 .collect::<Vec<Color>>();
 
             let mut color: Color = test_colors.iter().fold(color::BLACK.clone(), |result, &color| result + color);
@@ -55,7 +55,7 @@ impl Sampler {
                 for sample_x in 0..antialias {
                     for sample_y in 0..antialias {
                         if !test_point_set.contains(&(sample_x, sample_y)) {
-                            color += self.sample_direct(image_x, image_y, sample_x, sample_y, &mut rng);
+                            color += self.sample_pixel_once(image_x, image_y, sample_x, sample_y, &mut rng);
                         }
                     }
                 }
@@ -66,7 +66,7 @@ impl Sampler {
         }
     }
 
-    fn sample_direct(&self, image_x: u32, image_y: u32, sample_x: u32, sample_y: u32, rng: &mut ThreadRng) -> Color {
+    fn sample_pixel_once(&self, image_x: u32, image_y: u32, sample_x: u32, sample_y: u32, rng: &mut ThreadRng) -> Color {
         let antialias = self.parameters.antialias;
 
         let (x_min, x_max, y_min, y_max) = (
