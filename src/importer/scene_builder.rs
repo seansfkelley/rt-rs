@@ -38,8 +38,6 @@ macro_rules! optional_setter {
         pub fn $name(&mut self, input: $type) {
             if self.$name.is_some() {
                 eprintln!("warning: scene file overrode already-set value for \"{}\"", stringify!($name));
-            } else {
-                eprintln!("warning: scene file set a new value for \"{}\"", stringify!($name));
             }
             self.$name = Some(input);
         }
