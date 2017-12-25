@@ -12,6 +12,7 @@ extern crate noise;
 mod bxdf;
 mod core;
 mod external_crate_traits;
+mod lights;
 mod geometry;
 mod scene;
 mod math;
