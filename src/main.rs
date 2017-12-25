@@ -9,6 +9,7 @@ extern crate ordered_float;
 extern crate rayon;
 extern crate noise;
 
+mod bxdf;
 mod core;
 mod external_crate_traits;
 mod geometry;
@@ -18,6 +19,7 @@ mod importer;
 mod progress_bar;
 mod material;
 mod sampler;
+mod samples;
 mod tessellation;
 
 use std::fs::{File, create_dir_all};
