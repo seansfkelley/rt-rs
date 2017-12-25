@@ -4,6 +4,8 @@ use std::fmt::{ Debug, Formatter, Result };
 use ordered_float::NotNaN;
 use core::*;
 
+use rayon;
+
 #[derive(Debug, Clone, Copy)]
 enum Axis {
     X = 0,
@@ -170,7 +172,7 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
                         coalesced
                     })
                     .into_iter()
-                    .map(|(distance, start_count, end_count)| {
+                    .filter_map(|(distance, start_count, end_count)| {
                         right_count -= end_count;
                         // Note that these are strict comparisons, since the case where distance == bounds is
                         // degenerate and useless (one partition will be zero-width which doesn't actually save work).
@@ -191,7 +193,6 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
                         left_count += start_count;
                         candidate
                     })
-                    .filter_map(|o| o)
                     .min_by_key(|&(_, cost)| cost)
                     .map(|(distance, cost)| (axis, distance, cost));
 
@@ -231,11 +232,15 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
                     left_bounds.max[axis_index] = distance;
                     let mut right_bounds = node_bounds.clone();
                     right_bounds.min[axis_index] = distance;
+                    let (left_node, right_node) = rayon::join(
+                        move || recursively_build_tree(left_items, left_bounds),
+                        move || recursively_build_tree(right_items, right_bounds),
+                    );
                     Node::Internal(
                         axis,
                         distance,
-                        Box::new(recursively_build_tree(left_items, left_bounds)),
-                        Box::new(recursively_build_tree(right_items, right_bounds)),
+                        Box::new(left_node),
+                        Box::new(right_node),
                     )
                 }
             },

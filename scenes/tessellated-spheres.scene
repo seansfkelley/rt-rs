@@ -1,5 +1,5 @@
 inline "common/common.scene"
-inline "common/lighting/3_front_1_back.scene"
+inline "common/lighting/3-front-1-back.scene"
 
 inline "common/image/standard.scene"
 // inline "common/image/orbit.scene"
