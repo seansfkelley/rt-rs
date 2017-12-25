@@ -20,7 +20,6 @@ mod importer;
 mod progress_bar;
 mod material;
 mod sampler;
-mod samples;
 mod tessellation;
 
 use std::fs::{File, create_dir_all};

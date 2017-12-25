@@ -1,6 +1,7 @@
 use std::f64::consts::FRAC_PI_4;
 use rand::Rng;
-use math::*;
+use super::xyz::*;
+use super::non_nan::*;
 
 // pbrt pg. 667
 //
