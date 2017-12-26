@@ -12,7 +12,6 @@ extern crate noise;
 mod core;
 mod external_crate_traits;
 mod geometry;
-mod scene;
 mod math;
 mod importer;
 mod progress_bar;
@@ -110,12 +109,7 @@ fn main() {
 
     let mut moving_camera = scene_file.camera;
     let mut renderer = Renderer::new(
-        Scene::new(
-            object_tree,
-            scene_file.lights,
-            scene_file.parameters.background_color,
-            scene_file.parameters.depth_limit,
-        ),
+        Scene { objects: object_tree, lights: scene_file.lights },
         scene_file.parameters,
         moving_camera.clone());
 
