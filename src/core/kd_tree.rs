@@ -52,14 +52,13 @@ impl<T: Geometry> Node<T> {
 
 struct IntersectionIterator<'a, T: Geometry + 'a> {
     node_stack: Vec<(&'a Node<T>, f64, f64)>,
-    items: Box<Iterator<Item = Arc<T>> + 'a>,
+    items: Box<Iterator<Item=Arc<T>> + 'a>,
     ray: Ray,
 }
 
 
 impl<'a, T> IntersectionIterator<'a, T>
     where T: Geometry + 'a {
-
     pub fn new(node_stack: Vec<(&'a Node<T>, f64, f64)>, ray: Ray) -> IntersectionIterator<T> {
         IntersectionIterator {
             node_stack,
@@ -69,16 +68,22 @@ impl<'a, T> IntersectionIterator<'a, T>
     }
 
     fn process_items(&mut self) -> Option<Intersection> {
-        for item in self.items {
-            match item.intersect(&self.ray) {
-                Some(intersection) => {
-                    self.ray.t_max = intersection.distance;
-                    return Some(intersection);
-                }
-                None => {}
-            }
+        loop {
+            match self.items.next() {
+                Some(item) => {
+                    match item.intersect(&self.ray) {
+                        Some(intersection) => {
+                            self.ray.t_max = intersection.distance;
+                            return Some(intersection);
+                        }
+                        None => {}
+                    }
+                },
+                None => {
+                    return None;
+                },
+            };
         };
-        None
     }
 }
 
@@ -218,7 +223,7 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
                             let bonus_multiplier = 1f64 - (if left_count == 0 || right_count == 0 { EMPTY_BONUS } else { 0f64 });
                             let cost = TRAVERSAL_COST + INTERSECTION_COST * bonus_multiplier * (
                                 surface_area(&left_bounds) * left_count as f64 / node_surface_area +
-                                surface_area(&right_bounds) * right_count  as f64 / node_surface_area
+                                    surface_area(&right_bounds) * right_count as f64 / node_surface_area
                             );
                             Some((distance, NotNaN::new(cost).unwrap()))
                         } else {
