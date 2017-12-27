@@ -31,5 +31,6 @@
 - partial intersection in kd-tree
 
 ## misc
+- Add pixel-matching image tests
 - make matrix a typedef of [[f64; 4]; 4] and then implement things for it?
 - update rayon to 0.9.0 (version compatibility issues?)
