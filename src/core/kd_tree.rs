@@ -52,25 +52,24 @@ impl<T: Geometry> Node<T> {
 
 struct IntersectionIterator<'a, T: Geometry + 'a> {
     node_stack: Vec<(&'a Node<T>, f64, f64)>,
-    items: Vec<Arc<T>>,
+    items: Box<Iterator<Item = Arc<T>>>,
     ray: Ray,
 }
 
 
 impl<'a, T> IntersectionIterator<'a, T>
-    where T: Geometry {
+    where T: Geometry + 'a {
 
     pub fn new(node_stack: Vec<(&'a Node<T>, f64, f64)>, ray: Ray) -> IntersectionIterator<T> {
         IntersectionIterator {
             node_stack,
-            items: vec![],
+            items: Box::new(vec![].into_iter()),
             ray,
         }
     }
 
     fn process_items(&mut self) -> Option<Intersection> {
-        while self.items.len() > 0 {
-            let item = self.items.pop().unwrap();
+        for item in self.items {
             match item.intersect(&self.ray) {
                 Some(intersection) => {
                     self.ray.t_max = intersection.distance;
@@ -121,7 +120,7 @@ impl<'a, T> Iterator for IntersectionIterator<'a, T>
                         }
                     }
                     &Node::Leaf(ref items) => {
-                        self.items.extend_from_slice(items);
+                        self.items = Box::new(self.items.chain(items));
                         hit = self.process_items();
                     }
                 }
