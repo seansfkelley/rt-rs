@@ -9,7 +9,6 @@ extern crate ordered_float;
 extern crate rayon;
 extern crate noise;
 
-mod bxdf;
 mod core;
 mod external_crate_traits;
 mod lights;
