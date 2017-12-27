@@ -1,4 +1,3 @@
-use color::Color;
 use core::*;
 use material::*;
 
