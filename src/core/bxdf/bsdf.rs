@@ -5,12 +5,12 @@ use core::*;
 pub struct Bsdf {
     bxdfs: Vec<Box<Bxdf>>,
     world_to_local: Transform,
-    eta: f64, // For refraction, I guess? A little abstraction-breaky but not terrible.
+    // eta: f64, // For refraction, I guess? A little abstraction-breaky but not terrible.
 }
 
 impl Bsdf {
-    pub fn new(bxdfs: Vec<Box<Bxdf>>, world_to_local: Transform, eta: f64) -> Bsdf {
-        Bsdf { bxdfs, world_to_local, eta }
+    pub fn new(bxdfs: Vec<Box<Bxdf>>, world_to_local: Transform) -> Bsdf {
+        Bsdf { bxdfs, world_to_local }
     }
 
     pub fn evaluate(&self, w_o_world: Vec3, w_i_world: Vec3, types: Vec<BxdfType>) -> Color {
