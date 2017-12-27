@@ -1,7 +1,7 @@
 use std::f64;
 use std::sync::Arc;
 use std::fmt::{Debug, Formatter, Result};
-use ordered_float::{NotNaN,OrderedFloat};
+use ordered_float::NotNaN;
 use core::*;
 
 use rayon;
@@ -308,7 +308,7 @@ impl<T: Geometry> Geometry for KdTree<T> {
     }
 
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-        intersect(self, ray.clone()).min_by_key(|i| OrderedFloat(i.distance))
+        intersect(self, ray.clone()).min_by_key(|i| NotNaN::new(i.distance).unwrap())
     }
 
     fn does_intersect(&self, ray: &Ray) -> bool {
