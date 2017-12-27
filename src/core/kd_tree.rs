@@ -1,7 +1,7 @@
 use std::f64;
 use std::sync::Arc;
-use std::fmt::{ Debug, Formatter, Result };
-use ordered_float::NotNaN;
+use std::fmt::{Debug, Formatter, Result};
+use ordered_float::{NotNaN,OrderedFloat};
 use core::*;
 
 use rayon;
@@ -24,88 +24,123 @@ enum Node<T: Geometry> {
     Leaf(Vec<Arc<T>>),
 }
 
-impl <T: Geometry> Node<T> {
+impl<T: Geometry> Node<T> {
     fn size(&self) -> usize {
         match self {
             &Node::Internal(_, _, ref left, ref right) => {
                 left.size() + right.size()
-            },
+            }
             &Node::Leaf(ref items) => {
                 items.len()
-            },
+            }
         }
     }
 
     fn fmt_indented(&self, f: &mut Formatter, indent_level: usize) -> Result {
         match self {
             &Node::Internal(ref axis, ref distance, ref left, ref right) => {
-                write!(f, "{}{} objects, split {:?} at {}\n",  " ".repeat(indent_level * 2), self.size(), *axis, distance)?;
+                write!(f, "{}{} objects, split {:?} at {}\n", " ".repeat(indent_level * 2), self.size(), *axis, distance)?;
                 left.fmt_indented(f, indent_level + 1)?;
                 right.fmt_indented(f, indent_level + 1)
-            },
+            }
             &Node::Leaf(ref items) => {
                 write!(f, "{}{} objects\n", " ".repeat(indent_level * 2), items.len())
-            },
+            }
         }
     }
 }
 
-// pbrt pg. 240
-fn intersect<T: Geometry>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
-    let (t_min_init, t_max_init) = match tree.bound.intersect(&ray) {
-        Some((t0, t1)) => (t0, t1),
-        None => { return None; }
-    };
-    let mut node_stack = vec![(&tree.root, t_min_init, t_max_init)];
-    let mut r = ray;
-    let mut closest: Option<Intersection> = None;
+struct IntersectionIterator<'a, T: Geometry + 'a> {
+    node_stack: Vec<(&'a Node<T>, f64, f64)>,
+    items: Vec<Arc<T>>,
+    ray: Ray,
+}
 
-    while node_stack.len() > 0 {
-        let (node, t_min, t_max) = node_stack.pop().unwrap();
-        if t_min < r.t_max {
-            match node {
-                &Node::Internal(axis, distance, ref left, ref right) => {
-                    let axis_index = axis as usize;
-                    let origin_component = r.origin[axis_index];
-                    let direction_component = r.direction[axis_index];
-                    let (near, far) = if (origin_component < distance) || (origin_component == distance && direction_component <= 0f64) {
-                        (left, right)
-                    } else {
-                        (right, left)
-                    };
 
-                    let t_plane = (distance - origin_component) / direction_component;
-                    if t_plane > t_max || t_plane <= 0f64 {
-                        // t_plane > t_max means we hit the plane outside the current node's bounds, so skip far.
-                        // t_plane <= 0 is not because the starting point of the ray is significant, but because the
-                        // sign tells us if we're pointing away from the plane and can skip far.
-                        // Note that this automatically handles both infinities.
-                        node_stack.push((near, t_min, t_max));
-                    } else if t_plane < t_min {
-                        // t_plane < t_min means we're poining towards the plane, but it's behind where we care about
-                        // so skip near.
-                        node_stack.push((far, t_min, t_max));
-                    } else {
-                        node_stack.push((far, t_plane, t_max));
-                        node_stack.push((near, t_min, t_plane));
-                    }
-                },
-                &Node::Leaf(ref items) => {
-                    for item in items {
-                        match item.intersect(&r) {
-                            Some(intersection) => {
-                                r.t_max = intersection.distance;
-                                closest = Some(intersection);
-                            },
-                            None => {},
-                        }
-                    }
-                },
-            }
+impl<'a, T> IntersectionIterator<'a, T>
+    where T: Geometry {
+
+    pub fn new(node_stack: Vec<(&'a Node<T>, f64, f64)>, ray: Ray) -> IntersectionIterator<T> {
+        IntersectionIterator {
+            node_stack,
+            items: vec![],
+            ray,
         }
     }
 
-    closest
+    fn process_items(&mut self) -> Option<Intersection> {
+        while self.items.len() > 0 {
+            let item = self.items.pop().unwrap();
+            match item.intersect(&self.ray) {
+                Some(intersection) => {
+                    self.ray.t_max = intersection.distance;
+                    return Some(intersection);
+                }
+                None => {}
+            }
+        };
+        None
+    }
+}
+
+impl<'a, T> Iterator for IntersectionIterator<'a, T>
+    where T: Geometry {
+    type Item = Intersection;
+
+    // pbrt pg. 240
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut hit: Option<Self::Item> = self.process_items();
+        while hit.is_none() && self.node_stack.len() > 0 {
+            let (node, t_min, t_max) = self.node_stack.pop().unwrap();
+            if t_min < self.ray.t_max {
+                match node {
+                    &Node::Internal(axis, distance, ref left, ref right) => {
+                        let axis_index = axis as usize;
+                        let origin_component = self.ray.origin[axis_index];
+                        let direction_component = self.ray.direction[axis_index];
+                        let (near, far) = if (origin_component < distance) || (origin_component == distance && direction_component <= 0f64) {
+                            (left, right)
+                        } else {
+                            (right, left)
+                        };
+
+                        let t_plane = (distance - origin_component) / direction_component;
+                        if t_plane > t_max || t_plane <= 0f64 {
+                            // t_plane > t_max means we hit the plane outside the current node's bounds, so skip far.
+                            // t_plane <= 0 is not because the starting point of the ray is significant, but because the
+                            // sign tells us if we're pointing away from the plane and can skip far.
+                            // Note that this automatically handles both infinities.
+                            self.node_stack.push((near, t_min, t_max));
+                        } else if t_plane < t_min {
+                            // t_plane < t_min means we're poining towards the plane, but it's behind where we care about
+                            // so skip near.
+                            self.node_stack.push((far, t_min, t_max));
+                        } else {
+                            self.node_stack.push((far, t_plane, t_max));
+                            self.node_stack.push((near, t_min, t_plane));
+                        }
+                    }
+                    &Node::Leaf(ref items) => {
+                        self.items.extend_from_slice(items);
+                        hit = self.process_items();
+                    }
+                }
+            }
+        }
+        hit
+    }
+}
+
+fn intersect<T: Geometry>(tree: &KdTree<T>, ray: Ray) -> IntersectionIterator<T> {
+    let (t_min_init, t_max_init) = match tree.bound.intersect(&ray) {
+        Some((t0, t1)) => (t0, t1),
+        None => {
+            return IntersectionIterator::new(vec![], ray);
+        }
+    };
+    let node_stack = vec![(&tree.root, t_min_init, t_max_init)];
+
+    IntersectionIterator::new(node_stack, ray)
 }
 
 pub struct KdTree<T: Geometry> {
@@ -243,15 +278,15 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
                         Box::new(right_node),
                     )
                 }
-            },
+            }
             None => {
                 Node::Leaf(items.into_iter().map(|(i, _)| Arc::clone(&i)).collect())
-            },
+            }
         }
     }
 }
 
-impl <T: Geometry> KdTree<T> {
+impl<T: Geometry> KdTree<T> {
     pub fn from(items: Vec<T>) -> KdTree<T> {
         let pairs: Vec<(Arc<T>, BoundingBox)> = items.into_iter().map(|i| {
             let bound = i.bound();
@@ -267,22 +302,21 @@ impl <T: Geometry> KdTree<T> {
     }
 }
 
-impl <T: Geometry> Geometry for KdTree<T> {
+impl<T: Geometry> Geometry for KdTree<T> {
     fn bound(&self) -> BoundingBox {
         self.bound.clone()
     }
 
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-        intersect(&self, ray.clone())
+        intersect(self, ray.clone()).min_by_key(|i| OrderedFloat(i.distance))
     }
 
     fn does_intersect(&self, ray: &Ray) -> bool {
-        // TODO: Actually implement a separate method for this.
-        self.intersect(ray).is_some()
+        intersect(self, ray.clone()).next().is_some()
     }
 }
 
-impl <T: Geometry> Debug for KdTree<T> {
+impl<T: Geometry> Debug for KdTree<T> {
     fn fmt(&self, f: &mut Formatter) -> Result {
         self.root.fmt_indented(f, 0)
     }

@@ -269,3 +269,7 @@ impl Vec3 {
         *self - axis * (2f64 * self.dot(&axis))
     }
 }
+
+impl Point {
+    pub const ORIGIN: Point = Point { x: 0f64, y: 0f64, z: 0f64 };
+}
