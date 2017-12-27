@@ -103,7 +103,8 @@ impl Renderer {
     fn integrate_direct_lighting(&self, ray: Ray, intersection: Intersection, depth: u32) -> Color {
         const NUDGE_FACTOR: f64 = 1e-10f64;
 
-        let mut color = Color::BLACK.clone();
+        #[allow(non_snake_case)]
+        let mut L = Color::BLACK.clone();
 
         let bsdf = intersection.material.as_ref().expect("scene intersections should always have a material").get_bsdf(&intersection);
 
@@ -122,7 +123,7 @@ impl Renderer {
         // TODO: When do we figure shit out about being inside the shape...?
 
         for light in &self.scene.lights {
-            color += self.uniform_sample_light(light, &bsdf, p, n, w_o);
+            L += self.uniform_sample_light(light, &bsdf, p, n, w_o);
         }
 
         // let mut reflection_fraction = material.reflectivity;
@@ -185,7 +186,7 @@ impl Renderer {
         //     }
         // }
 
-        color
+        L
     }
 
     fn uniform_sample_light(&self, light: &Box<Light>, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3) -> Color {
@@ -200,7 +201,7 @@ impl Renderer {
         let Ld = Color::BLACK.clone();
 
         #[allow(non_snake_case)]
-        let sampled_Li = light.sample_L(p);
+        let sampled_Li = light.choose_and_sample_L(p);
         if sampled_Li.pdf > 0f64 && sampled_Li.color.is_nonzero() {
             let bsdf_transport = bsdf.evaluate(w_o, sampled_Li.w_i, bxdf_types);
 

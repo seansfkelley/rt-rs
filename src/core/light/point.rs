@@ -1,18 +1,5 @@
 use math::*;
-use super::color::Color;
-use super::ray::Ray;
-
-pub struct LightSample {
-    pub color: Color,
-    pub w_i: Vec3,
-    pub pdf: f64,
-    pub visibility_ray: Ray,
-}
-
-pub trait Light {
-    #[allow(non_snake_case)]
-    fn sample_L(&self, p: Point) -> LightSample;
-}
+use core::*;
 
 #[derive(Debug)]
 pub struct PointLight {
@@ -22,7 +9,7 @@ pub struct PointLight {
 
 // pbrt pg. 610
 impl Light for PointLight {
-    fn sample_L(&self, p: Point) -> LightSample {
+    fn choose_and_sample_L(&self, p: Point) -> LightSample {
         let (w_i, distance) = {
             let difference = self.position - p;
             (difference.as_normalized(), difference.magnitude())

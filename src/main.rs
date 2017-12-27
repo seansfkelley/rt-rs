@@ -11,7 +11,6 @@ extern crate noise;
 
 mod core;
 mod external_crate_traits;
-mod lights;
 mod geometry;
 mod math;
 mod importer;

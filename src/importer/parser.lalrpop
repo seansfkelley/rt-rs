@@ -221,7 +221,7 @@ TriangleMeshData: TriangleMeshData = {
     ),
 };
 
-Light: Box<Light> = "{"
+Light: Box<LightType> = "{"
     "position" <position:Point>
     "intensity" <intensity:Color>
 "}" => Box::new(PointLight { position, intensity });

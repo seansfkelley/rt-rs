@@ -29,5 +29,5 @@ impl Geometry for SceneObject {
 
 pub struct Scene {
     pub objects: KdTree<SceneObject>,
-    pub lights: Vec<Box<Light>>,
+    pub lights: Vec<LightType>,
 }
