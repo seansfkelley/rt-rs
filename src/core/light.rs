@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use math::*;
 use super::ray::Ray;
 use super::color::Color;
@@ -14,7 +15,7 @@ pub struct LightSample {
     pub visibility_ray: Ray,
 }
 
-pub trait Light {
+pub trait Light: Debug {
     // We are not on the light, so pick a point we can see from `p` and sample it.
     fn choose_and_sample_L(&self, p: Point) -> LightSample;
 }

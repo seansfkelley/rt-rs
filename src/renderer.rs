@@ -189,7 +189,7 @@ impl Renderer {
         L
     }
 
-    fn uniform_sample_light(&self, light: &Box<Light>, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3) -> Color {
+    fn uniform_sample_light(&self, light: &LightType, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3) -> Color {
         let bxdf_types = vec![
             (TransportType::Reflective, SpectrumType::Diffuse),
             (TransportType::Reflective, SpectrumType::GlossySpecular),

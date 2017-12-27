@@ -6,9 +6,10 @@ use math::*;
 use core::*;
 use geometry::*;
 use tessellation::*;
+use material::*;
+use light::*;
 use importer::scene_builder::*;
 use importer::parse_into_builder;
-use color::Color;
 
 grammar(builder: &mut SceneBuilder, scene_file_path: &Path);
 
@@ -24,7 +25,7 @@ Statement: () = {
     "antialias_tolerance" <F64> => builder.antialias_tolerance(<>),
     "depth_limit" <U32> => builder.depth_limit(<>),
     "background_color" <Color> => builder.background_color(<>),
-    "texture" <Identifier> <Texture> => builder.register_texture(<>),
+    "material" <Identifier> <Material> => builder.register_material(<>),
     "transform" "pop" "all" => builder.pop_all_transforms(),
     "transform" "pop" <U32?> => builder.pop_n_transforms(<>.unwrap_or(1u32)),
     "transform" <Transform> => builder.push_transform(<>),
@@ -55,86 +56,61 @@ Animation: (u32, Vec<Mat4>) = "{"
     "camera_transforms" <List<Transform>>
 "}";
 
-Material: Material = {
+Material: Box<Material> = {
     "flat" "{"
-        "color" <color:Color>
-        <specular_exponent:("specular_exponent" <F64>)?>
-        <reflectivity_option:("reflectivity" <F64>)?>
-    "}" => Material {
-        ambient: color * 0.1f64,
-        diffuse: color,
-        specular: SpecularLighting(color * 0.5f64, specular_exponent.unwrap_or(0f64)),
-        transmission: None,
-        reflectivity: reflectivity_option.unwrap_or(0f64),
-    },
-    "transmissive" "{"
-        "color" <color:Color>
-        "specular_exponent" <specular_exponent:F64>
-        "index_of_refraction" <index_of_refraction:F64>
-        "transmissivity" <transmissivity:F64>
-        "reflectivity" <reflectivity:F64>
-    "}" => Material {
-        ambient: color * 0.1f64,
-        diffuse: color,
-        specular: SpecularLighting(color * 0.5f64, specular_exponent),
-        transmission: Some(Transmission { transmissivity, index_of_refraction }),
-        reflectivity,
-    },
+        "color" <Color>
+    "}" => Box::new(FlatMaterial { color: <> }),
+    // "image" "{"
+    //     "diffuse" <diffuse:ImageTextureFacet>
+    //     <ambient:("ambient" <ImageTextureFacet>)?>
+    //     <specular:("specular" <ImageTextureFacet>)?>
+    //     <reflectivity:("reflectivity" <ImageTextureFacet>)?>
+    // "}" => Box::new(ImageTexture::new(
+    //     ambient.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.1f64)),
+    //     diffuse,
+    //     specular.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.3f64)),
+    //     reflectivity.unwrap_or(ImageTextureFacet::Constant(Color::BLACK)),
+    // )),
+    // "checkerboard" "{"
+    //     <checks_u:("checks_u" <U32>)?>
+    //     <checks_v:("checks_v" <U32>)?>
+    //     <color_one:("color_one" <Color>)?>
+    //     <color_two:("color_two" <Color>)?>
+    // "}" => Box::new(CheckerboardTexture {
+    //     checks_u: checks_u.unwrap_or(2u32),
+    //     checks_v: checks_v.unwrap_or(2u32),
+    //     color_one: color_one.unwrap_or(Color::WHITE),
+    //     color_two: color_two.unwrap_or(Color::BLACK),
+    // }),
+    // "wood" "{"
+    //     "color_one" <color_one:Color>
+    //     "color_two" <color_two:Color>
+    //     <scale:("scale" <F64>)?>
+    //     <reflectivity:("reflectivity" <F64>)?>
+    //     <specular_exponent:("specular_exponent" <F64>)?>
+    //     <seed:("seed" <Usize>)?>
+    // "}" => Box::new(Wood::new(
+    //     seed.unwrap_or(0usize),
+    //     color_one,
+    //     color_two,
+    //     scale.unwrap_or(0.2f64),
+    //     reflectivity.unwrap_or(0.1f64),
+    //     specular_exponent.unwrap_or(20f64),
+    // )),
 };
 
-Texture: Box<Texture> = {
-    "constant" <Material> => Box::new(ConstantTexture { material: <> }),
-    "image" "{"
-        "diffuse" <diffuse:ImageTextureFacet>
-        <ambient:("ambient" <ImageTextureFacet>)?>
-        <specular:("specular" <ImageTextureFacet>)?>
-        <reflectivity:("reflectivity" <ImageTextureFacet>)?>
-    "}" => Box::new(ImageTexture::new(
-        ambient.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.1f64)),
-        diffuse,
-        specular.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.3f64)),
-        reflectivity.unwrap_or(ImageTextureFacet::Constant(Color::BLACK)),
-    )),
-    "checkerboard" "{"
-        <checks_u:("checks_u" <U32>)?>
-        <checks_v:("checks_v" <U32>)?>
-        <color_one:("color_one" <Color>)?>
-        <color_two:("color_two" <Color>)?>
-    "}" => Box::new(CheckerboardTexture {
-        checks_u: checks_u.unwrap_or(2u32),
-        checks_v: checks_v.unwrap_or(2u32),
-        color_one: color_one.unwrap_or(Color::WHITE),
-        color_two: color_two.unwrap_or(Color::BLACK),
-    }),
-    "wood" "{"
-        "color_one" <color_one:Color>
-        "color_two" <color_two:Color>
-        <scale:("scale" <F64>)?>
-        <reflectivity:("reflectivity" <F64>)?>
-        <specular_exponent:("specular_exponent" <F64>)?>
-        <seed:("seed" <Usize>)?>
-    "}" => Box::new(Wood::new(
-        seed.unwrap_or(0usize),
-        color_one,
-        color_two,
-        scale.unwrap_or(0.2f64),
-        reflectivity.unwrap_or(0.1f64),
-        specular_exponent.unwrap_or(20f64),
-    )),
-};
+// LightingFacet: LightingFacet = {
+//     "ambient" => LightingFacet::Ambient,
+//     "diffuse" => LightingFacet::Diffuse,
+//     "specular" => LightingFacet::Specular,
+//     "reflectivity" => LightingFacet::Reflectivity,
+// };
 
-LightingFacet: LightingFacet = {
-    "ambient" => LightingFacet::Ambient,
-    "diffuse" => LightingFacet::Diffuse,
-    "specular" => LightingFacet::Specular,
-    "reflectivity" => LightingFacet::Reflectivity,
-};
-
-ImageTextureFacet: ImageTextureFacet = {
-    <fraction:F64> "*" <facet:LightingFacet> => ImageTextureFacet::Reference(facet, fraction),
-    "constant" <color:Color> => ImageTextureFacet::Constant(color),
-    <path:Path> => ImageTextureFacet::from_path(path.as_ref()),
-};
+// ImageTextureFacet: ImageTextureFacet = {
+//     <fraction:F64> "*" <facet:LightingFacet> => ImageTextureFacet::Reference(facet, fraction),
+//     "constant" <color:Color> => ImageTextureFacet::Constant(color),
+//     <path:Path> => ImageTextureFacet::from_path(path.as_ref()),
+// };
 
 Transform: Mat4 = {
     "scale" <Vec3> => Mat4::create_scale(<>),

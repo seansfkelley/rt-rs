@@ -1,7 +1,8 @@
 use rand::Rng;
 use math::*;
-use super::bxdf::Bxdf;
-use super::transform::Transform;
+use super::bxdf::{ Bxdf, BxdfType };
+use super::color::Color;
+use super::transform::{ Transform, Transformable };
 
 pub struct Bsdf {
     bxdfs: Vec<Box<Bxdf>>,
@@ -60,6 +61,6 @@ impl Bsdf {
             }
         }
 
-        if matching_bxdf_count > 0 { pdf / matching_pdf_count as f64 } else { 0f64 }
+        if matching_bxdf_count > 0 { pdf / matching_bxdf_count as f64 } else { 0f64 }
     }
 }
