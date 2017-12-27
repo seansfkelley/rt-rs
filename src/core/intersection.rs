@@ -1,6 +1,6 @@
 use math::*;
-use material::*;
-use super::uv::*;
+use super::uv::Uv;
+use super::material::Material;
 
 #[derive(Debug, Clone)]
 pub struct Intersection {

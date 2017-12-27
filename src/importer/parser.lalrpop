@@ -5,7 +5,6 @@ use std::path::{ Path, PathBuf };
 use math::*;
 use core::*;
 use geometry::*;
-use material::*;
 use tessellation::*;
 use importer::scene_builder::*;
 use importer::parse_into_builder;
