@@ -1,40 +1,106 @@
+use std::collections::HashSet;
+use rand::{ Rng, thread_rng };
 use math::*;
 use core::*;
-use color::Color;
 
-pub struct Scene {
-    objects: KdTree<SceneObject>,
-    lights: Vec<Light>,
-    background_color: Color,
-    depth_limit: u32,
+pub struct Renderer {
+    scene: Scene,
+    parameters: RenderParamaters,
+    camera: Camera,
 }
 
-impl Scene {
-    pub fn new(
-        objects: KdTree<SceneObject>,
-        lights: Vec<Light>,
-        background_color: Color,
-        depth_limit: u32
-    ) -> Scene {
-        Scene { objects, lights, background_color, depth_limit }
+impl Renderer {
+    pub fn new(scene: Scene, parameters: RenderParamaters, camera: Camera) -> Renderer {
+        Renderer {
+            scene,
+            parameters,
+            camera,
+        }
     }
 
-    pub fn raytrace(&self, ray: Ray) -> Color {
-        self.cast_ray(ray, 0)
+    pub fn with_camera(self, camera: Camera) -> Renderer {
+        Renderer {
+            scene: self.scene,
+            parameters: self.parameters,
+            camera,
+        }
     }
 
-    fn cast_ray(&self, ray: Ray, depth: u32) -> Color {
-        if depth > self.depth_limit {
-            self.background_color
+    pub fn render_pixel(&self, image_x: u32, image_y: u32) -> Color {
+        let antialias = self.parameters.antialias;
+        if antialias == 1u32 {
+            self.Li(self.generate_ray(image_x, image_y), 0)
         } else {
-            match self.objects.intersect(&ray) {
-                Some(object_hit) => self.get_color(ray, object_hit, depth),
-                None => self.background_color,
+            let mut rng = thread_rng();
+
+            let test_points = {
+                let max = antialias - 1;
+                vec![
+                    (0u32, 0u32),
+                    (0u32, max),
+                    (max, 0u32),
+                    (max, max),
+                ]
+            };
+
+            let test_colors = test_points
+                .iter()
+                .map(|&(sample_x, sample_y)| {
+                    self.Li(self.generate_supersampling_ray(image_x, image_y, sample_x, sample_y, &mut rng), 0)
+                })
+                .collect::<Vec<Color>>();
+
+            let mut color: Color = test_colors.iter().fold(Color::BLACK.clone(), |result, &color| result + color);
+
+            if min_vs_max(&test_colors) > self.parameters.antialias_tolerance {
+                let test_point_set: HashSet<&(u32, u32)> = test_points.iter().collect();
+                for sample_x in 0..antialias {
+                    for sample_y in 0..antialias {
+                        if !test_point_set.contains(&(sample_x, sample_y)) {
+                            color += self.Li(self.generate_supersampling_ray(image_x, image_y, sample_x, sample_y, &mut rng), 0);
+                        }
+                    }
+                }
+                color / (antialias * antialias) as f64
+            } else {
+                color / 4f64
             }
         }
     }
 
-    fn get_color(&self, ray: Ray, intersection: Intersection, depth: u32) -> Color {
+    fn generate_ray(&self, image_x: u32, image_y: u32) -> Ray {
+        self.camera.get_ray(image_x as f64, image_y as f64)
+    }
+
+    fn generate_supersampling_ray(&self, image_x: u32, image_y: u32, sample_x: u32, sample_y: u32, rng: &mut Rng) -> Ray {
+        let antialias = self.parameters.antialias;
+
+        let (x_min, x_max, y_min, y_max) = (
+            sample_x as f64 / antialias as f64,
+            (1f64 + sample_x as f64) / antialias as f64,
+            sample_y as f64 / antialias as f64,
+            (1f64 + sample_y as f64) / antialias as f64
+        );
+
+        let x_jitter = rng.next_f64() * (x_max - x_min) + x_min;
+        let y_jitter = rng.next_f64() * (y_max - y_min) + y_min;
+
+        self.camera.get_ray(image_x as f64 + x_jitter, image_y as f64 + y_jitter)
+    }
+
+    #[allow(non_snake_case)] // Name from pbrt.
+    fn Li(&self, ray: Ray, depth: u32) -> Color {
+        if depth > self.parameters.depth_limit {
+            self.parameters.background_color
+        } else {
+            match self.scene.objects.intersect(&ray) {
+                Some(object_hit) => self.compute_color_for_intersection(ray, object_hit, depth),
+                None => self.parameters.background_color,
+            }
+        }
+    }
+
+    fn compute_color_for_intersection(&self, ray: Ray, intersection: Intersection, depth: u32) -> Color {
         const NUDGE_FACTOR: f64 = 1e-10f64;
 
         let material = intersection.material.expect("scene intersections should always have a material");
@@ -66,7 +132,7 @@ impl Scene {
         }
 
         let phong_fraction = 1f64 - reflection_fraction - transmission_fraction;
-        let mut color = BLACK;
+        let mut color = Color::BLACK;
 
         // TODO: increase other fractions if inside
         if !is_inside && phong_fraction > 0f64 {
@@ -84,7 +150,7 @@ impl Scene {
         if reflection_fraction > 0f64 {
             let new_direction = ray.direction.reflect(shading_normal.as_vector());
             let new_ray = Ray::half_infinite(nudged_location(normal), new_direction);
-            color += reflection_fraction * self.cast_ray(new_ray, depth + 1)
+            color += reflection_fraction * self.Li(new_ray, depth + 1)
         }
 
         if transmission_fraction > 0f64 {
@@ -94,7 +160,7 @@ impl Scene {
                 let direction = ray.direction * eta + (shading_normal * (eta * cos_i - k.sqrt())).into_vector();
                 let origin = nudged_location(-normal);
                 let new_ray = Ray::half_infinite(origin, direction.as_normalized());
-                color += transmission_fraction * self.cast_ray(new_ray, depth + 1)
+                color += transmission_fraction * self.Li(new_ray, depth + 1)
             }
         }
 
@@ -119,14 +185,13 @@ impl Scene {
     }
 
     fn get_visible_lights(&self, point: Point) -> Vec<&Light> {
-        self.lights
+        self.scene.lights
             .iter()
             .filter(|light| {
                 let light_direction = (light.position - point).into_normalized();
                 let ray = Ray::half_infinite(point, light_direction);
-                !self.objects.does_intersect(&ray)
+                !self.scene.objects.does_intersect(&ray)
             })
             .collect::<Vec<&Light>>()
     }
 }
-

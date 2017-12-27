@@ -9,7 +9,7 @@ use material::*;
 use tessellation::*;
 use importer::scene_builder::*;
 use importer::parse_into_builder;
-use color::{ Color, BLACK, WHITE };
+use color::Color;
 
 grammar(builder: &mut SceneBuilder, scene_file_path: &Path);
 
@@ -94,7 +94,7 @@ Texture: Box<Texture> = {
         ambient.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.1f64)),
         diffuse,
         specular.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.3f64)),
-        reflectivity.unwrap_or(ImageTextureFacet::Constant(BLACK)),
+        reflectivity.unwrap_or(ImageTextureFacet::Constant(Color::BLACK)),
     )),
     "checkerboard" "{"
         <checks_u:("checks_u" <U32>)?>
@@ -104,8 +104,8 @@ Texture: Box<Texture> = {
     "}" => Box::new(CheckerboardTexture {
         checks_u: checks_u.unwrap_or(2u32),
         checks_v: checks_v.unwrap_or(2u32),
-        color_one: color_one.unwrap_or(WHITE),
-        color_two: color_two.unwrap_or(BLACK),
+        color_one: color_one.unwrap_or(Color::WHITE),
+        color_two: color_two.unwrap_or(Color::BLACK),
     }),
     "wood" "{"
         "color_one" <color_one:Color>
