@@ -35,6 +35,10 @@ impl Color {
         }
     }
 
+    pub fn is_nonzero(&self) -> bool {
+        self.r > 0f64 && self.g > 0f64 && self.b > 0f64
+    }
+
     pub fn average(&self) -> f64 {
         (self.r + self.g + self.b) / 3f64
     }

@@ -221,10 +221,10 @@ TriangleMeshData: TriangleMeshData = {
     ),
 };
 
-Light: Light = "{"
+Light: Box<Light> = "{"
     "position" <position:Point>
-    "color" <color:Color>
-"}" => Light { position, color };
+    "intensity" <intensity:Color>
+"}" => Box::new(PointLight { position, intensity });
 
 Curve: Box<Curve> = {
     "cubic_bezier" "("

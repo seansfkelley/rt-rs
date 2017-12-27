@@ -3,8 +3,6 @@ use rand::Rng;
 use math::*;
 use core::*;
 
-use super::util::*;
-
 // pbrt pg. 424, 428
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SpectrumType {

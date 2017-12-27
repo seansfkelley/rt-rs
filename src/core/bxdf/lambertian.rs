@@ -1,7 +1,6 @@
 use std::f64::consts::PI;
-use core::Color;
 use math::*;
-use super::bxdf::*;
+use core::*;
 
 // pbrt pg. 447
 pub struct Lambertian {

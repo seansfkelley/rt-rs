@@ -1,7 +1,6 @@
 use rand::Rng;
 use core::*;
 use math::*;
-use super::bxdf::*;
 
 pub struct PerfectSpecularTransmission {
     transmittance: Color,

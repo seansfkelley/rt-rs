@@ -5,7 +5,7 @@ use core::*;
 use math::*;
 use material::*;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct SceneBuilder {
     camera: Option<CameraBuilder>,
     animation: Option<(u32, Vec<Mat4>)>,
@@ -18,7 +18,7 @@ pub struct SceneBuilder {
     // TODO: Should transform be an Arc instead? Feels like this can get expensive.
     transform_stack: Vec<Transform>,
     pub objects: Vec<SceneObject>,
-    pub lights: Vec<Light>,
+    pub lights: Vec<Box<Light>>,
 }
 
 pub type CameraCommon = (Point, Point, Vec3, Option<ScreenSize>);
@@ -106,7 +106,7 @@ impl SceneBuilder {
         });
     }
 
-    pub fn add_light(&mut self, light: Light) {
+    pub fn add_point_light(&mut self, light: Box<Light>) {
         self.lights.push(light);
     }
 
