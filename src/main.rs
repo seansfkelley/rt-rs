@@ -14,12 +14,11 @@ mod core;
 mod external_crate_traits;
 mod lights;
 mod geometry;
-mod scene;
 mod math;
 mod importer;
 mod progress_bar;
 mod material;
-mod sampler;
+mod renderer;
 mod tessellation;
 
 use std::fs::{File, create_dir_all};
@@ -35,7 +34,7 @@ use image::{RgbImage, Rgb, Pixel};
 
 use core::*;
 use scene::Scene;
-use sampler::Sampler;
+use renderer::Renderer;
 use progress_bar::ProgressBar;
 
 fn seconds_since(t: SystemTime) -> f64 {
@@ -111,13 +110,8 @@ fn main() {
     });
 
     let mut moving_camera = scene_file.camera;
-    let mut sampler = Sampler::new(
-        Scene::new(
-            object_tree,
-            scene_file.lights,
-            scene_file.parameters.background_color,
-            scene_file.parameters.depth_limit,
-        ),
+    let mut renderer = Renderer::new(
+        Scene { objects: object_tree, lights: scene_file.lights },
         scene_file.parameters,
         moving_camera.clone());
 
@@ -131,7 +125,7 @@ fn main() {
             .map(|image_x| {
                 (0..height)
                     .map(|image_y| {
-                        let color = sampler.sample(image_x, image_y);
+                        let color = renderer.render_pixel(image_x, image_y);
                         progress.increment_operations(1);
                         (image_x, image_y, color)
                     })
@@ -149,6 +143,6 @@ fn main() {
         image::ImageRgb8(img).save(output_file, image::PNG).expect("error saving image");
 
         moving_camera = moving_camera.transform(&scene_file.animation.1);
-        sampler = sampler.with_camera(moving_camera.clone());
+        renderer = renderer.with_camera(moving_camera.clone());
     }
 }

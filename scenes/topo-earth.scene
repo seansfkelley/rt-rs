@@ -12,7 +12,7 @@ camera perspective {
 }
 
 texture flat_earth image {
-  diffuse "common/textures/earth.png"
+  diffuse "common/textures/earth.jpg"
   ambient 0.2 * diffuse
   specular "common/textures/earth-specular.png"
   // reflectivity 1 * specular
@@ -26,7 +26,7 @@ object {
     min 9
     max 10
     mesh tessellated_sphere {
-      depth 9
+      depth 10
     }
   }
   texture flat_earth

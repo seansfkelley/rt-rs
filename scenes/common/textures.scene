@@ -63,7 +63,7 @@ texture glass constant transmissive {
 }
 
 texture earth image {
-  diffuse "textures/earth.png"
+  diffuse "textures/earth.jpg"
   ambient 0.2 * diffuse
   specular "textures/earth-specular.png"
   reflectivity 1 * specular

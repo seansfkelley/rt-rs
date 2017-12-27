@@ -24,22 +24,3 @@ impl Intersection {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_should_add_uv() {
-        let sum = Uv(1f64, 2f64) + Uv(10f64, 20f64);
-        assert_eq!(sum.0, 11f64);
-        assert_eq!(sum.1, 22f64);
-    }
-
-    #[test]
-    fn it_should_multiply_uv() {
-        let product = Uv(1f64, 2f64) * 10f64;
-        assert_eq!(product.0, 10f64);
-        assert_eq!(product.1, 20f64);
-    }
-}
