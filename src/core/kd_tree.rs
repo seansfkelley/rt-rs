@@ -52,38 +52,34 @@ impl<T: Geometry> Node<T> {
 
 struct IntersectionIterator<'a, T: Geometry + 'a> {
     node_stack: Vec<(&'a Node<T>, f64, f64)>,
-    items: Box<Iterator<Item=Arc<T>> + 'a>,
+    items: Vec<Arc<T>>,
     ray: Ray,
 }
 
 
 impl<'a, T> IntersectionIterator<'a, T>
     where T: Geometry + 'a {
+
     pub fn new(node_stack: Vec<(&'a Node<T>, f64, f64)>, ray: Ray) -> IntersectionIterator<T> {
         IntersectionIterator {
             node_stack,
-            items: Box::new(vec![].into_iter()),
+            items: vec![],
             ray,
         }
     }
 
     fn process_items(&mut self) -> Option<Intersection> {
-        loop {
-            match self.items.next() {
-                Some(item) => {
-                    match item.intersect(&self.ray) {
-                        Some(intersection) => {
-                            self.ray.t_max = intersection.distance;
-                            return Some(intersection);
-                        }
-                        None => {}
-                    }
-                },
-                None => {
-                    return None;
-                },
-            };
+        while self.items.len() > 0 {
+            let item = self.items.pop().unwrap();
+            match item.intersect(&self.ray) {
+                Some(intersection) => {
+                    self.ray.t_max = intersection.distance;
+                    return Some(intersection);
+                }
+                None => {}
+            }
         };
+        None
     }
 }
 
@@ -125,7 +121,9 @@ impl<'a, T> Iterator for IntersectionIterator<'a, T>
                         }
                     }
                     &Node::Leaf(ref items) => {
-                        self.items = Box::new(items.into_iter().map(|i| Arc::clone(i)));
+                        for item in items {
+                            self.items.push(Arc::clone(item));
+                        }
                         hit = self.process_items();
                     }
                 }
