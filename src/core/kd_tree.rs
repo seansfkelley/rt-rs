@@ -68,13 +68,22 @@ impl<'a, T> IntersectionIterator<'a, T>
         }
     }
 
-    fn process_items(&mut self) -> Option<Intersection> {
-        while self.items.len() > 0 {
-            let item = self.items.pop().unwrap();
-            match item.intersect(&self.ray) {
+    fn process_own_items(&mut self) -> Option<Intersection> {
+        match IntersectionIterator::process_items(&self.ray, &self.items) {
+            Some((intersection, number_processed)) => {
+                self.items.drain(0..number_processed);
+                self.ray.t_max = intersection.distance;
+                Some(intersection)
+            }
+            None => None
+        }
+    }
+
+    fn process_items(ray: &Ray, items: &[Arc<T>]) -> Option<(Intersection, usize)> {
+        for (index, item) in items.into_iter().enumerate() {
+            match item.intersect(ray) {
                 Some(intersection) => {
-                    self.ray.t_max = intersection.distance;
-                    return Some(intersection);
+                    return Some((intersection, index + 1));
                 }
                 None => {}
             }
@@ -89,7 +98,7 @@ impl<'a, T> Iterator for IntersectionIterator<'a, T>
 
     // pbrt pg. 240
     fn next(&mut self) -> Option<Self::Item> {
-        let mut hit: Option<Self::Item> = self.process_items();
+        let mut hit: Option<Self::Item> = self.process_own_items();
         while hit.is_none() && self.node_stack.len() > 0 {
             let (node, t_min, t_max) = self.node_stack.pop().unwrap();
             if t_min < self.ray.t_max {
@@ -121,10 +130,16 @@ impl<'a, T> Iterator for IntersectionIterator<'a, T>
                         }
                     }
                     &Node::Leaf(ref items) => {
-                        for item in items {
-                            self.items.push(Arc::clone(item));
-                        }
-                        hit = self.process_items();
+                        match IntersectionIterator::process_items(&self.ray, items) {
+                            Some((intersection, number_processed)) => {
+                                self.ray.t_max = intersection.distance;
+                                hit = Some(intersection);
+                                for item in items.into_iter().skip(number_processed) {
+                                    self.items.push(Arc::clone(item));
+                                }
+                            }
+                            None => { }
+                        };
                     }
                 }
             }
