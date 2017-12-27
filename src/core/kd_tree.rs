@@ -125,7 +125,7 @@ impl<'a, T> Iterator for IntersectionIterator<'a, T>
                         }
                     }
                     &Node::Leaf(ref items) => {
-                        self.items = Box::new(items.iter().map(|i| Arc::clone(i)));
+                        self.items = Box::new(items.into_iter().map(|i| Arc::clone(i)));
                         hit = self.process_items();
                     }
                 }
