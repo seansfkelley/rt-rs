@@ -1,5 +1,5 @@
-pub mod bxdf;
 pub mod bounding_box;
+pub mod bsdf;
 pub mod bxdf;
 pub mod camera;
 pub mod color;
@@ -15,8 +15,8 @@ pub mod shape;
 pub mod transform;
 pub mod uv;
 
-pub use self::bxdf::*;
 pub use self::bounding_box::*;
+pub use self::bsdf::*;
 pub use self::bxdf::*;
 pub use self::camera::*;
 pub use self::color::*;

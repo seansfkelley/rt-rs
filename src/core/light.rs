@@ -1,5 +1,6 @@
 use math::*;
-use core::*;
+use super::ray::Ray;
+use super::color::Color;
 
 pub enum LightType {
     Delta(Box<Light>),

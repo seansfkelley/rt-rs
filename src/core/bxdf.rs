@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 use rand::Rng;
 use math::*;
-use core::*;
+use super::color::Color;
 
 // pbrt pg. 424, 428
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -44,4 +44,19 @@ pub trait Bxdf {
             0f64
         }
     }
+}
+
+// TODO: Read up on why things are not always in the upper hemisphere.
+pub fn same_hemisphere(v1: &Vec3, v2: &Vec3) -> bool {
+    (v1.z < 0f64) == (v2.z < 0f64)
+}
+
+pub fn cos_theta(v: &Vec3) -> f64 {
+    v.assert_normalized();
+    v.z
+}
+
+pub fn abs_cos_theta(v: &Vec3) -> f64 {
+    v.assert_normalized();
+    v.z.abs()
 }

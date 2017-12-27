@@ -1,6 +1,7 @@
 use rand::Rng;
 use math::*;
-use core::*;
+use super::bxdf::Bxdf;
+use super::transform::Transform;
 
 pub struct Bsdf {
     bxdfs: Vec<Box<Bxdf>>,
