@@ -22,11 +22,13 @@
 ## performance/quality
 - r-tree/bvh (would these be better than the kd-tree?)
 - profile
-- optimize & parallelize kd-tree construction (how does pbrt assign things to left/right, specifically, things that are on the splitting plane??)
+- optimize kd-tree construction (how does pbrt assign things to left/right, specifically, things that are on the splitting plane??)
 - audit usages of Clone/Copy derivations and reference parameters to see if we're too copy-happy (or will rustc automatically optimize extraneous copies into moves?)
 - bounding boxes should maybe always be computed relative to the world for better bounds?
 - display image as it is being created
 - possible optimization heuristic: on each pixel, check intersection with the nearest object from the previous pixel, if any. if some, then chop down the ray range before running it through the spatial index. this may make performance worse if you have a small number of very complex objects (i.e. topo-earth) unless you can punch an analogous optimization through to them as well, or otherwise skip them during the normal collision checking (since you already checked it).
+- partial intersection in geometries
+- partial intersection in kd-tree
 
 ## misc
 - make matrix a typedef of [[f64; 4]; 4] and then implement things for it?
