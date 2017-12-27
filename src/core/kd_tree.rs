@@ -52,7 +52,7 @@ impl<T: Geometry> Node<T> {
 
 struct IntersectionIterator<'a, T: Geometry + 'a> {
     node_stack: Vec<(&'a Node<T>, f64, f64)>,
-    items: Box<Iterator<Item = Arc<T>>>,
+    items: Box<Iterator<Item = Arc<T>> + 'a>,
     ray: Ray,
 }
 
@@ -120,7 +120,7 @@ impl<'a, T> Iterator for IntersectionIterator<'a, T>
                         }
                     }
                     &Node::Leaf(ref items) => {
-                        self.items = Box::new(self.items.chain(items));
+                        self.items = Box::new(self.items.chain(items.iter().map(|i| Arc::clone(i))));
                         hit = self.process_items();
                     }
                 }
