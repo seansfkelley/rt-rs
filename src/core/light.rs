@@ -3,9 +3,23 @@ use math::*;
 use super::ray::Ray;
 use super::color::Color;
 
+#[derive(Debug)]
 pub enum LightType {
     Delta(Box<Light>),
     Area(Box<AreaLight>),
+}
+
+impl Light for LightType {
+    fn choose_and_sample_L(&self, p: Point) -> LightSample {
+        match self {
+            &LightType::Delta(light) => {
+                light.choose_and_sample_L(p)
+            }
+            &LightType::Area(light) => {
+                light.choose_and_sample_L(p)
+            }
+        }
+    }
 }
 
 pub struct LightSample {

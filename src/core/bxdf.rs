@@ -21,19 +21,35 @@ pub enum TransportType {
 // TODO: Maybe a pair of enums isn't the best type?
 pub type BxdfType = (TransportType, SpectrumType);
 
+pub struct BxdfSample {
+    color: Color,
+    pdf: f64,
+    w_i: Vec3,
+}
+
+impl BxdfSample {
+    pub fn new(color: Color, pdf: f64, w_i: Vec3) -> BxdfSample {
+        BxdfSample {
+            color,
+            pdf,
+            w_i,
+        }
+    }
+}
+
 pub trait Bxdf {
     fn bxdf_type(&self) -> BxdfType;
 
     fn evaluate(&self, w_o: Vec3, w_i: Vec3) -> Color;
 
-    fn choose_and_evaluate(&self, w_o: Vec3, rng: &mut Rng) -> (Color, f64, Vec3) {
+    fn choose_and_evaluate(&self, w_o: Vec3, rng: &mut Rng) -> BxdfSample {
         w_o.assert_normalized();
         let mut w_i = sample_hemisphere_cosine(rng);
         w_i.assert_normalized();
         if w_o.z < 0f64 {
             w_i.z = -w_i.z;
         }
-        (self.evaluate(w_o, w_i), self.pdf(w_o, w_i), w_i)
+        BxdfSample::new(self.evaluate(w_o, w_i), self.pdf(w_o, w_i), w_i)
     }
 
     // TODO: Read up on why this is the default.

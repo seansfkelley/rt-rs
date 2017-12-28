@@ -201,13 +201,13 @@ impl Renderer {
         let Ld = Color::BLACK.clone();
 
         #[allow(non_snake_case)]
-        let sampled_Li = light.choose_and_sample_L(p);
-        if sampled_Li.pdf > 0f64 && sampled_Li.color.is_nonzero() {
-            let bsdf_transport = bsdf.evaluate(w_o, sampled_Li.w_i, bxdf_types);
+        let LightSample { color: Li, w_i, pdf, visibility_ray } = light.choose_and_sample_L(p);
+        if pdf > 0f64 && Li.is_nonzero() {
+            let bsdf_transport = bsdf.evaluate(w_o, w_i, bxdf_types);
 
-            if bsdf_transport.is_nonzero() && !self.scene.objects.does_intersect(&sampled_Li.visibility_ray) {
+            if bsdf_transport.is_nonzero() && !self.scene.objects.does_intersect(&visibility_ray) {
                 // TODO: Transmittance.
-                let pdf = bsdf.pdf(w_o, sampled_Li.w_i, bxdf_types);
+                let pdf = bsdf.pdf(w_o, w_i, bxdf_types);
 
                 // weight and cosine projection and shit
             }

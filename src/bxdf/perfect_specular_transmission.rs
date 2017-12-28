@@ -24,8 +24,8 @@ impl Bxdf for PerfectSpecularTransmission {
         Color::BLACK
     }
 
-    fn choose_and_evaluate(&self, w_o: Vec3, _rng: &mut Rng) -> (Color, f64, Vec3) {
+    fn choose_and_evaluate(&self, w_o: Vec3, _rng: &mut Rng) -> BxdfSample {
         // TODO.
-        (Color::BLACK, 0f64, Vec3::uniform(0f64))
+        BxdfSample::new(Color::BLACK, 0f64, Vec3::uniform(0f64))
     }
 }

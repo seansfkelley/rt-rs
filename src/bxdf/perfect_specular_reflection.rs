@@ -24,9 +24,9 @@ impl Bxdf for PerfectSpecularReflection {
         Color::BLACK
     }
 
-    fn choose_and_evaluate(&self, w_o: Vec3, _rng: &mut Rng) -> (Color, f64, Vec3) {
+    fn choose_and_evaluate(&self, w_o: Vec3, _rng: &mut Rng) -> BxdfSample {
         let w_i = Vec3::new(-w_o.x, -w_o.y, w_o.z); // Remember: local coordinate system. Reflection is easy.
         // TODO: actually evaluate the Fresnel value to modulate the reflectance by.
-        (self.reflectance, 1f64, w_i)
+        BxdfSample::new(self.reflectance, 1f64, w_i)
     }
 }

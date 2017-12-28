@@ -1,6 +1,6 @@
 use rand::Rng;
 use math::*;
-use super::bxdf::{ Bxdf, BxdfType };
+use super::bxdf::*;
 use super::color::Color;
 use super::transform::{ Transform, Transformable };
 
@@ -31,7 +31,7 @@ impl Bsdf {
         color
     }
 
-    pub fn choose_and_evaluate(&self, w_o_world: Vec3, rng: &mut Rng, types: Vec<BxdfType>) -> (Color, f64, Vec3) {
+    pub fn choose_and_evaluate(&self, w_o_world: Vec3, rng: &mut Rng, types: Vec<BxdfType>) -> BxdfSample {
         let w_o = w_o_world.transform(&self.world_to_local);
         w_o.assert_normalized();
 
