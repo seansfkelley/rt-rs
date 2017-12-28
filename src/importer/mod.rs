@@ -37,7 +37,7 @@ pub struct SceneFile {
     pub animation: (u32, Transform),
     pub parameters: RenderParamaters,
     pub objects: Vec<SceneObject>,
-    pub lights: Vec<Box<Light>>,
+    pub lights: Vec<LightType>,
 }
 
 pub fn parse(path: &Path) -> SceneFile {

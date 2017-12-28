@@ -12,10 +12,10 @@ pub enum LightType {
 impl Light for LightType {
     fn choose_and_sample_L(&self, p: Point) -> LightSample {
         match self {
-            &LightType::Delta(light) => {
+            &LightType::Delta(ref light) => {
                 light.choose_and_sample_L(p)
             }
-            &LightType::Area(light) => {
+            &LightType::Area(ref light) => {
                 light.choose_and_sample_L(p)
             }
         }
@@ -29,7 +29,7 @@ pub struct LightSample {
     pub visibility_ray: Ray,
 }
 
-pub trait Light: Debug {
+pub trait Light: Sync + Debug {
     // We are not on the light, so pick a point we can see from `p` and sample it.
     fn choose_and_sample_L(&self, p: Point) -> LightSample;
 }

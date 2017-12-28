@@ -8,7 +8,7 @@ pub struct FlatMaterial {
 }
 
 impl FlatMaterial {
-    fn new(color: Color) -> FlatMaterial {
+    pub fn new(color: Color) -> FlatMaterial {
         FlatMaterial {
             color,
         }

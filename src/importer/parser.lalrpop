@@ -59,7 +59,7 @@ Animation: (u32, Vec<Mat4>) = "{"
 Material: Box<Material> = {
     "flat" "{"
         "color" <Color>
-    "}" => Box::new(FlatMaterial { color: <> }),
+    "}" => Box::new(FlatMaterial::new(<>))
     // "image" "{"
     //     "diffuse" <diffuse:ImageTextureFacet>
     //     <ambient:("ambient" <ImageTextureFacet>)?>
@@ -197,10 +197,10 @@ TriangleMeshData: TriangleMeshData = {
     ),
 };
 
-Light: Box<LightType> = "{"
+Light: LightType = "{"
     "position" <position:Point>
     "intensity" <intensity:Color>
-"}" => Box::new(PointLight { position, intensity });
+"}" => LightType::Delta(Box::new(PointLight { position, intensity }));
 
 Curve: Box<Curve> = {
     "cubic_bezier" "("

@@ -15,7 +15,7 @@ impl Bsdf {
         Bsdf { bxdfs, world_to_local }
     }
 
-    pub fn evaluate(&self, w_o_world: Vec3, w_i_world: Vec3, types: Vec<BxdfType>) -> Color {
+    pub fn evaluate(&self, w_o_world: Vec3, w_i_world: Vec3, types: &Vec<BxdfType>) -> Color {
         let w_o = w_o_world.transform(&self.world_to_local);
         let w_i = w_i_world.transform(&self.world_to_local);
         w_o.assert_normalized();
@@ -31,7 +31,7 @@ impl Bsdf {
         color
     }
 
-    pub fn choose_and_evaluate(&self, w_o_world: Vec3, rng: &mut Rng, types: Vec<BxdfType>) -> BxdfSample {
+    pub fn choose_and_evaluate(&self, w_o_world: Vec3, rng: &mut Rng, types: &Vec<BxdfType>) -> BxdfSample {
         let w_o = w_o_world.transform(&self.world_to_local);
         w_o.assert_normalized();
 
@@ -43,10 +43,10 @@ impl Bsdf {
             }
         }
 
-        (Color::BLACK, 0f64, Vec3::uniform(0f64))
+        BxdfSample::new(Color::BLACK, 0f64, Vec3::uniform(0f64))
     }
 
-    pub fn pdf(&self, w_o_world: Vec3, w_i_world: Vec3, types: Vec<BxdfType>) -> f64 {
+    pub fn pdf(&self, w_o_world: Vec3, w_i_world: Vec3, types: &Vec<BxdfType>) -> f64 {
         let w_o = w_o_world.transform(&self.world_to_local);
         let w_i = w_i_world.transform(&self.world_to_local);
         w_o.assert_normalized();

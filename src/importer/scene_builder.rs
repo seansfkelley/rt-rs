@@ -17,7 +17,7 @@ pub struct SceneBuilder {
     // TODO: Should transform be an Arc instead? Feels like this can get expensive.
     transform_stack: Vec<Transform>,
     pub objects: Vec<SceneObject>,
-    pub lights: Vec<Box<LightType>>,
+    pub lights: Vec<LightType>,
 }
 
 pub type CameraCommon = (Point, Point, Vec3, Option<ScreenSize>);
@@ -105,7 +105,7 @@ impl SceneBuilder {
         });
     }
 
-    pub fn add_light(&mut self, light: Box<LightType>) {
+    pub fn add_light(&mut self, light: LightType) {
         self.lights.push(light);
     }
 
