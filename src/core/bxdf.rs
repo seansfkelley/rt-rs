@@ -76,3 +76,10 @@ pub fn abs_cos_theta(v: &Vec3) -> f64 {
     v.assert_normalized();
     v.z.abs()
 }
+
+// pbrt pg. 693
+pub fn variance_power_heuristic(f_pdf: f64, f_samples: usize, g_pdf: f64, g_samples: usize) -> f64 {
+    let f = f_pdf * f_samples as f64;
+    let g = g_pdf * g_samples as f64;
+    (f * f) / (f * f + g * g)
+}

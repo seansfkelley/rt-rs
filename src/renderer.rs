@@ -9,6 +9,15 @@ pub struct Renderer {
     camera: Camera,
 }
 
+lazy_static! {
+    static ref BXDF_SAMPLE_TYPES: Vec<BxdfType> = vec![
+        (TransportType::Reflective, SpectrumType::Diffuse),
+        (TransportType::Reflective, SpectrumType::GlossySpecular),
+        (TransportType::Transmissive, SpectrumType::Diffuse),
+        (TransportType::Transmissive, SpectrumType::GlossySpecular),
+    ];
+}
+
 impl Renderer {
     pub fn new(scene: Scene, parameters: RenderParamaters, camera: Camera) -> Renderer {
         Renderer {
@@ -123,7 +132,7 @@ impl Renderer {
         // TODO: When do we figure shit out about being inside the shape...?
 
         for light in &self.scene.lights {
-            L += self.uniform_sample_light(light, &bsdf, p, n, w_o);
+            L += self.estimate_light(light, &bsdf, p, n, w_o) + self.estimate_bsdf(light, &bsdf, p, n, w_o);
         }
 
         // let mut reflection_fraction = material.reflectivity;
@@ -189,31 +198,53 @@ impl Renderer {
         L
     }
 
-    fn uniform_sample_light(&self, light: &LightType, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3) -> Color {
-        let bxdf_types = vec![
-            (TransportType::Reflective, SpectrumType::Diffuse),
-            (TransportType::Reflective, SpectrumType::GlossySpecular),
-            (TransportType::Transmissive, SpectrumType::Diffuse),
-            (TransportType::Transmissive, SpectrumType::GlossySpecular),
-        ];
-
-        #[allow(non_snake_case)]
-        let Ld = Color::BLACK.clone();
-
-        #[allow(non_snake_case)]
-        let LightSample { color: Li, w_i, pdf, visibility_ray } = light.choose_and_sample_L(p);
-        if pdf > 0f64 && Li.is_nonzero() {
-            let bsdf_transport = bsdf.evaluate(w_o, w_i, &bxdf_types);
+    fn estimate_light(&self, light: &LightType, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3) -> Color {
+        // light_color ~ Li
+        let LightSample { color: light_color, w_i, pdf: light_pdf, visibility_ray } = light.choose_and_sample_L(p);
+        if light_pdf > 0f64 && light_color.is_nonzero() {
+            let bsdf_transport = bsdf.evaluate(w_o, w_i, &BXDF_SAMPLE_TYPES);
 
             if bsdf_transport.is_nonzero() && !self.scene.objects.does_intersect(&visibility_ray) {
                 // TODO: Transmittance.
-                let pdf = bsdf.pdf(w_o, w_i, &bxdf_types);
+                match light {
+                    // If the light is a delta light, we know that w_i is spot on (because that's how delta lights work)
+                    // and thus multiple importance sampling isn't going to improve our results. Don't weight it.
+                    &LightType::Delta(ref light) => {
+                        bsdf_transport * light_color * (w_i.dot(&n).abs() / light_pdf)
+                    }
+                    // If the light is not a delta light, we will try sampling again later. For now, yield the contribution
+                    // of this light sample weighted by its likelihood.
+                    &LightType::Area(ref light) => {
+                        let bsdf_pdf = bsdf.pdf(w_o, w_i, &BXDF_SAMPLE_TYPES);
+                        let weight = variance_power_heuristic(light_pdf, 1, bsdf_pdf, 1);
+                        bsdf_transport * light_color * (w_i.dot(&n) * weight / light_pdf)
+                    }
+                }
+            } else {
+                Color::BLACK
+            }
+        } else {
+            Color::BLACK
+        }
+    }
 
-                // weight and cosine projection and shit
+    fn estimate_bsdf(&self, light: &LightType, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3) -> Color {
+        match light {
+            // If the light is a delta light, bsdf sampling will never hit it. Abort.
+            &LightType::Delta(_) => {
+                Color::BLACK
+            }
+            &LightType::Area(ref light) => {
+                let mut rng = thread_rng();
+
+                let BxdfSample { color: bsdf_transport, pdf: bsdf_pdf, w_i, } = bsdf.choose_and_evaluate(w_o, &mut rng, &BXDF_SAMPLE_TYPES);
+                if bsdf_pdf > 0f64 && bsdf_transport.is_nonzero() {
+
+                } else {
+                    Color::BLACK
+                }
             }
         }
-
-        Ld
     }
 
     // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
