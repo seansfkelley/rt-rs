@@ -1,0 +1,77 @@
+material flat_off_white flat {
+  color #ddd
+}
+
+material flat_white flat {
+  color #fff
+}
+
+material flat_red flat {
+  color #f00
+}
+
+material flat_green flat {
+  color #0f0
+}
+
+material flat_blue flat {
+  color #00f
+}
+
+material flat_purple flat {
+  color #f0f
+}
+
+material cyan_plastic flat {
+  color 0 .7 .7
+  // specular_exponent 1
+  // reflectivity .1
+}
+
+material yellow_matte flat {
+  color .7 .7 0
+  // specular_exponent 0
+}
+
+material mirror flat {
+  color 0.9 0.9 0.9
+  // specular_exponent 7
+  // reflectivity 0.95
+}
+
+// material sphere_default_checkerboard checkerboard {
+//   checks_u 32
+//   checks_v 32
+// }
+//
+// material rect_prism_default_checkerboard checkerboard {
+//   checks_u 48
+//   checks_v 32
+// }
+//
+// material material wood {
+//   color_one #96643c
+//   color_two #55280f
+// }
+//
+// material glass constant transmissive {
+//   color 0.9 0.9 0.9
+//   specular_exponent 7
+//   index_of_refraction 1.5
+//   transmissivity 0.95
+//   reflectivity 0.95
+// }
+//
+// material earth image {
+//   diffuse "textures/earth.jpg"
+//   ambient 0.2 * diffuse
+//   specular "textures/earth-specular.png"
+//   reflectivity 1 * specular
+// }
+//
+// material moon image {
+//   diffuse "textures/moon.png"
+//   ambient 0.2 * diffuse
+//   specular 0.7 * diffuse
+//   reflectivity constant #555
+// }

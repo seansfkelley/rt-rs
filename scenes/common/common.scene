@@ -1,4 +1,4 @@
-inline "textures.scene"
+inline "materials.scene"
 
 depth_limit 10
 background_color #111
