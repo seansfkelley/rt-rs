@@ -199,9 +199,8 @@ impl Renderer {
     }
 
     fn estimate_light(&self, light: &LightType, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3) -> Color {
-        // light_color ~ Li
-        let LightSample { color: light_color, w_i, pdf: light_pdf, visibility_ray } = light.choose_and_sample_L(p);
-        if light_pdf > 0f64 && light_color.is_nonzero() {
+        let LightSample { l: l_i, w_i, pdf: light_pdf, visibility_ray } = light.choose_and_sample_radiance(p);
+        if light_pdf > 0f64 && l_i.is_nonzero() {
             let bsdf_transport = bsdf.evaluate(w_o, w_i, &BXDF_SAMPLE_TYPES);
 
             if bsdf_transport.is_nonzero() && !self.scene.objects.does_intersect(&visibility_ray) {
@@ -210,14 +209,14 @@ impl Renderer {
                     // If the light is a delta light, we know that w_i is spot on (because that's how delta lights work)
                     // and thus multiple importance sampling isn't going to improve our results. Don't weight it.
                     &LightType::Delta(_) => {
-                        bsdf_transport * light_color * (w_i.dot(&n).abs() / light_pdf)
+                        bsdf_transport * l_i * (w_i.dot(&n).abs() / light_pdf)
                     }
                     // If the light is not a delta light, we will try sampling again later. For now, yield the contribution
                     // of this light sample weighted by its likelihood.
                     &LightType::Area(_) => {
                         let bsdf_pdf = bsdf.pdf(w_o, w_i, &BXDF_SAMPLE_TYPES);
                         let weight = variance_power_heuristic(light_pdf, 1, bsdf_pdf, 1);
-                        bsdf_transport * light_color * (w_i.dot(&n) * weight / light_pdf)
+                        bsdf_transport * l_i * (w_i.dot(&n) * weight / light_pdf)
                     }
                 }
             } else {
@@ -252,8 +251,7 @@ impl Renderer {
                                     }
                                 }
                             };
-                            // light_color ~ Li
-                            let light_color = match self.scene.objects.intersect(&Ray::half_infinite(p, w_i)) {
+                            let l_i = match self.scene.objects.intersect(&Ray::half_infinite(p, w_i)) {
                                 Some(intersection) => {
                                     // TODO: We'll want to modify Intersection to allow us to check if we hit the right thing.
                                     Color::WHITE
@@ -261,9 +259,9 @@ impl Renderer {
                                 // TODO: This branch should be used for infinite area lights iff we implement them.
                                 None => { Color::BLACK }
                             };
-                            if light_color.is_nonzero() {
+                            if l_i.is_nonzero() {
                                 // TODO: Transmittance.
-                                bsdf_transport * light_color * (w_i.dot(&n) * weight / bsdf_pdf)
+                                bsdf_transport * l_i * (w_i.dot(&n) * weight / bsdf_pdf)
                             } else {
                                 Color::BLACK
                             }
