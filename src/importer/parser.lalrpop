@@ -197,10 +197,16 @@ TriangleMeshData: TriangleMeshData = {
     ),
 };
 
-Light: LightType = "{"
-    "position" <position:Point>
-    "intensity" <intensity:Color>
-"}" => LightType::Delta(Box::new(PointLight { position, intensity }));
+Light: LightType = {
+    "point" "{"
+        "position" <position:Point>
+        "intensity" <intensity:Color>
+    "}" => LightType::Delta(Box::new(PointLight::new(position, intensity))),
+    "directional" "{"
+        "direction" <direction:Vec3>
+        "radiance" <radiance:Color>
+    "}" => LightType::Delta(Box::new(DirectionalLight::new(direction, radiance))),
+};
 
 Curve: Box<Curve> = {
     "cubic_bezier" "("

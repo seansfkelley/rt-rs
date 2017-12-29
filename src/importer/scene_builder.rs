@@ -70,7 +70,7 @@ impl SceneBuilder {
         self.materials.insert(name.to_owned(), Arc::from(material));
     }
 
-    fn get_current_transform(&self) -> Transform {
+    pub fn get_current_transform(&self) -> Transform {
         match self.transform_stack.last() {
             Some(transform) => transform.clone(),
             None => IDENTITY_TRANSFORM.clone(),
