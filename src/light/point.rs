@@ -30,4 +30,9 @@ impl Light for PointLight {
             visibility_ray: Ray::finite(p,  w_i, 0f64, distance),
         }
     }
+
+    fn pdf (&self, p: Point, w_i: Vec3) -> f64 {
+        // We assume that arbitrary point's we're given are never going to hit the light.
+        0f64
+    }
 }

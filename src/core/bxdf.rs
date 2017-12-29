@@ -22,9 +22,9 @@ pub enum TransportType {
 pub type BxdfType = (TransportType, SpectrumType);
 
 pub struct BxdfSample {
-    color: Color,
-    pdf: f64,
-    w_i: Vec3,
+    pub color: Color,
+    pub pdf: f64,
+    pub w_i: Vec3,
 }
 
 impl BxdfSample {

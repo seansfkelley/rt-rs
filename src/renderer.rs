@@ -209,12 +209,12 @@ impl Renderer {
                 match light {
                     // If the light is a delta light, we know that w_i is spot on (because that's how delta lights work)
                     // and thus multiple importance sampling isn't going to improve our results. Don't weight it.
-                    &LightType::Delta(ref light) => {
+                    &LightType::Delta(_) => {
                         bsdf_transport * light_color * (w_i.dot(&n).abs() / light_pdf)
                     }
                     // If the light is not a delta light, we will try sampling again later. For now, yield the contribution
                     // of this light sample weighted by its likelihood.
-                    &LightType::Area(ref light) => {
+                    &LightType::Area(_) => {
                         let bsdf_pdf = bsdf.pdf(w_o, w_i, &BXDF_SAMPLE_TYPES);
                         let weight = variance_power_heuristic(light_pdf, 1, bsdf_pdf, 1);
                         bsdf_transport * light_color * (w_i.dot(&n) * weight / light_pdf)
@@ -237,11 +237,41 @@ impl Renderer {
             &LightType::Area(ref light) => {
                 let mut rng = thread_rng();
 
-                let BxdfSample { color: bsdf_transport, pdf: bsdf_pdf, w_i, } = bsdf.choose_and_evaluate(w_o, &mut rng, &BXDF_SAMPLE_TYPES);
-                if bsdf_pdf > 0f64 && bsdf_transport.is_nonzero() {
-
-                } else {
-                    Color::BLACK
+                match bsdf.choose_and_evaluate(w_o, &mut rng, &BXDF_SAMPLE_TYPES) {
+                    Some((BxdfSample { color: bsdf_transport, pdf: bsdf_pdf, w_i, }, spectrum_type)) => {
+                        if bsdf_pdf > 0f64 && bsdf_transport.is_nonzero() {
+                            let weight = match spectrum_type {
+                                // TODO: I thought perfect specular was hard to aim, why does this automatically get max weight?
+                                SpectrumType::PerfectSpecular => { 1f64 }
+                                _ => {
+                                    let light_pdf = light.pdf(p, w_i);
+                                    if light_pdf == 0f64 {
+                                        0f64
+                                    } else {
+                                        variance_power_heuristic(bsdf_pdf, 1, light_pdf, 1)
+                                    }
+                                }
+                            };
+                            // light_color ~ Li
+                            let light_color = match self.scene.objects.intersect(&Ray::half_infinite(p, w_i)) {
+                                Some(intersection) => {
+                                    // TODO: We'll want to modify Intersection to allow us to check if we hit the right thing.
+                                    Color::WHITE
+                                }
+                                // TODO: This branch should be used for infinite area lights iff we implement them.
+                                None => { Color::BLACK }
+                            };
+                            if light_color.is_nonzero() {
+                                // TODO: Transmittance.
+                                bsdf_transport * light_color * (w_i.dot(&n) * weight / bsdf_pdf)
+                            } else {
+                                Color::BLACK
+                            }
+                        } else {
+                            Color::BLACK
+                        }
+                    }
+                    None => { Color::BLACK }
                 }
             }
         }

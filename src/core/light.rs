@@ -20,6 +20,17 @@ impl Light for LightType {
             }
         }
     }
+
+    fn pdf(&self, p: Point, w_i: Vec3) -> f64 {
+        match self {
+            &LightType::Delta(ref light) => {
+                light.pdf(p, w_i)
+            }
+            &LightType::Area(ref light) => {
+                light.pdf(p, w_i)
+            }
+        }
+    }
 }
 
 pub struct LightSample {
@@ -32,6 +43,8 @@ pub struct LightSample {
 pub trait Light: Sync + Debug {
     // We are not on the light, so pick a point we can see from `p` and sample it.
     fn choose_and_sample_L(&self, p: Point) -> LightSample;
+
+    fn pdf(&self, p: Point, w_o: Vec3) -> f64;
 }
 
 pub trait AreaLight: Light {

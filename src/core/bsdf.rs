@@ -31,19 +31,20 @@ impl Bsdf {
         color
     }
 
-    pub fn choose_and_evaluate(&self, w_o_world: Vec3, rng: &mut Rng, types: &Vec<BxdfType>) -> BxdfSample {
+    pub fn choose_and_evaluate(&self, w_o_world: Vec3, rng: &mut Rng, types: &Vec<BxdfType>) -> Option<(BxdfSample, SpectrumType)> {
         let w_o = w_o_world.transform(&self.world_to_local);
         w_o.assert_normalized();
 
         for bxdf in &self.bxdfs {
-            if types.contains(&bxdf.bxdf_type()) {
+            let bxdf_type = &bxdf.bxdf_type();
+            if types.contains(bxdf_type) {
                 // TODO: Have to modify pdf value per pbrt, though I think that only applies when you can
                 // have multiple brdfs that match.
-                return bxdf.choose_and_evaluate(w_o, rng);
+                return Some((bxdf.choose_and_evaluate(w_o, rng), bxdf_type.1));
             }
         }
 
-        BxdfSample::new(Color::BLACK, 0f64, Vec3::uniform(0f64))
+        None
     }
 
     pub fn pdf(&self, w_o_world: Vec3, w_i_world: Vec3, types: &Vec<BxdfType>) -> f64 {
