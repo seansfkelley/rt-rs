@@ -9,14 +9,15 @@ camera perspective {
   up 0 1 0
 }
 
+// pbrt only uses a light of power 2000 for this... are ours really that much farther?
 light point {
   position 50 100 -200
-  intensity #555
+  intensity 15000 15000 15000
 }
 
 light point {
   position -50 100 -200
-  intensity #555
+  intensity 15000 15000 15000
 }
 
 transform rotate -75 1 0 0

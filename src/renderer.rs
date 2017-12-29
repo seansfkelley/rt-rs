@@ -118,8 +118,7 @@ impl Renderer {
         let bsdf = intersection.material.as_ref().expect("scene intersections should always have a material").get_bsdf(&intersection);
 
         // pbrt doesn't seem to normalize direction -- is it implicitly normalized already?
-        let w_o = -ray.direction;
-        let p = intersection.location;
+        let w_o = -ray.direction.as_normalized();
         // pbrt uses the explictly already-normalized normal, so we just do that work here instead.
         let n = {
             match intersection.shading_normal {
@@ -127,6 +126,7 @@ impl Renderer {
                 None => intersection.normal,
             }
         }.as_normalized();
+        let p = intersection.location + intersection.normal * NUDGE_FACTOR;
 
         // TODO: Emission from area lights.
         // TODO: When do we figure shit out about being inside the shape...?

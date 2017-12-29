@@ -3,6 +3,8 @@ use math::*;
 use super::ray::Ray;
 use super::color::Color;
 
+// TODO: Could probably elide this differentiation and instead have pdf/radiance return as an Option
+// which implicitly does it. AFAICT pbrt light sources have pdf = 0 iff it's a delta source anyway.
 #[derive(Debug)]
 pub enum LightType {
     Delta(Box<Light>),
