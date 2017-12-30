@@ -10,14 +10,6 @@ pub struct Renderer {
 }
 
 lazy_static! {
-    static ref BXDF_REFLECTION_TYPES: Vec<BxdfType> = vec![
-        (TransportType::Reflective, SpectrumType::PerfectSpecular),
-    ];
-
-    static ref BXDF_TRANSMISSION_TYPES: Vec<BxdfType> = vec![
-        (TransportType::Transmissive, SpectrumType::PerfectSpecular),
-    ];
-
     static ref BXDF_SURFACE_TYPES: Vec<BxdfType> = vec![
         (TransportType::Reflective, SpectrumType::Diffuse),
         (TransportType::Reflective, SpectrumType::GlossySpecular),
@@ -143,8 +135,8 @@ impl Renderer {
             L += self.estimate_light(light, &bsdf, p, n, w_o) + self.estimate_bsdf(light, &bsdf, p, n, w_o);
         }
 
-        L += self.integrate_perfect_specular_transport(&bsdf, p, n, w_o, &BXDF_REFLECTION_TYPES, depth);
-        L += self.integrate_perfect_specular_transport(&bsdf, p, n, w_o, &BXDF_TRANSMISSION_TYPES, depth);
+        L += self.integrate_perfect_specular_transport(&bsdf, p, n, w_o, TransportType::Reflective, depth);
+        L += self.integrate_perfect_specular_transport(&bsdf, p, n, w_o, TransportType::Transmissive, depth);
 
         L
     }
@@ -230,12 +222,12 @@ impl Renderer {
         }
     }
 
-    fn integrate_perfect_specular_transport(&self, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3, bxdf_types: &Vec<BxdfType>, depth: u32) -> Color {
+    fn integrate_perfect_specular_transport(&self, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3, transport: TransportType, depth: u32) -> Color {
         if depth == self.parameters.depth_limit {
             Color::BLACK
         } else {
             let mut rng = thread_rng();
-            match bsdf.choose_and_evaluate(w_o, &mut rng, bxdf_types) {
+            match bsdf.choose_and_evaluate(w_o, &mut rng, vec![(transport, SpectrumType::PerfectSpecular)]) {
                 Some((BxdfSample { color: bsdf_transport, pdf, w_i, }, _)) => {
                     if pdf > 0f64 && bsdf_transport.is_nonzero() && w_i.dot(&n) != 0f64 {
                         bsdf_transport * self.Li(Ray::half_infinite(p, w_i), depth + 1) * (w_i.dot(&n).abs() / pdf)
