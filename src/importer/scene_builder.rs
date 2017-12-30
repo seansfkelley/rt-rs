@@ -3,9 +3,8 @@ use std::boxed::Box;
 use std::sync::Arc;
 use core::*;
 use math::*;
-use material::*;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct SceneBuilder {
     camera: Option<CameraBuilder>,
     animation: Option<(u32, Vec<Mat4>)>,
@@ -14,11 +13,11 @@ pub struct SceneBuilder {
     antialias_tolerance: Option<f64>,
     depth_limit: Option<u32>,
     background_color: Option<Color>,
-    textures: HashMap<String, Arc<Texture>>,
+    materials: HashMap<String, Arc<Material>>,
     // TODO: Should transform be an Arc instead? Feels like this can get expensive.
     transform_stack: Vec<Transform>,
     pub objects: Vec<SceneObject>,
-    pub lights: Vec<Light>,
+    pub lights: Vec<LightType>,
 }
 
 pub type CameraCommon = (Point, Point, Vec3, Option<ScreenSize>);
@@ -67,11 +66,15 @@ impl SceneBuilder {
     optional_setter!(depth_limit, u32);
     optional_setter!(background_color, Color);
 
-    pub fn register_texture(&mut self, name: &str, texture: Box<Texture>) {
-        self.textures.insert(name.to_owned(), Arc::from(texture));
+    pub fn register_material(&mut self, name: &str, material: Box<Material>) {
+        let key = name.to_owned();
+        if self.materials.contains_key(&key) {
+            panic!("cannot redefine material \"{}\"", key);
+        }
+        self.materials.insert(key, Arc::from(material));
     }
 
-    fn get_current_transform(&self) -> Transform {
+    pub fn get_current_transform(&self) -> Transform {
         match self.transform_stack.last() {
             Some(transform) => transform.clone(),
             None => IDENTITY_TRANSFORM.clone(),
@@ -99,14 +102,14 @@ impl SceneBuilder {
 
     pub fn add_object(&mut self, partial_object: (Box<Geometry>, &str)) {
         let transform = self.get_current_transform();
-        let texture_name = partial_object.1.to_owned();
+        let material_name = partial_object.1.to_owned();
         self.objects.push(SceneObject {
             shape: Shape::new(Arc::from(partial_object.0), transform),
-            texture: Arc::clone(self.textures.get(&texture_name).expect(format!("no texture named \"{}\" defined", texture_name).as_str())),
+            material: Arc::clone(self.materials.get(&material_name).expect(format!("no texture named \"{}\" defined", material_name).as_str())),
         });
     }
 
-    pub fn add_light(&mut self, light: Light) {
+    pub fn add_light(&mut self, light: LightType) {
         self.lights.push(light);
     }
 

@@ -9,15 +9,18 @@ extern crate ordered_float;
 extern crate rayon;
 extern crate noise;
 
+mod bxdf;
 mod core;
-mod external_crate_traits;
 mod geometry;
-mod math;
+mod image_utils;
 mod importer;
-mod progress_bar;
+mod light;
 mod material;
+mod math;
+mod progress_bar;
 mod renderer;
 mod tessellation;
+mod texture;
 
 use std::fs::{File, create_dir_all};
 use std::path::{Path, PathBuf};

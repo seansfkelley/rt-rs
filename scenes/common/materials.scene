@@ -1,0 +1,76 @@
+material flat_off_white flat {
+  texture #ddd
+}
+
+material flat_white flat {
+  texture #fff
+}
+
+material flat_red flat {
+  texture #f00
+}
+
+material flat_green flat {
+  texture #0f0
+}
+
+material flat_blue flat {
+  texture #00f
+}
+
+material flat_purple flat {
+  texture #f0f
+}
+
+material cyan_plastic phong {
+  diffuse 0 .7 .7
+  specular 0 .7 .7
+  reflection .1 .1 .1
+}
+
+material yellow_matte flat {
+  texture .7 .7 0
+}
+
+material mirror phong {
+  diffuse .1 .1 .1
+  reflection .95 .95 .95
+}
+
+material sphere_default_checkerboard flat {
+  texture checkerboard {
+    checks_u 32
+    checks_v 32
+  }
+}
+
+material rect_prism_default_checkerboard flat {
+  texture checkerboard {
+    checks_u 48
+    checks_v 32
+  }
+}
+
+// material material wood {
+//   color_one #96643c
+//   color_two #55280f
+// }
+
+material glass phong {
+  diffuse .1 .1 .1
+  specular .9 .9 .9
+  reflection .1 .1 .1
+  transmission .9 .9 .9
+  index_of_refraction 1.5
+}
+
+// material earth phong {
+//   diffuse image "textures/earth.jpg"
+//   specular image "textures/earth-specular.png"
+//   reflection .1 .1 .1
+// }
+//
+// material moon phong {
+//   diffuse image "textures/moon.png"
+//   reflection .1 .1 .1
+// }

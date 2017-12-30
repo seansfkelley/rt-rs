@@ -9,14 +9,20 @@ camera perspective {
   up 0 1 0
 }
 
-light {
+// pbrt only uses a power of 2000 for these, but ours are ~230 units from the center versus pbrt's, which are ~190.
+light point {
   position 50 100 -200
-  color #555
+  intensity 12000 12000 12000
 }
 
-light {
+light point {
   position -50 100 -200
-  color #555
+  intensity 12000 12000 12000
+}
+
+light directional {
+  direction -0.5 -0.5 1
+  radiance 1 1 1
 }
 
 transform rotate -75 1 0 0
@@ -12634,5 +12640,5 @@ object {
       3522 3414 3429,
     ]
   }
-  texture flat_off_white
+  material flat_white
 }

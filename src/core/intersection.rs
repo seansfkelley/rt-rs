@@ -1,6 +1,7 @@
+use std::sync::Arc;
 use math::*;
-use material::*;
-use super::uv::*;
+use super::uv::Uv;
+use super::material::Material;
 
 #[derive(Debug, Clone)]
 pub struct Intersection {
@@ -9,11 +10,11 @@ pub struct Intersection {
     pub normal: Normal,
     pub shading_normal: Option<Normal>,
     pub uv: Option<Uv>,
-    pub material: Option<Material>,
+    pub material: Option<Arc<Material>>,
 }
 
 impl Intersection {
-    pub fn with_material(self, material: Material) -> Intersection {
+    pub fn with_material(self, material: Arc<Material>) -> Intersection {
         Intersection {
             distance: self.distance,
             location: self.location,
