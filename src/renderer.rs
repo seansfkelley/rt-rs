@@ -227,7 +227,7 @@ impl Renderer {
             Color::BLACK
         } else {
             let mut rng = thread_rng();
-            match bsdf.choose_and_evaluate(w_o, &mut rng, vec![(transport, SpectrumType::PerfectSpecular)]) {
+            match bsdf.choose_and_evaluate(w_o, &mut rng, &vec![(transport, SpectrumType::PerfectSpecular)]) {
                 Some((BxdfSample { color: bsdf_transport, pdf, w_i, }, _)) => {
                     if pdf > 0f64 && bsdf_transport.is_nonzero() && w_i.dot(&n) != 0f64 {
                         bsdf_transport * self.Li(Ray::half_infinite(p, w_i), depth + 1) * (w_i.dot(&n).abs() / pdf)
