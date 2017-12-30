@@ -1,4 +1,3 @@
-use math::*;
 use core::*;
 use bxdf::*;
 
@@ -24,12 +23,10 @@ impl Material for PhongMaterial {
         }
 
         if self.transmission.is_nonzero() {
-            bxdfs.push(Box::new(PerfectSpecularTransmission::new(self.transmission, self.index_of_refraction)));
+            // TODO: pbrt has these two IOR flipped the other way, but why?
+            bxdfs.push(Box::new(PerfectSpecularTransmission::new(self.transmission, 1f64, self.index_of_refraction)));
         }
 
-        Bsdf::new(
-            bxdfs,
-            Transform::new(Mat4::create_translation(-intersection.location.as_vector())),
-        )
+        Bsdf::new(bxdfs, intersection)
     }
 }

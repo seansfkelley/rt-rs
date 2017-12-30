@@ -1,4 +1,3 @@
-use math::*;
 use core::*;
 use bxdf::*;
 
@@ -17,9 +16,6 @@ impl FlatMaterial {
 
 impl Material for FlatMaterial {
     fn get_bsdf(&self, intersection: &Intersection) -> Bsdf {
-        Bsdf::new(
-            vec![Box::new(Lambertian::new(self.color))],
-            Transform::new(Mat4::create_translation(-intersection.location.as_vector())),
-        )
+        Bsdf::new(vec![Box::new(Lambertian::new(self.color))], intersection)
     }
 }
