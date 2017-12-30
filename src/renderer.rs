@@ -202,17 +202,21 @@ impl Renderer {
                                     }
                                 }
                             };
-                            let l_i = match self.scene.objects.intersect(&Ray::half_infinite(p, w_i)) {
-                                Some(intersection) => {
-                                    // TODO: We'll want to modify Intersection to allow us to check if we hit the right thing.
-                                    Color::WHITE
+                            if weight > 0f64 {
+                                let l_i = match self.scene.objects.intersect(&Ray::half_infinite(p, w_i)) {
+                                    Some(intersection) => {
+                                        // TODO: We'll want to modify Intersection to allow us to check if we hit the right thing.
+                                        Color::WHITE
+                                    }
+                                    // TODO: This branch should be used for infinite area lights iff we implement them.
+                                    None => { Color::BLACK }
+                                };
+                                if l_i.is_nonzero() {
+                                    // TODO: Transmittance.
+                                    bsdf_transport * l_i * (w_i.dot(&n) * weight / bsdf_pdf)
+                                } else {
+                                    Color::BLACK
                                 }
-                                // TODO: This branch should be used for infinite area lights iff we implement them.
-                                None => { Color::BLACK }
-                            };
-                            if l_i.is_nonzero() {
-                                // TODO: Transmittance.
-                                bsdf_transport * l_i * (w_i.dot(&n) * weight / bsdf_pdf)
                             } else {
                                 Color::BLACK
                             }
