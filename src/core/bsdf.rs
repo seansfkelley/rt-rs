@@ -37,19 +37,22 @@ impl Bsdf {
         }
     }
 
-    fn world_to_local(&self, v: Vec3) -> Vec3 {
+    fn world_to_local(&self, v: &Vec3) -> Vec3 {
         Vec3::new(v.dot(&self.primary_tangent), v.dot(&self.secondary_tangent), v.dot(&self.normal))
     }
 
-    // local_to_world:
-    // [ sn.x * v.x + tn.x * v.y + nn.x * v.z,
-    //   sn.y * v.x + tn.y * v.y + nn.y * v.z,
-    //   sn.z * v.x + tn.z * v.y + nn.z * v.z ]
-    // where sn = primary and tn = secondary
+    fn local_to_world(&self, v: &Vec3) -> Vec3 {
+        let (p_t, s_t, n) = (self.primary_tangent, self.secondary_tangent, self.normal);
+        Vec3::new(
+            p_t.x * v.x + s_t.x * v.y + n.x * v.z,
+            p_t.y * v.x + s_t.y * v.y + n.y * v.z,
+            p_t.z * v.x + s_t.z * v.y + n.z * v.z,
+        )
+    }
 
     pub fn evaluate(&self, w_o_world: Vec3, w_i_world: Vec3, types: &Vec<BxdfType>) -> Color {
-        let w_o = self.world_to_local(w_o_world);
-        let w_i = self.world_to_local(w_i_world);
+        let w_o = self.world_to_local(&w_o_world);
+        let w_i = self.world_to_local(&w_i_world);
         w_o.assert_normalized();
         w_i.assert_normalized();
 
@@ -64,7 +67,7 @@ impl Bsdf {
     }
 
     pub fn choose_and_evaluate(&self, w_o_world: Vec3, rng: &mut Rng, types: &Vec<BxdfType>) -> Option<(BxdfSample, SpectrumType)> {
-        let w_o = self.world_to_local(w_o_world);
+        let w_o = self.world_to_local(&w_o_world);
         w_o.assert_normalized();
 
         for bxdf in &self.bxdfs {
@@ -72,8 +75,9 @@ impl Bsdf {
             if types.contains(bxdf_type) {
                 // TODO: Have to modify pdf value per pbrt, though I think that only applies when you can
                 // have multiple brdfs that match.
-                // TODO: Fuck, have to translate this back into world coordinates.
-                return Some((bxdf.choose_and_evaluate(w_o, rng), bxdf_type.1));
+                let mut bxdf_sample = bxdf.choose_and_evaluate(w_o, rng);
+                bxdf_sample.w_i = self.local_to_world(&bxdf_sample.w_i);
+                return Some((bxdf_sample, bxdf_type.1));
             }
         }
 
@@ -81,8 +85,8 @@ impl Bsdf {
     }
 
     pub fn pdf(&self, w_o_world: Vec3, w_i_world: Vec3, types: &Vec<BxdfType>) -> f64 {
-        let w_o = self.world_to_local(w_o_world);
-        let w_i = self.world_to_local(w_i_world);
+        let w_o = self.world_to_local(&w_o_world);
+        let w_i = self.world_to_local(&w_i_world);
         w_o.assert_normalized();
         w_i.assert_normalized();
 
