@@ -53,15 +53,15 @@ material mirror flat {
 //   color_one #96643c
 //   color_two #55280f
 // }
-//
-// material glass constant transmissive {
-//   color 0.9 0.9 0.9
-//   specular_exponent 7
-//   index_of_refraction 1.5
-//   transmissivity 0.95
-//   reflectivity 0.95
-// }
-//
+
+material glass phong {
+  diffuse .1 .1 .1
+  specular .9 .9 .9
+  reflection .1 .1 .1
+  transmission .9 .9 .9
+  index_of_refraction 1.5
+}
+
 // material earth image {
 //   diffuse "textures/earth.jpg"
 //   ambient 0.2 * diffuse
