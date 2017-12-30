@@ -55,7 +55,7 @@ pub trait Bxdf {
     // TODO: Read up on why this is the default.
     fn pdf(&self, w_o: Vec3, w_i: Vec3) -> f64 {
         if same_hemisphere(&w_o, &w_i) {
-            abs_cos_theta(&w_i) / PI
+            cos_theta(&w_i).abs() / PI
         } else {
             0f64
         }
@@ -72,9 +72,8 @@ pub fn cos_theta(v: &Vec3) -> f64 {
     v.z
 }
 
-pub fn abs_cos_theta(v: &Vec3) -> f64 {
-    v.assert_normalized();
-    v.z.abs()
+pub fn sin_theta_2(v: &Vec3) -> f64 {
+    non_nan_max(0f64, 1f64 - cos_theta(v) * cos_theta(v))
 }
 
 // pbrt pg. 693

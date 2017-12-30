@@ -303,21 +303,4 @@ impl Renderer {
             }
         }
     }
-
-    // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel
-    // https://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf
-    // TODO: Schlick?
-    fn get_fresnel_reflection_percentage(&self, ray: &Ray, normal: &Normal, eta_i: f64, eta_t: f64) -> f64 {
-        let cos_i = -ray.direction.dot(normal).clamp(-1f64, 1f64);
-        let eta = eta_i / eta_t;
-        let sin2_t = eta * eta * (1f64 - cos_i * cos_i);
-        if sin2_t > 1f64 {
-            1f64
-        } else {
-            let cos_t = (1f64 - sin2_t).sqrt();
-            let r_orthogonal = (eta_i * cos_i - eta_t * cos_t) / (eta_i * cos_i + eta_t * cos_t);
-            let r_parallel = (eta_t * cos_i - eta_i * cos_t) / (eta_t * cos_i + eta_i * cos_t);
-            (r_orthogonal * r_orthogonal + r_parallel * r_parallel) / 2f64
-        }
-    }
 }

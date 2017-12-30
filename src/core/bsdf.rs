@@ -72,6 +72,7 @@ impl Bsdf {
             if types.contains(bxdf_type) {
                 // TODO: Have to modify pdf value per pbrt, though I think that only applies when you can
                 // have multiple brdfs that match.
+                // TODO: Fuck, have to translate this back into world coordinates.
                 return Some((bxdf.choose_and_evaluate(w_o, rng), bxdf_type.1));
             }
         }
