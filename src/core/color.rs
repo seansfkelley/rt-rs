@@ -36,7 +36,7 @@ impl Color {
     }
 
     pub fn is_nonzero(&self) -> bool {
-        self.r > 0f64 && self.g > 0f64 && self.b > 0f64
+        self.r > 0f64 || self.g > 0f64 || self.b > 0f64
     }
 
     pub fn average(&self) -> f64 {
@@ -174,4 +174,17 @@ pub fn min_vs_max(colors: &[Color]) -> f64 {
         max_b = max_b.max(color.b);
     }
     max_r - min_r + max_g - min_g + max_b - min_b
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_should_be_nonzero_if_any_terms_are_greater_than_zero() {
+        assert!(Color::new(0f64, 0f64, 1f64).is_nonzero());
+        assert!(Color::new(0f64, 1f64, 0f64).is_nonzero());
+        assert!(Color::new(1f64, 0f64, 0f64).is_nonzero());
+        assert!(!Color::new(0f64, 0f64, 0f64).is_nonzero());
+    }
 }
