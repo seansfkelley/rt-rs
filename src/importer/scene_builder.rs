@@ -67,7 +67,11 @@ impl SceneBuilder {
     optional_setter!(background_color, Color);
 
     pub fn register_material(&mut self, name: &str, material: Box<Material>) {
-        self.materials.insert(name.to_owned(), Arc::from(material));
+        let key = name.to_owned();
+        if self.materials.contains_key(&key) {
+            panic!("cannot redefine material \"{}\"", key);
+        }
+        self.materials.insert(key, Arc::from(material));
     }
 
     pub fn get_current_transform(&self) -> Transform {

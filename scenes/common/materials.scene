@@ -70,7 +70,7 @@ material earth phong {
   reflection .1 .1 .1
 }
 
-material earth phong {
+material moon phong {
   diffuse image "textures/moon.png"
   reflection .1 .1 .1
 }
