@@ -45,12 +45,12 @@ object {
   material rect_prism_default_checkerboard
 }
 
-light {
+light point {
   position 5 3 -20
-  color #999
+  intensity 500 500 500
 }
 
-light {
+light point {
   position -10 -10 -5
-  color #999
+  intensity 500 500 500
 }

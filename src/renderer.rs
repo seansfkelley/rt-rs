@@ -146,66 +146,6 @@ impl Renderer {
         L += self.integrate_perfect_specular_transport(&bsdf, p, n, w_o, &BXDF_REFLECTION_TYPES, depth);
         L += self.integrate_perfect_specular_transport(&bsdf, p, n, w_o, &BXDF_TRANSMISSION_TYPES, depth);
 
-        // let mut reflection_fraction = material.reflectivity;
-        // let mut transmission_fraction = material.transmission.as_ref().map(|transmission| transmission.transmissivity).unwrap_or(0f64);
-
-        // let is_inside = intersection.normal.dot(&ray.direction) > 0f64;
-        // let normal = (if is_inside { -intersection.normal } else { intersection.normal }).into_normalized();
-        // let shading_normal = intersection.shading_normal
-        //     .map(|n| (if is_inside { -n } else { n }).into_normalized()).unwrap_or(normal);
-        // let location = intersection.location;
-
-        // let nudged_location = |normal: Normal| location + (normal * NUDGE_FACTOR).into_vector();
-
-        // let mut eta = 0f64;
-
-        // if material.transmission.is_some() && reflection_fraction > 0f64 {
-        //     let transmission = material.transmission.as_ref().unwrap();
-        //     let (eta_i, eta_t) = if is_inside {
-        //         (transmission.index_of_refraction, 1f64)
-        //     } else {
-        //         (1f64, transmission.index_of_refraction)
-        //     };
-        //     eta = eta_i / eta_t;
-        //     let fresnel_reflection_fraction =
-        //         self.get_fresnel_reflection_percentage(&ray, &shading_normal, eta_i, eta_t);
-        //     reflection_fraction *= fresnel_reflection_fraction;
-        //     transmission_fraction *= 1f64 - fresnel_reflection_fraction;
-        // }
-
-        // let phong_fraction = 1f64 - reflection_fraction - transmission_fraction;
-        // let mut color = Color::BLACK;
-
-        // // TODO: increase other fractions if inside
-        // if !is_inside && phong_fraction > 0f64 {
-        //     color += phong_fraction * self.get_visible_lights(nudged_location(normal))
-        //         .iter()
-        //         .fold(material.ambient, |color, light| {
-        //             let light_direction = (light.position - location).into_normalized();
-        //             let diffuse_illumination = material.diffuse * light.color * shading_normal.dot(&light_direction).max(0f64);
-        //             let specular_illumination = material.specular.0 * light.color
-        //                 * shading_normal.dot(&(light_direction - ray.direction).into_normalized()).max(0f64).powf(material.specular.1);
-        //             color + diffuse_illumination + specular_illumination
-        //         });
-        // }
-
-        // if reflection_fraction > 0f64 {
-        //     let new_direction = ray.direction.reflect(shading_normal.as_vector());
-        //     let new_ray = Ray::half_infinite(nudged_location(normal), new_direction);
-        //     color += reflection_fraction * self.Li(new_ray, depth + 1)
-        // }
-
-        // if transmission_fraction > 0f64 {
-        //     let cos_i = -ray.direction.dot(&shading_normal).clamp(-1f64, 1f64);
-        //     let k = 1f64 - eta * eta * (1f64 - cos_i * cos_i);
-        //     if k >= 0f64 {
-        //         let direction = ray.direction * eta + (shading_normal * (eta * cos_i - k.sqrt())).into_vector();
-        //         let origin = nudged_location(-normal);
-        //         let new_ray = Ray::half_infinite(origin, direction.as_normalized());
-        //         color += transmission_fraction * self.Li(new_ray, depth + 1)
-        //     }
-        // }
-
         L
     }
 
