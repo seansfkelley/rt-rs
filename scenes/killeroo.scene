@@ -12640,5 +12640,5 @@ object {
       3522 3414 3429,
     ]
   }
-  texture flat_white
+  material flat_white
 }

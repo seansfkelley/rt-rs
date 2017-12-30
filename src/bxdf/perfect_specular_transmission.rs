@@ -4,12 +4,16 @@ use math::*;
 
 pub struct PerfectSpecularTransmission {
     transmittance: Color,
+    index_of_refraction: f64,
     // TODO: Different types of Fresnel.
 }
 
 impl PerfectSpecularTransmission {
-    pub fn new(transmittance: Color) -> PerfectSpecularTransmission {
-        PerfectSpecularTransmission { transmittance }
+    pub fn new(transmittance: Color, index_of_refraction: f64) -> PerfectSpecularTransmission {
+        PerfectSpecularTransmission {
+            transmittance,
+            index_of_refraction,
+        }
     }
 }
 

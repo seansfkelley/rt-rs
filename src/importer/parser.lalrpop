@@ -59,7 +59,20 @@ Animation: (u32, Vec<Mat4>) = "{"
 Material: Box<Material> = {
     "flat" "{"
         "color" <Color>
-    "}" => Box::new(FlatMaterial::new(<>))
+    "}" => Box::new(FlatMaterial::new(<>)),
+    "phong" "{"
+        <diffuse:("diffuse" <Color>)?>
+        <specular:("specular" <Color>)?>
+        <reflection:("reflection" <Color>)?>
+        <transmission:("transmission" <Color>)?>
+        <index_of_refraction:("index_of_refraction" <F64>)?>
+    "}" => Box::new(PhongMaterial {
+        diffuse: diffuse.unwrap_or(Color::BLACK),
+        specular: specular.unwrap_or(Color::BLACK),
+        reflection: reflection.unwrap_of(Color::BLACK),
+        transmission: transmission.unwrap_of(Color::BLACK),
+        index_of_refraction: index_of_refraction.unwrap_or(1f64),
+    })
     // "image" "{"
     //     "diffuse" <diffuse:ImageTextureFacet>
     //     <ambient:("ambient" <ImageTextureFacet>)?>
@@ -120,7 +133,7 @@ Transform: Mat4 = {
 
 Object = "{"
     "geometry" <Geometry>
-    "texture" <Identifier>
+    "material" <Identifier>
 "}";
 
 Geometry: Box<Geometry> = {
