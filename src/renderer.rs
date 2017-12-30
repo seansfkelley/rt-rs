@@ -10,7 +10,15 @@ pub struct Renderer {
 }
 
 lazy_static! {
-    static ref BXDF_SAMPLE_TYPES: Vec<BxdfType> = vec![
+    static ref BXDF_REFLECTION_TYPES: Vec<BxdfType> = vec![
+        (TransportType::Reflective, SpectrumType::PerfectSpecular),
+    ];
+
+    static ref BXDF_TRANSMISSION_TYPES: Vec<BxdfType> = vec![
+        (TransportType::Transmissive, SpectrumType::PerfectSpecular),
+    ];
+
+    static ref BXDF_SURFACE_TYPES: Vec<BxdfType> = vec![
         (TransportType::Reflective, SpectrumType::Diffuse),
         (TransportType::Reflective, SpectrumType::GlossySpecular),
         (TransportType::Transmissive, SpectrumType::Diffuse),
@@ -135,6 +143,9 @@ impl Renderer {
             L += self.estimate_light(light, &bsdf, p, n, w_o) + self.estimate_bsdf(light, &bsdf, p, n, w_o);
         }
 
+        L += self.integrate_perfect_specular_transport(&bsdf, p, n, w_o, &BXDF_REFLECTION_TYPES, depth);
+        L += self.integrate_perfect_specular_transport(&bsdf, p, n, w_o, &BXDF_TRANSMISSION_TYPES, depth);
+
         // let mut reflection_fraction = material.reflectivity;
         // let mut transmission_fraction = material.transmission.as_ref().map(|transmission| transmission.transmissivity).unwrap_or(0f64);
 
@@ -201,7 +212,7 @@ impl Renderer {
     fn estimate_light(&self, light: &LightType, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3) -> Color {
         let LightSample { l: l_i, w_i, pdf: light_pdf, visibility_ray } = light.choose_and_sample_radiance(p);
         if light_pdf > 0f64 && l_i.is_nonzero() {
-            let bsdf_transport = bsdf.evaluate(w_o, w_i, &BXDF_SAMPLE_TYPES);
+            let bsdf_transport = bsdf.evaluate(w_o, w_i, &BXDF_SURFACE_TYPES);
 
             if bsdf_transport.is_nonzero() && !self.scene.objects.does_intersect(&visibility_ray) {
                 // TODO: Transmittance.
@@ -214,7 +225,7 @@ impl Renderer {
                     // If the light is not a delta light, we will try sampling again later. For now, yield the contribution
                     // of this light sample weighted by its likelihood.
                     &LightType::Area(_) => {
-                        let bsdf_pdf = bsdf.pdf(w_o, w_i, &BXDF_SAMPLE_TYPES);
+                        let bsdf_pdf = bsdf.pdf(w_o, w_i, &BXDF_SURFACE_TYPES);
                         let weight = variance_power_heuristic(light_pdf, 1, bsdf_pdf, 1);
                         bsdf_transport * l_i * (w_i.dot(&n) * weight / light_pdf)
                     }
@@ -236,7 +247,7 @@ impl Renderer {
             &LightType::Area(ref light) => {
                 let mut rng = thread_rng();
 
-                match bsdf.choose_and_evaluate(w_o, &mut rng, &BXDF_SAMPLE_TYPES) {
+                match bsdf.choose_and_evaluate(w_o, &mut rng, &BXDF_SURFACE_TYPES) {
                     Some((BxdfSample { color: bsdf_transport, pdf: bsdf_pdf, w_i, }, spectrum_type)) => {
                         if bsdf_pdf > 0f64 && bsdf_transport.is_nonzero() {
                             let weight = match spectrum_type {
@@ -271,6 +282,24 @@ impl Renderer {
                     }
                     None => { Color::BLACK }
                 }
+            }
+        }
+    }
+
+    fn integrate_perfect_specular_transport(&self, bsdf: &Bsdf, p: Point, n: Normal, w_o: Vec3, bxdf_types: &Vec<BxdfType>, depth: u32) -> Color {
+        if depth == self.parameters.depth_limit {
+            Color::BLACK
+        } else {
+            let mut rng = thread_rng();
+            match bsdf.choose_and_evaluate(w_o, &mut rng, bxdf_types) {
+                Some((BxdfSample { color: bsdf_transport, pdf, w_i, }, spectrum_type)) => {
+                    if pdf > 0f64 && bsdf_transport.is_nonzero() && w_i.dot(&n) != 0f64 {
+                        bsdf_transport * self.Li(Ray::half_infinite(p, w_i), depth + 1) * (w_i.dot(&n).abs() / pdf)
+                    } else {
+                        Color::BLACK
+                    }
+                }
+                None => { Color::BLACK }
             }
         }
     }

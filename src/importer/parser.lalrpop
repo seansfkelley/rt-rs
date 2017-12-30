@@ -69,8 +69,8 @@ Material: Box<Material> = {
     "}" => Box::new(PhongMaterial {
         diffuse: diffuse.unwrap_or(Color::BLACK),
         specular: specular.unwrap_or(Color::BLACK),
-        reflection: reflection.unwrap_of(Color::BLACK),
-        transmission: transmission.unwrap_of(Color::BLACK),
+        reflection: reflection.unwrap_or(Color::BLACK),
+        transmission: transmission.unwrap_or(Color::BLACK),
         index_of_refraction: index_of_refraction.unwrap_or(1f64),
     })
     // "image" "{"
