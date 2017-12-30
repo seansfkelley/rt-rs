@@ -21,6 +21,6 @@ object {
       }
     }
   }
-  texture glass
+  material glass
 }
 transform pop

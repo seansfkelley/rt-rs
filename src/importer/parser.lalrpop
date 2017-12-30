@@ -4,10 +4,12 @@ use std::sync::Arc;
 use std::path::{ Path, PathBuf };
 use math::*;
 use core::*;
+use material::*;
 use geometry::*;
 use tessellation::*;
-use material::*;
+use texture::*;
 use light::*;
+use image_utils::*;
 use importer::scene_builder::*;
 use importer::parse_into_builder;
 
@@ -58,43 +60,50 @@ Animation: (u32, Vec<Mat4>) = "{"
 
 Material: Box<Material> = {
     "flat" "{"
-        "color" <Color>
-    "}" => Box::new(FlatMaterial::new(<>)),
+        "texture" <texture:Texture>
+    "}" => Box::new(FlatMaterial { texture }),
     "phong" "{"
-        <diffuse:("diffuse" <Color>)?>
-        <specular:("specular" <Color>)?>
-        <reflection:("reflection" <Color>)?>
-        <transmission:("transmission" <Color>)?>
+        <diffuse:("diffuse" <Texture>)?>
+        <specular:("specular" <Texture>)?>
+        <reflection:("reflection" <Texture>)?>
+        <transmission:("transmission" <Texture>)?>
         <index_of_refraction:("index_of_refraction" <F64>)?>
     "}" => Box::new(PhongMaterial {
-        diffuse: diffuse.unwrap_or(Color::BLACK),
-        specular: specular.unwrap_or(Color::BLACK),
-        reflection: reflection.unwrap_or(Color::BLACK),
-        transmission: transmission.unwrap_or(Color::BLACK),
+        diffuse: diffuse.unwrap_or(Box::new(Color::BLACK)),
+        specular: specular.unwrap_or(Box::new(Color::BLACK)),
+        reflection: reflection.unwrap_or(Box::new(Color::BLACK)),
+        transmission: transmission.unwrap_or(Box::new(Color::BLACK)),
         index_of_refraction: index_of_refraction.unwrap_or(1f64),
     })
-    // "image" "{"
-    //     "diffuse" <diffuse:ImageTextureFacet>
-    //     <ambient:("ambient" <ImageTextureFacet>)?>
-    //     <specular:("specular" <ImageTextureFacet>)?>
-    //     <reflectivity:("reflectivity" <ImageTextureFacet>)?>
-    // "}" => Box::new(ImageTexture::new(
-    //     ambient.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.1f64)),
-    //     diffuse,
-    //     specular.unwrap_or(ImageTextureFacet::Reference(LightingFacet::Diffuse, 0.3f64)),
-    //     reflectivity.unwrap_or(ImageTextureFacet::Constant(Color::BLACK)),
-    // )),
-    // "checkerboard" "{"
-    //     <checks_u:("checks_u" <U32>)?>
-    //     <checks_v:("checks_v" <U32>)?>
-    //     <color_one:("color_one" <Color>)?>
-    //     <color_two:("color_two" <Color>)?>
-    // "}" => Box::new(CheckerboardTexture {
-    //     checks_u: checks_u.unwrap_or(2u32),
-    //     checks_v: checks_v.unwrap_or(2u32),
-    //     color_one: color_one.unwrap_or(Color::WHITE),
-    //     color_two: color_two.unwrap_or(Color::BLACK),
-    // }),
+};
+
+// LightingFacet: LightingFacet = {
+//     "ambient" => LightingFacet::Ambient,
+//     "diffuse" => LightingFacet::Diffuse,
+//     "specular" => LightingFacet::Specular,
+//     "reflectivity" => LightingFacet::Reflectivity,
+// };
+
+// ImageTextureFacet: ImageTextureFacet = {
+//     <fraction:F64> "*" <facet:LightingFacet> => ImageTextureFacet::Reference(facet, fraction),
+//     "constant" <color:Color> => ImageTextureFacet::Constant(color),
+//     <path:Path> => ImageTextureFacet::from_path(path.as_ref()),
+// };
+
+Texture: Box<Texture> = {
+    <Color> => Box::new(<>),
+    "image" <Path> => Box::new(load_image(<>.as_ref())),
+    "checkerboard" "{"
+        <checks_u:("checks_u" <U32>)?>
+        <checks_v:("checks_v" <U32>)?>
+        <color_one:("color_one" <Color>)?>
+        <color_two:("color_two" <Color>)?>
+    "}" => Box::new(CheckerboardTexture {
+        checks_u: checks_u.unwrap_or(2u32),
+        checks_v: checks_v.unwrap_or(2u32),
+        color_one: color_one.unwrap_or(Color::WHITE),
+        color_two: color_two.unwrap_or(Color::BLACK),
+    }),
     // "wood" "{"
     //     "color_one" <color_one:Color>
     //     "color_two" <color_two:Color>
@@ -111,19 +120,6 @@ Material: Box<Material> = {
     //     specular_exponent.unwrap_or(20f64),
     // )),
 };
-
-// LightingFacet: LightingFacet = {
-//     "ambient" => LightingFacet::Ambient,
-//     "diffuse" => LightingFacet::Diffuse,
-//     "specular" => LightingFacet::Specular,
-//     "reflectivity" => LightingFacet::Reflectivity,
-// };
-
-// ImageTextureFacet: ImageTextureFacet = {
-//     <fraction:F64> "*" <facet:LightingFacet> => ImageTextureFacet::Reference(facet, fraction),
-//     "constant" <color:Color> => ImageTextureFacet::Constant(color),
-//     <path:Path> => ImageTextureFacet::from_path(path.as_ref()),
-// };
 
 Transform: Mat4 = {
     "scale" <Vec3> => Mat4::create_scale(<>),
@@ -198,13 +194,13 @@ TriangleMeshData: TriangleMeshData = {
         smoothing.unwrap_or(Smoothing::Implicit),
     ),
     "displace" "{"
-        "map" <path:Path>
+        "texture" <path:Path>
         "min" <min:F64>
         "max" <max:F64>
         "mesh" <mesh:TriangleMeshData>
         <smoothing:("smoothing" <Smoothing>)?>
     "}" => displace_triangle_mesh(
-        DisplacementMap::from_path(path.as_ref(), min, max),
+        DisplacementMap::new(Box::new(load_image(path.as_ref())), min, max),
         mesh,
         smoothing.unwrap_or(Smoothing::Implicit),
     ),

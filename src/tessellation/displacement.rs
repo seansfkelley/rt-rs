@@ -1,20 +1,19 @@
-use std::path::Path;
-use image::open as openImage;
 use math::*;
 use geometry::*;
 use core::*;
 
 pub struct DisplacementMap {
-    map: Box<UvMap>,
+    texture: Box<Texture>,
     min: f64,
     max: f64,
 }
 
 impl DisplacementMap {
-    pub fn from_path(path: &Path, min: f64, max: f64) -> DisplacementMap {
-        match openImage(path) {
-            Ok(img) => DisplacementMap { map: Box::new(img.to_rgb()), min, max },
-            Err(reason) => { panic!("could not open image at {:?}: {:?}", path, reason); }
+    pub fn new(texture: Box<Texture>, min: f64, max: f64) -> DisplacementMap {
+        DisplacementMap {
+            texture,
+            min,
+            max,
         }
     }
 }
@@ -26,7 +25,7 @@ pub fn displace_triangle_mesh(map: DisplacementMap, data: TriangleMeshData, smoo
         .into_iter()
         .enumerate()
         .map(|(i, position)| {
-            let scale = map.map.get_color(uvs[i]).average() * map_extent + map.min;
+            let scale = map.texture.get_color(Some(uvs[i])).average() * map_extent + map.min;
             position * scale
         })
         .collect();

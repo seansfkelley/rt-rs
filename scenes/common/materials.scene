@@ -1,54 +1,56 @@
 material flat_off_white flat {
-  color #ddd
+  texture #ddd
 }
 
 material flat_white flat {
-  color #fff
+  texture #fff
 }
 
 material flat_red flat {
-  color #f00
+  texture #f00
 }
 
 material flat_green flat {
-  color #0f0
+  texture #0f0
 }
 
 material flat_blue flat {
-  color #00f
+  texture #00f
 }
 
 material flat_purple flat {
-  color #f0f
+  texture #f0f
 }
 
-material cyan_plastic flat {
-  color 0 .7 .7
-  // specular_exponent 1
-  // reflectivity .1
+material cyan_plastic phong {
+  diffuse 0 .7 .7
+  specular 0 .7 .7
+  reflection .1 .1 .1
 }
 
 material yellow_matte flat {
-  color .7 .7 0
-  // specular_exponent 0
+  texture .7 .7 0
 }
 
-material mirror flat {
-  color 0.9 0.9 0.9
-  // specular_exponent 7
-  // reflectivity 0.95
+material mirror phong {
+  diffuse .1 .1 .1
+  reflection .95 .95 .95
 }
 
-// material sphere_default_checkerboard checkerboard {
-//   checks_u 32
-//   checks_v 32
-// }
-//
-// material rect_prism_default_checkerboard checkerboard {
-//   checks_u 48
-//   checks_v 32
-// }
-//
+material sphere_default_checkerboard flat {
+  texture checkerboard {
+    checks_u 32
+    checks_v 32
+  }
+}
+
+material rect_prism_default_checkerboard flat {
+  texture checkerboard {
+    checks_u 48
+    checks_v 32
+  }
+}
+
 // material material wood {
 //   color_one #96643c
 //   color_two #55280f
@@ -62,16 +64,13 @@ material glass phong {
   index_of_refraction 1.5
 }
 
-// material earth image {
-//   diffuse "textures/earth.jpg"
-//   ambient 0.2 * diffuse
-//   specular "textures/earth-specular.png"
-//   reflectivity 1 * specular
-// }
-//
-// material moon image {
-//   diffuse "textures/moon.png"
-//   ambient 0.2 * diffuse
-//   specular 0.7 * diffuse
-//   reflectivity constant #555
-// }
+material earth phong {
+  diffuse image "textures/earth.jpg"
+  specular image "textures/earth-specular.png"
+  reflection .1 .1 .1
+}
+
+material earth phong {
+  diffuse image "textures/moon.png"
+  reflection .1 .1 .1
+}

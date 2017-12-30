@@ -12,6 +12,7 @@ pub mod ray;
 pub mod render_parameters;
 pub mod scene;
 pub mod shape;
+pub mod texture;
 pub mod transform;
 pub mod uv;
 
@@ -29,5 +30,6 @@ pub use self::ray::*;
 pub use self::render_parameters::*;
 pub use self::scene::*;
 pub use self::shape::*;
+pub use self::texture::*;
 pub use self::transform::*;
 pub use self::uv::*;
