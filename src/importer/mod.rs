@@ -42,7 +42,7 @@ pub struct SceneFile {
 
 pub fn parse(path: &Path) -> SceneFile {
     let mut builder = SceneBuilder::new();
-    parse_into_builder(path, &mut builder);
+    parse_into_builder(path, &mut builder, parser::parse_SceneFile);
     SceneFile {
         camera: builder.build_camera(),
         animation: builder.build_animation(),
@@ -52,7 +52,10 @@ pub fn parse(path: &Path) -> SceneFile {
     }
 }
 
-pub fn parse_into_builder(path: &Path, builder: &mut SceneBuilder) {
+// I don't even know what's going on in this signature.
+// https://stackoverflow.com/questions/48038871/value-does-not-live-long-enough-but-only-when-using-a-function-pointer
+// I tried to use a type alias for the return type. The compiler doesn't allow it. Oh well.
+pub fn parse_into_builder<T, F>(path: &Path, builder: &mut SceneBuilder, method: F) -> T where F: for<'a> Fn(&mut SceneBuilder, &Path, &'a str) -> Result<T, ParseError<usize, (usize, &'a str), ()>> {
     let file_source = strip_comments(read_file_contents(path));
     let line_lengths: Vec<usize> = NEWLINE_REGEX
         .split(file_source.as_str())
@@ -69,8 +72,8 @@ pub fn parse_into_builder(path: &Path, builder: &mut SceneBuilder) {
         (line + 1, index + 1)
     };
 
-    match parser::parse_SceneFile(builder, path, file_source.as_str()) {
-        Ok(_) => {},
+    match method(builder, path, file_source.as_str()) {
+        Ok(value) => { value },
         Err(reason) => {
             let formatted_file_name = path.to_str().expect("could not convert path to string");
             match reason {
