@@ -64,11 +64,11 @@ fn transform_point(point: &Point, mat4: &Mat4) -> Point {
     }
 
     // TODO: Worth optimizing away the division when it's == 1, per pbrt?
-    Point {
-        x: vec4[0] / vec4[3],
-        y: vec4[1] / vec4[3],
-        z: vec4[2] / vec4[3],
-    }
+    Point::new(
+        vec4[0] / vec4[3],
+        vec4[1] / vec4[3],
+        vec4[2] / vec4[3],
+    )
 }
 
 make_transformable!(Point, transform_point);
@@ -102,11 +102,11 @@ fn transform_normal(normal: &Normal, mat4: &Mat4) -> Normal {
             mat4.cells[2][i] * normal.z;
     }
 
-    Normal {
-        x: vec3[0],
-        y: vec3[1],
-        z: vec3[2],
-    }
+    Normal::new(
+        vec3[0],
+        vec3[1],
+        vec3[2],
+    )
 }
 
 make_transformable_inverted!(Normal, transform_normal);

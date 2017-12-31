@@ -19,10 +19,12 @@ macro_rules! xyz_base {
 
         impl $name {
             pub fn new(x: f64, y: f64, z: f64) -> $name {
+                assert!(!x.is_nan() && !y.is_nan() && !z.is_nan(), "had NaN terms in {} construction", stringify!($name));
                 $name { x, y, z }
             }
 
             pub fn uniform(value: f64) -> $name {
+                assert!(!value.is_nan(), "had NaN terms in {} construction", stringify!($name));
                 $name { x: value, y: value, z: value }
             }
         }
@@ -71,11 +73,11 @@ macro_rules! xyz_op_xyz {
             type Output = $result;
 
             fn $fnname(self, other: $rhs) -> $result {
-                $result {
-                    x: self.x $opsymbol other.x,
-                    y: self.y $opsymbol other.y,
-                    z: self.z $opsymbol other.z,
-                }
+                $result::new(
+                    self.x $opsymbol other.x,
+                    self.y $opsymbol other.y,
+                    self.z $opsymbol other.z,
+                )
             }
         }
     };
@@ -155,11 +157,11 @@ macro_rules! xyz_cross {
     ($lhs:ident, $rhs:ident, $result:ident) => {
         impl $lhs {
             pub fn cross(&self, other: $rhs) -> $result {
-                $result {
-                    x: self.y * other.z - self.z * other.y,
-                    y: self.z * other.x - self.x * other.z,
-                    z: self.x * other.y - self.y * other.x,
-                }
+                $result::new(
+                    self.y * other.z - self.z * other.y,
+                    self.z * other.x - self.x * other.z,
+                    self.x * other.y - self.y * other.x,
+                )
             }
         }
     };
@@ -193,19 +195,19 @@ macro_rules! xyz_convertible {
     ($name:ident, $result:ident, $as_name:ident, $into_name:ident) => {
         impl $name {
             pub fn $as_name(&self) -> $result {
-                $result {
-                    x: self.x,
-                    y: self.y,
-                    z: self.z,
-                }
+                $result::new(
+                    self.x,
+                    self.y,
+                    self.z,
+                )
             }
 
             pub fn $into_name(self) -> $result {
-                $result {
-                    x: self.x,
-                    y: self.y,
-                    z: self.z,
-                }
+                $result::new(
+                    self.x,
+                    self.y,
+                    self.z,
+                )
             }
         }
     };
