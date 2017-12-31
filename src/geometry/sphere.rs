@@ -20,7 +20,7 @@ impl Sphere {
             location: intersection_point.clone(),
             normal: intersection_point.into_normal().into_normalized(),
             shading_normal: None,
-            uv: Some(sphere_uv_for_normalized_point(intersection_point / self.radius)),
+            uv: sphere_uv_for_normalized_point(intersection_point / self.radius),
             material: None,
         }
     }

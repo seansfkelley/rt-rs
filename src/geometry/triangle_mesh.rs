@@ -112,7 +112,7 @@ impl Geometry for Triangle {
 
         let b0 = 1f64 - b2 - b1;
 
-        let uv = self.mesh.uvs.as_ref().map(|uv| {
+        let uv = self.mesh.uvs.as_ref().map_or(Uv(0f64, 0f64), |uv| {
             let (uv0, uv1, uv2) = (uv[i0], uv[i1], uv[i2]);
             uv0 * b0 + uv1 * b1 + uv2 * b2
         });

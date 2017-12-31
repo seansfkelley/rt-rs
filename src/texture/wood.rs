@@ -21,14 +21,10 @@ impl Wood {
 }
 
 impl Texture for Wood {
-    fn get_color(&self, uv: Option<Uv>) -> Color {
-        match uv {
-            Some(Uv(u, v)) => {
-                let point = intersection.location * self.scale;
-                let grain = (self.perlin.get([point.x, point.y, point.z]) * 5f64).fract();
-                self.color_one * grain + self.color_two * (1f64 - grain)
-            }
-            None => { Color::BLACK }
-        }
+    fn get_color(&self, uv: Uv) -> Color {
+        let Uv(u, v) = uv;
+        let point = intersection.location * self.scale;
+        let grain = (self.perlin.get([point.x, point.y, point.z]) * 5f64).fract();
+        self.color_one * grain + self.color_two * (1f64 - grain)
     }
 }

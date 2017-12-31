@@ -25,7 +25,7 @@ pub fn displace_triangle_mesh(map: DisplacementMap, data: TriangleMeshData, smoo
         .into_iter()
         .enumerate()
         .map(|(i, position)| {
-            let scale = map.texture.get_color(Some(uvs[i])).average() * map_extent + map.min;
+            let scale = map.texture.get_color(uvs[i]).average() * map_extent + map.min;
             position * scale
         })
         .collect();

@@ -78,7 +78,7 @@ impl RectPrism {
             location,
             normal,
             shading_normal: None,
-            uv: Some(Uv(u, v)),
+            uv: Uv(u, v),
             material: None,
         }
     }

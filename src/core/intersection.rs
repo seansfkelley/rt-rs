@@ -9,7 +9,7 @@ pub struct Intersection {
     pub location: Point,
     pub normal: Normal,
     pub shading_normal: Option<Normal>,
-    pub uv: Option<Uv>,
+    pub uv: Uv,
     pub material: Option<Arc<Material>>,
 }
 
