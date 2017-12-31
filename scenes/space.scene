@@ -3,6 +3,8 @@ inline "common/common.scene"
 inline "common/image/standard.scene"
 // inline "common/image/orbit.scene"
 
+inline "common/space-materials.scene"
+
 background_color #000
 
 camera perspective {
@@ -20,7 +22,7 @@ object {
   geometry sphere {
     radius 3
   }
-  texture earth
+  material earth
 }
 transform pop all
 
@@ -30,11 +32,11 @@ object {
   geometry sphere {
     radius 1
   }
-  texture moon
+  material moon
 }
 transform pop all
 
-light {
+light point {
   position 0 5 -20
-  color #fff
+  intensity 1000 1000 1000
 }

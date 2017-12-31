@@ -30,6 +30,6 @@ object {
       transform translate 0 0 -10.1
     }
   }
-  texture glass
+  material glass
 }
 transform pop

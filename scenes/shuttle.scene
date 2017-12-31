@@ -9,9 +9,9 @@ camera perspective {
   up 0 1 0
 }
 
-light {
+light point {
   position 0 0 -25
-  color 0.4 0.4 0.4
+  intensity 500 500 500
 }
 
 transform rotate -60 1 0 0
@@ -979,6 +979,6 @@ object {
       169 125 124,
     ]
   }
-  texture flat_off_white
+  material flat_off_white
 }
 

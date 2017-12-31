@@ -15,7 +15,7 @@ object {
     min -2 -2 -2
     max  2  2  2
   }
-  texture glass
+  material glass
 }
 
 transform rotate 45 1 0 0
@@ -25,11 +25,10 @@ object {
     min -5 -0.25 -0.25
     max  5  0.25  0.25
   }
-  texture flat_blue
+  material flat_blue
 }
 
-
-light {
+light point {
   position 0 5 -10
-  color #bbb
+  intensity 500 500 500
 }

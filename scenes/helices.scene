@@ -29,7 +29,7 @@ object {
     ]
     tessellation_factor 20
   }
-  texture flat_purple
+  material flat_purple
 }
 transform pop
 
@@ -52,11 +52,11 @@ object {
     ]
     tessellation_factor 100
   }
-  texture flat_purple
+  material flat_purple
 }
 transform pop
 
-light {
+light point {
   position 5 2 -10
-  color 0.4 0.4 0.4
+  intensity 500 500 500
 }

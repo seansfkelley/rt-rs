@@ -17,8 +17,8 @@ animation {
   ]
 }
 
-texture cubemap image {
-  diffuse "common/textures/cube-map.png"
+material cubemap flat {
+  texture image "common/textures/cube-map.png"
 }
 
 object {
@@ -26,15 +26,15 @@ object {
     min -1 -1 -1
     max 1 1 1
   }
-  texture cubemap
+  material cubemap
 }
 
-light {
+light point {
   position 5 5 -10
-  color #ddd
+  intensity 200 200 200
 }
 
-light {
+light point {
   position -5 -5 10
-  color #ddd
+  intensity 200 200 200
 }

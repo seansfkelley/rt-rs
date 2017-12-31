@@ -1,0 +1,10 @@
+material earth phong {
+  diffuse image "textures/earth.jpg"
+  specular image "textures/earth-specular.png"
+  reflection .1 .1 .1
+}
+
+material moon phong {
+  diffuse image "textures/moon.png"
+  reflection .1 .1 .1
+}

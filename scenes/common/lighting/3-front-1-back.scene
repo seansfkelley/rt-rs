@@ -1,19 +1,19 @@
-light {
+light point {
   position 20 20 -50
-  color #444
+  intensity 1000 1000 1000
 }
 
-light {
+light point {
   position -20 20 -50
-  color #444
+  intensity 1000 1000 1000
 }
 
-light {
+light point {
   position 0 -20 -50
-  color #444
+  intensity 1000 1000 1000
 }
 
-light {
+light point {
   position -20 20 50
-  color #444
+  intensity 1000 1000 1000
 }

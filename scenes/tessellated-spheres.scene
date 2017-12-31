@@ -20,7 +20,7 @@ object {
     depth 0
     smoothing none
   }
-  texture flat_off_white
+  material flat_off_white
 }
 
 transform translate 3 0 0
@@ -29,7 +29,7 @@ object {
     depth 2
     smoothing none
   }
-  texture flat_off_white
+  material flat_off_white
 }
 
 transform translate 3 0 0
@@ -38,7 +38,7 @@ object {
     depth 4
     smoothing none
   }
-  texture flat_off_white
+  material flat_off_white
 }
 
 transform translate 3 0 0
@@ -47,7 +47,7 @@ object {
     depth 6
     smoothing none
   }
-  texture flat_off_white
+  material flat_off_white
 }
 
 transform pop all
@@ -58,7 +58,7 @@ object {
   geometry tessellated_sphere {
     depth 0
   }
-  texture flat_off_white
+  material flat_off_white
 }
 
 transform translate 3 0 0
@@ -66,7 +66,7 @@ object {
   geometry tessellated_sphere {
     depth 2
   }
-  texture flat_off_white
+  material flat_off_white
 }
 
 transform translate 3 0 0
@@ -74,7 +74,7 @@ object {
   geometry tessellated_sphere {
     depth 4
   }
-  texture flat_off_white
+  material flat_off_white
 }
 
 transform translate 3 0 0
@@ -82,7 +82,7 @@ object {
   geometry tessellated_sphere {
     depth 6
   }
-  texture flat_off_white
+  material flat_off_white
 }
 
 transform pop all

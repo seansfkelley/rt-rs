@@ -28,16 +28,16 @@ object {
     ]
     tessellation_factor 3
   }
-  texture flat_purple
+  material flat_purple
 }
 
 
-light {
+light point {
   position 0 0 10
-  color 0.4 0.4 0.4
+  intensity 200 200 200
 }
 
-light {
+light point {
   position 5 2 -10
-  color 0.4 0.4 0.4
+  intensity 200 200 200
 }

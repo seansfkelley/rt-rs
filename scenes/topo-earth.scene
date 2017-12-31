@@ -11,24 +11,22 @@ camera perspective {
   field_of_view 30
 }
 
-texture flat_earth image {
-  diffuse "common/textures/earth.jpg"
-  ambient 0.2 * diffuse
-  specular "common/textures/earth-specular.png"
-  // reflectivity 1 * specular
+material flat_earth phong {
+  diffuse image "common/textures/earth.jpg"
+  specular image "common/textures/earth-specular.png"
 }
 
 transform rotate 180 0 1 0
 transform rotate -10 1 0 0
 object {
   geometry displace {
-    map "common/textures/earth-displacement.png"
+    texture "common/textures/earth-displacement.png"
     min 9
     max 10
     mesh tessellated_sphere {
       depth 10
     }
   }
-  texture flat_earth
+  material flat_earth
 }
 transform pop 2

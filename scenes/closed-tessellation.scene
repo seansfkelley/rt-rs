@@ -54,20 +54,20 @@ object {
     tessellation_factor 200
     closure join
   }
-  texture flat_purple
+  material flat_purple
 }
 
-light {
+light point {
   position 5 2 5
-  color #777
+  intensity 200 200 200
 }
 
-light {
+light point {
   position -5 2 5
-  color #777
+  intensity 200 200 200
 }
 
-light {
+light point {
   position 5 2 -5
-  color #777
+  intensity 200 200 200
 }

@@ -24,14 +24,14 @@ animation {
   ]
 }
 
-light {
+light point {
   position 0 0 -10
-  color #fff
+  intensity 500 500 500
 }
 
-light {
+light point {
   position 0 0 10
-  color #fff
+  intensity 500 500 500
 }
 
 object {
@@ -45,7 +45,7 @@ object {
       0 1 2
     ]
   }
-  texture flat_white
+  material flat_white
 }
 
 transform translate -3  -3 1
@@ -53,7 +53,7 @@ object {
   geometry sphere {
     radius 0.25
   }
-  texture flat_red
+  material flat_red
 }
 transform pop
 
@@ -62,7 +62,7 @@ object {
   geometry sphere {
     radius 0.25
   }
-  texture flat_green
+  material flat_green
 }
 transform pop
 
@@ -71,6 +71,6 @@ object {
   geometry sphere {
     radius 0.25
   }
-  texture flat_blue
+  material flat_blue
 }
 transform pop

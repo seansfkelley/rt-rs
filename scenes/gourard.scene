@@ -17,14 +17,14 @@ animation {
   ]
 }
 
-light {
+light point {
   position 4 10 -40
-  color 0.4 0.4 0.4
+  intensity 1000 1000 1000
 }
 
-light {
+light point {
   position 4 10 40
-  color 0.4 0.4 0.4
+  intensity 1000 1000 1000
 }
 
 transform translate 0 0 -0.5
@@ -54,7 +54,7 @@ object {
     ]
     is_closed false
   }
-  texture flat_purple
+  material flat_purple
 }
 transform pop
 
@@ -75,7 +75,7 @@ object {
     ]
     is_closed false
   }
-  texture flat_purple
+  material flat_purple
 }
 
 transform translate 3 0 0
@@ -97,7 +97,7 @@ object {
     smoothing none
     is_closed false
   }
-  texture flat_purple
+  material flat_purple
 }
 transform pop
 

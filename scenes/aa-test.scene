@@ -10,13 +10,13 @@ camera perspective {
   field_of_view 60
 }
 
-light {
+light point {
   position 0 0 -5
-  color #ddd
+  intensity 500 500 500
 }
 
-texture dark constant flat {
-  color #111
+material dark flat {
+  texture #111
 }
 
 object {
@@ -30,7 +30,7 @@ object {
       0 2 1,
     ]
   }
-  texture flat_purple
+  material flat_purple
 }
 
 transform rotate 180 0 0 1
@@ -45,6 +45,6 @@ object {
       0 2 1,
     ]
   }
-  texture dark
+  material dark
 }
 transform pop

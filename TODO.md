@@ -2,6 +2,8 @@
 - fix refraction
 - actually implement area lights
 - transmittance (volume integration) -- does this cover traveling through refractive substances?
+- correct lighting in handedness.scene (it shouldn't be lit on the back)
+- some scenes fail assertions when converting into bxdf-local space (e.g. cube-mapping.scene)
 
 ## features
 - animate objects in scenes
@@ -32,6 +34,7 @@
 - possible optimization heuristic: on each pixel, check intersection with the nearest object from the previous pixel, if any. if some, then chop down the ray range before running it through the spatial index. this may make performance worse if you have a small number of very complex objects (i.e. topo-earth) unless you can punch an analogous optimization through to them as well, or otherwise skip them during the normal collision checking (since you already checked it).
 - partial intersection in geometries
 - partial intersection in kd-tree
+- loading the large images for the space pictures is sloooooow
 
 ## misc
 - Add pixel-matching image tests
