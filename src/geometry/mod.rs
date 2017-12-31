@@ -1,7 +1,7 @@
-pub mod difference;
-pub mod rect_prism;
-pub mod sphere;
-pub mod triangle_mesh;
+mod difference;
+mod rect_prism;
+mod sphere;
+mod triangle_mesh;
 
 pub use self::difference::*;
 pub use self::rect_prism::*;

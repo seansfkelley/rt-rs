@@ -1,6 +1,6 @@
-pub mod cloth;
-pub mod displacement;
-pub mod sphere;
+mod cloth;
+mod displacement;
+mod sphere;
 
 pub use self::cloth::*;
 pub use self::displacement::*;

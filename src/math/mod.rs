@@ -1,10 +1,10 @@
-pub mod curve;
-pub mod clamp;
-pub mod fuzzy_eq;
-pub mod mat4;
-pub mod non_nan;
-pub mod samples;
-pub mod xyz;
+mod curve;
+mod clamp;
+mod fuzzy_eq;
+mod mat4;
+mod non_nan;
+mod samples;
+mod xyz;
 
 pub use self::curve::*;
 pub use self::clamp::*;

@@ -1,5 +1,5 @@
 mod parser;
-pub mod scene_builder;
+mod scene_builder;
 
 use regex::Regex;
 use std::path::Path;
