@@ -52,10 +52,10 @@ pub fn parse(path: &Path) -> SceneFile {
     }
 }
 
-// I don't even know what's going on in this signature.
+type ParserFn<T> = for<'a> fn(&mut SceneBuilder, &Path, &'a str) -> Result<T, ParseError<usize, (usize, &'a str), ()>>;
+
 // https://stackoverflow.com/questions/48038871/value-does-not-live-long-enough-but-only-when-using-a-function-pointer
-// I tried to use a type alias for the return type. The compiler doesn't allow it. Oh well.
-pub fn parse_into_builder<T, F>(path: &Path, builder: &mut SceneBuilder, method: F) -> T where F: for<'a> Fn(&mut SceneBuilder, &Path, &'a str) -> Result<T, ParseError<usize, (usize, &'a str), ()>> {
+pub fn parse_into_builder<T>(path: &Path, builder: &mut SceneBuilder, method: ParserFn<T>) -> T {
     let file_source = strip_comments(read_file_contents(path));
     let line_lengths: Vec<usize> = NEWLINE_REGEX
         .split(file_source.as_str())
