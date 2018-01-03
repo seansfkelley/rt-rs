@@ -1,3 +1,4 @@
+use std::f64::INFINITY;
 use math::*;
 use core::*;
 
@@ -24,7 +25,7 @@ impl Light for DirectionalLight {
             l: self.radiance,
             w_i,
             pdf: 1f64,
-            visibility_ray: Ray::half_infinite(p, w_i),
+            visibility_ray: Ray::finite(p, w_i, EPSILON, INFINITY),
         }
     }
 

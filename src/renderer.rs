@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::f64::INFINITY;
 use rand::{ Rng, thread_rng };
 use math::*;
 use core::*;
@@ -110,13 +111,12 @@ impl Renderer {
     }
 
     fn integrate_direct_lighting(&self, ray: Ray, intersection: Intersection, depth: u32) -> Color {
-        const NUDGE_FACTOR: f64 = 1e-10f64;
-
         #[allow(non_snake_case)]
         let mut L = Color::BLACK.clone();
 
         let bsdf = intersection.material.as_ref().expect("scene intersections should always have a material").get_bsdf(&intersection);
 
+        let p = intersection.location;
         // pbrt doesn't seem to normalize direction -- is it implicitly normalized already?
         let w_o = -ray.direction.as_normalized();
         // pbrt uses the explictly already-normalized normal, so we just do that work here instead.
@@ -126,7 +126,6 @@ impl Renderer {
                 None => intersection.normal,
             }
         }.as_normalized();
-        let p = intersection.location + intersection.normal * NUDGE_FACTOR;
 
         // TODO: Emission from area lights.
         // TODO: When do we figure shit out about being inside the shape...?
@@ -195,7 +194,7 @@ impl Renderer {
                                 }
                             };
                             if weight > 0f64 {
-                                let l_i = match self.scene.objects.intersect(&Ray::half_infinite(p, w_i)) {
+                                let l_i = match self.scene.objects.intersect(&Ray::finite(p, w_i, EPSILON, INFINITY)) {
                                     Some(intersection) => {
                                         // TODO: We'll want to modify Intersection to allow us to check if we hit the right thing.
                                         Color::WHITE
@@ -230,7 +229,7 @@ impl Renderer {
             match bsdf.choose_and_evaluate(w_o, &mut rng, &vec![(transport, SpectrumType::PerfectSpecular)]) {
                 Some((BxdfSample { color: bsdf_transport, pdf, w_i, }, _)) => {
                     if pdf > 0f64 && bsdf_transport.is_nonzero() && w_i.dot(&n) != 0f64 {
-                        bsdf_transport * self.Li(Ray::half_infinite(p, w_i), depth + 1) * (w_i.dot(&n).abs() / pdf)
+                        bsdf_transport * self.Li(Ray::finite(p, w_i, EPSILON, INFINITY), depth + 1) * (w_i.dot(&n).abs() / pdf)
                     } else {
                         Color::BLACK
                     }

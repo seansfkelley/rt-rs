@@ -27,7 +27,7 @@ impl Light for PointLight {
             l: self.intensity / (distance * distance),
             w_i,
             pdf: 1f64,
-            visibility_ray: Ray::finite(p, w_i, 0f64, distance),
+            visibility_ray: Ray::finite(p, w_i, EPSILON, distance),
         }
     }
 

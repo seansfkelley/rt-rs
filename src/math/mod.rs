@@ -13,3 +13,5 @@ pub use self::mat4::*;
 pub use self::non_nan::*;
 pub use self::samples::*;
 pub use self::xyz::*;
+
+pub const EPSILON: f64 = 1e-10;

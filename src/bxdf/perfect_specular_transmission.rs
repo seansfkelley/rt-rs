@@ -50,7 +50,7 @@ impl Bxdf for PerfectSpecularTransmission {
             let cos_t = non_nan_max(0f64, 1f64 - sin_t_2).sqrt() * (if is_entering { -1f64 } else { 1f64 });
             let w_i = Vec3::new(eta * -w_o.x, eta * -w_o.y, cos_t);
             BxdfSample::new(
-                (1f64 - evaluate_fresnel(cos_theta(&w_o), self.eta_i, self.eta_t)) / cos_theta(&w_i) * self.transmittance,
+                (1f64 - evaluate_fresnel(cos_theta(&w_o), self.eta_i, self.eta_t)) / cos_theta(&w_i).abs() * self.transmittance,
                 1f64,
                 w_i,
             )
@@ -69,11 +69,12 @@ fn evaluate_fresnel(cos_i: f64, eta_i: f64, eta_t: f64) -> f64 {
     };
 
     let eta = eta_i / eta_t;
-    let sin_t_2 = eta * eta * (1f64 - cos_i * cos_i);
+    let sin_t_2 = eta * eta * non_nan_max(0f64, 1f64 - cos_i * cos_i);
     if sin_t_2 >= 1f64 {
         1f64
     } else {
-        let cos_t = (1f64 - sin_t_2).sqrt();
+        let cos_i = cos_i.abs();
+        let cos_t = non_nan_max(0f64, 1f64 - sin_t_2).sqrt();
         let r_orthogonal = (eta_i * cos_i - eta_t * cos_t) / (eta_i * cos_i + eta_t * cos_t);
         let r_parallel = (eta_t * cos_i - eta_i * cos_t) / (eta_t * cos_i + eta_i * cos_t);
         (r_orthogonal * r_orthogonal + r_parallel * r_parallel) / 2f64
