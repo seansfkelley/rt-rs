@@ -14,8 +14,8 @@ light point {
   intensity 500 500 500
 }
 
-transform rotate -60 1 0 0
-// transform rotate 45 0 1 0
+transform rotate -60 deg 1 0 0
+// transform rotate 45 deg 0 1 0
 object {
   geometry triangle_mesh {
     positions [

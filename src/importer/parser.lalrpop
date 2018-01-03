@@ -124,7 +124,7 @@ Texture: Box<Texture> = {
 Transform: Mat4 = {
     "scale" <Vec3> => Mat4::create_scale(<>),
     "translate" <Vec3> => Mat4::create_translation(<>),
-    "rotate" <theta_degrees:F64> <axis:Vec3> => Mat4::create_rotation(theta_degrees.to_radians(), axis.as_normalized()),
+    "rotate" <theta_degrees:F64> "deg" <axis:Vec3> => Mat4::create_rotation(theta_degrees.to_radians(), axis.as_normalized()),
 };
 
 Object = "{"

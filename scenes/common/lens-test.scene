@@ -16,7 +16,7 @@ object {
 }
 transform pop
 
-transform rotate 45 1 1 1
+transform rotate 45 deg 1 1 1
 transform translate 3 3 0
 object {
   geometry rect_prism {

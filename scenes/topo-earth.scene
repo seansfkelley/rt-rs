@@ -16,8 +16,8 @@ material flat_earth phong {
   specular image "common/textures/earth-specular.png"
 }
 
-transform rotate 180 0 1 0
-transform rotate -10 1 0 0
+transform rotate 180 deg 0 1 0
+transform rotate -10 deg 1 0 0
 object {
   geometry displace {
     texture "common/textures/earth-displacement.png"

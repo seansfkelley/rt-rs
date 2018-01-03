@@ -18,8 +18,8 @@ object {
   material glass
 }
 
-transform rotate 45 1 0 0
-transform rotate 75 0 0 1
+transform rotate 45 deg 1 0 0
+transform rotate 75 deg 0 0 1
 object {
   geometry rect_prism {
     min -5 -0.25 -0.25

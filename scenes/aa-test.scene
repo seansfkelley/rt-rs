@@ -33,7 +33,7 @@ object {
   material flat_purple
 }
 
-transform rotate 180 0 0 1
+transform rotate 180 deg 0 0 1
 object {
   geometry triangle_mesh {
     positions [

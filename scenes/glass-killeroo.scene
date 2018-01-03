@@ -3,6 +3,8 @@ inline "common/common.scene"
 inline "common/image/standard.scene"
 // inline "common/image/orbit.scene"
 
+antialias 1
+
 background_color #666
 
 camera perspective {
@@ -11,35 +13,33 @@ camera perspective {
   up 0 1 0
 }
 
-light point {
-  position 50 100 -200
-  intensity 12000 12000 12000
-}
-
-light point {
-  position -50 100 -200
-  intensity 12000 12000 12000
-}
-
 light directional {
   direction -0.5 -0.5 1
   radiance 1 1 1
 }
 
-transform scale 1000 1000 1
-transform translate 0 0 300
+material dense_checkerboard flat {
+  texture checkerboard {
+    checks_u 144
+    checks_v 96
+  }
+}
+
+transform scale 1500 1500 1
+transform rotate 14 deg 1 0 0
+transform translate 0 0 1000
 object {
   geometry rect_prism {
     min -1 -1 -1
     max 1 1 0
   }
-  material flat_off_white
+  material dense_checkerboard
 }
 transform pop all
 
-transform rotate -75 1 0 0
-transform rotate 55 0 1 0
-transform translate 25 25 0
+transform rotate -75 deg 1 0 0
+transform rotate 55 deg 0 1 0
+transform translate 50 50 0
 object {
   geometry "common/geometry/killeroo.geo"
   material glass
