@@ -6,7 +6,6 @@ pub struct PerfectSpecularTransmission {
     transmittance: Color,
     eta_i: f64,
     eta_t: f64,
-    // TODO: Different types of Fresnel.
 }
 
 impl PerfectSpecularTransmission {
@@ -25,8 +24,7 @@ impl Bxdf for PerfectSpecularTransmission {
     }
 
     fn evaluate(&self, _w_o: Vec3, _w_i: Vec3) -> Color {
-        // We're not even going to try: your choice of w_o/w_i needs to be so spot-on to machine epsilon
-        // that we're going to assume you didn't do it and force you to use choose_and_evaluate.
+        // Perfect specular BxDFs are effectively impossible to sample well at random.
         Color::BLACK
     }
 
@@ -58,6 +56,7 @@ impl Bxdf for PerfectSpecularTransmission {
     }
 }
 
+// TODO: Factor this out for use in reflection. Is this dielectric or conductor?
 fn evaluate_fresnel(cos_i: f64, eta_i: f64, eta_t: f64) -> f64 {
     let cos_i = cos_i.clamp(-1f64, 1f64);
 

@@ -221,8 +221,6 @@ xyz_mul!(Vec3);
 xyz_div!(Vec3);
 xyz_dot!(Vec3);
 xyz_cross!(Vec3, Vec3, Vec3);
-// TODO: Function overloading!
-// xyz_cross!(Vec3, Normal, Vec3);
 xyz_normalizable!(Vec3);
 xyz_convertible!(Vec3, Normal, as_normal, into_normal);
 xyz_convertible!(Vec3, Point, as_point, into_point);
@@ -257,7 +255,6 @@ impl Vec3 {
     pub const Y_AXIS: Vec3 = Vec3 { x: 0f64, y: 1f64, z: 0f64 };
     pub const Z_AXIS: Vec3 = Vec3 { x: 0f64, y: 0f64, z: 1f64 };
 
-    // TODO: Remove this?
     pub fn assert_normalized(&self) {
         const EPSILON: f64 = 1e-10;
         let magnitude = (self.magnitude() - 1f64).abs();
@@ -265,7 +262,6 @@ impl Vec3 {
     }
 
     pub fn reflect(&self, axis: Vec3) -> Vec3 {
-        // If we decide to keep this, should do the normalization ourselves.
         self.assert_normalized();
         axis.assert_normalized();
         *self - axis * (2f64 * self.dot(&axis))

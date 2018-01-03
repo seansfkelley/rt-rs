@@ -30,7 +30,7 @@ impl Light for DirectionalLight {
     }
 
     fn pdf(&self, _p: Point, _w_i: Vec3) -> f64 {
-        // We assume that arbitrary point's we're given are never going to hit the light.
+        // Delta lights are effectively impossible to sample well at random.
         0f64
     }
 }

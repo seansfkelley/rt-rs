@@ -4,7 +4,7 @@ use bxdf::*;
 #[derive(Debug)]
 pub struct PhongMaterial {
     pub diffuse: Box<Texture>,
-    pub specular: Box<Texture>, // TODO
+    pub specular: Box<Texture>, // TODO: Glossy specular term.
     pub reflection: Box<Texture>,
     pub transmission: Box<Texture>,
     pub index_of_refraction: f64,

@@ -67,8 +67,7 @@ impl Mat4 {
     // pbrt pg. 84
     pub fn create_look_at(position: Point, look_at: Point, in_up: Vec3) -> Mat4 {
         let direction = (look_at - position).into_normalized();
-        // TODO: Double normalize should be redundant...?
-        let left = in_up.as_normalized().cross(direction).into_normalized();
+        let left = in_up.cross(direction).into_normalized();
         let up = direction.cross(left);
 
         Mat4 {
@@ -467,7 +466,7 @@ mod tests {
 
         #[test]
         fn it_should_create_a_look_at_matrix() {
-            // TODO
+            // TODO: Tests.
         }
     }
 }

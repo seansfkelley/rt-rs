@@ -27,7 +27,6 @@ fn read_file_contents(path: &Path) -> String {
 }
 
 fn strip_comments(s: String) -> String {
-    // It is VERY IMPORTANT that this regex does not drop newlines, else our line counts will be off.
     COMMENT_REGEX.replace_all(s.as_str(), "$1").into_owned()
 }
 

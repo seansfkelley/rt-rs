@@ -117,9 +117,7 @@ impl Renderer {
         let bsdf = intersection.material.as_ref().expect("scene intersections should always have a material").get_bsdf(&intersection);
 
         let p = intersection.location;
-        // pbrt doesn't seem to normalize direction -- is it implicitly normalized already?
         let w_o = -ray.direction.as_normalized();
-        // pbrt uses the explictly already-normalized normal, so we just do that work here instead.
         let n = {
             match intersection.shading_normal {
                 Some(normal) => normal,
@@ -128,7 +126,6 @@ impl Renderer {
         }.as_normalized();
 
         // TODO: Emission from area lights.
-        // TODO: When do we figure shit out about being inside the shape...?
 
         for light in &self.scene.lights {
             L += self.estimate_light(light, &bsdf, p, n, w_o) + self.estimate_bsdf(light, &bsdf, p, n, w_o);
@@ -197,6 +194,7 @@ impl Renderer {
                                 let l_i = match self.scene.objects.intersect(&Ray::finite(p, w_i, EPSILON, INFINITY)) {
                                     Some(intersection) => {
                                         // TODO: We'll want to modify Intersection to allow us to check if we hit the right thing.
+                                        // If we do, we pick the color of that light (I think?). Otherwise, black because we're occluded.
                                         Color::WHITE
                                     }
                                     // TODO: This branch should be used for infinite area lights iff we implement them.

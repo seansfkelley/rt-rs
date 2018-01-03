@@ -105,16 +105,15 @@ impl TriangleMeshBuilder {
 
         for (local_index, position) in positions.iter().enumerate() {
             let hashed_position = as_hashable(position, self.precision);
-            // map necessary to satisfy the borrow checker
-            let seen_point = self.point_mapping.get(&hashed_position).map(|i| *i);
+            let seen_point = self.point_mapping.get(&hashed_position).map(|p| p.clone());
             let index = match seen_point {
-                Some(i) => i,
+                Some(p) => p,
                 None => {
-                    let i = self.positions.len();
+                    let p = self.positions.len();
                     self.positions.push(*position);
                     self.uvs.push(uvs[local_index]);
-                    self.point_mapping.insert(hashed_position, i);
-                    i
+                    self.point_mapping.insert(hashed_position, p);
+                    p
                 }
             };
             local_points_mapping.insert(local_index, index);

@@ -19,13 +19,12 @@ impl Bxdf for PerfectSpecularReflection {
     }
 
     fn evaluate(&self, _w_o: Vec3, _w_i: Vec3) -> Color {
-        // We're not even going to try: your choice of w_o/w_i needs to be so spot-on to machine epsilon
-        // that we're going to assume you didn't do it and force you to use choose_and_evaluate.
+        // Perfect specular BxDFs are effectively impossible to sample well at random.
         Color::BLACK
     }
 
     fn choose_and_evaluate(&self, w_o: Vec3, _rng: &mut Rng) -> BxdfSample {
-        let w_i = Vec3::new(-w_o.x, -w_o.y, w_o.z); // Remember: local coordinate system. Reflection is easy.
+        let w_i = Vec3::new(-w_o.x, -w_o.y, w_o.z); // Reflection in the local coordinate system.
         // TODO: actually evaluate the Fresnel value to modulate the reflectance by.
         BxdfSample::new(self.reflectance, 1f64, w_i)
     }

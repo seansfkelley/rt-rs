@@ -9,7 +9,7 @@ pub struct Bsdf {
     normal: Normal,
     primary_tangent: Vec3,
     secondary_tangent: Vec3,
-    // eta: f64, // For refraction, I guess? A little abstraction-breaky but not terrible.
+    // eta: f64, // TODO: What does pbrt use this field for? Refraction?
 }
 
 impl Bsdf {
@@ -25,7 +25,7 @@ impl Bsdf {
         // TODO: We currently only support isotropic BxDFs, so the orientation of the primary and secondary
         // tangents is not relevant. In pbrt, these are computed based on the normal and dp/du.
 
-        // TODO: Hope this cross product isn't degenerate!
+        // TODO: We should probably compute dp/du, because this is sometimes degenerate.
         let primary_tangent = normal.cross(Vec3::X_AXIS).into_normalized();
         let secondary_tangent = normal.cross(primary_tangent).into_normalized();
 
