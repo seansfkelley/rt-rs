@@ -1,7 +1,6 @@
 ## todo
 - actually implement area lights
 - transmittance (volume integration) -- does this cover traveling through refractive substances?
-- correct lighting in handedness.scene (it shouldn't be lit on the back)
 - some scenes fail assertions when converting into bxdf-local space (e.g. cube-mapping.scene)
 
 ## features

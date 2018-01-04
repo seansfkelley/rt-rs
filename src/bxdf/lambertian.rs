@@ -18,7 +18,14 @@ impl Bxdf for Lambertian {
         (TransportType::Reflective, SpectrumType::Diffuse)
     }
 
-    fn evaluate(&self, _w_o: Vec3, _w_i: Vec3) -> Color {
-        self.reflectance / PI
+    fn evaluate(&self, w_o: Vec3, w_i: Vec3) -> Color {
+        // I don't know if this is right, but pbrt doesn't really address this: Lambertian shading should (?)
+        // not contribute if eitehr vector is not on the outside of the surface (like the inside of a triangle
+        // mesh).
+        if w_i.z > 0f64 && w_o.z > 0f64 {
+            self.reflectance / PI
+        } else {
+            Color::BLACK
+        }
     }
 }

@@ -1,4 +1,4 @@
-// You should see a flat_white triangle, animated in rotation to a dark triangle.
+// You should see a white triangle, animated in rotation to a dark triangle.
 // This is because the winding order of the vertices as seen from the camera
 // starts counterclockwise (i.e., the front), and then as the camera rotates
 // we see the backside (clockwise winding order), and the normals are then
