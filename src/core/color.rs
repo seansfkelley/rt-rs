@@ -1,5 +1,5 @@
 use std::ops::{ Add, Sub, Div, Mul, AddAssign, SubAssign, DivAssign, MulAssign };
-use std::fmt::{ Debug, Formatter, Result };
+use std::fmt::{ Display, Debug, Formatter, Result };
 use std::f64::{ INFINITY, NEG_INFINITY };
 use math::*;
 
@@ -41,6 +41,17 @@ impl Color {
 
     pub fn average(&self) -> f64 {
         (self.r + self.g + self.b) / 3f64
+    }
+
+    fn format(&self, f: &mut Formatter) -> Result {
+        match f.precision() {
+            Some(p) => {
+                write!(f, "Color<{:.*}, {:.*}, {:.*}>", p, self.r, p, self.g, p, self.b)
+            }
+            None => {
+                write!(f, "Color<{}, {}, {}>", self.r, self.g, self.b)
+            }
+        }
     }
 }
 
@@ -152,9 +163,15 @@ impl MulAssign for Color {
     }
 }
 
+impl Display for Color {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        self.format(f)
+    }
+}
+
 impl Debug for Color {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "Color<{}, {}, {}>", self.r, self.g, self.b)
+        self.format(f)
     }
 }
 

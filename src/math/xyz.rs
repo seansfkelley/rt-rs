@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use std::fmt::{ Debug, Formatter, Result };
+use std::fmt::{ Display, Debug, Formatter, Result };
 use std::ops::{ Add, Sub, Div, Mul, Neg, Index, IndexMut };
 
 pub trait Xyz {
@@ -27,6 +27,17 @@ macro_rules! xyz_base {
                 assert!(!value.is_nan(), "had NaN terms in {} construction", stringify!($name));
                 $name { x: value, y: value, z: value }
             }
+
+            fn format(&self, f: &mut Formatter) -> Result {
+                match f.precision() {
+                    Some(p) => {
+                        write!(f, "{}<{:.*}, {:.*}, {:.*}>", stringify!($name), p, self.x, p, self.y, p, self.z)
+                    }
+                    None => {
+                        write!(f, "{}<{}, {}, {}>", stringify!($name), self.x, self.y, self.z)
+                    }
+                }
+            }
         }
 
         impl Index<usize> for $name {
@@ -53,9 +64,15 @@ macro_rules! xyz_base {
             }
         }
 
+        impl Display for $name {
+            fn fmt(&self, f: &mut Formatter) -> Result {
+                self.format(f)
+            }
+        }
+
         impl Debug for $name {
             fn fmt(&self, f: &mut Formatter) -> Result {
-                write!(f, "{}<{}, {}, {}>", stringify!($name), self.x, self.y, self.z)
+                self.format(f)
             }
         }
 
