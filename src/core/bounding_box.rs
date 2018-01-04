@@ -110,11 +110,11 @@ macro_rules! apply_transform {
 
 // TODO: Use Arvo 1990 "Transforming Axis-Aligned Bounding Boxes", per pbrt's suggestion.
 impl Transformable for BoundingBox {
-    fn transform(&self, transform: &Transform) -> BoundingBox {
+    fn transform(self, transform: &Transform) -> BoundingBox {
         apply_transform!(self, transform, transform)
     }
 
-    fn invert_transform(&self, transform: &Transform) -> BoundingBox {
+    fn invert_transform(self, transform: &Transform) -> BoundingBox {
         apply_transform!(self, invert_transform, transform)
     }
 }

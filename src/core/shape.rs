@@ -25,17 +25,7 @@ impl Geometry for Shape {
     }
 
     fn intersect(&self, world_ray: &Ray) -> Option<Intersection> {
-        let ref object_ray = world_ray.invert_transform(&self.object_to_world);
-        match self.geometry.intersect(object_ray) {
-            Some(object_space_intersection) => Some(Intersection {
-                distance: object_space_intersection.distance,
-                location: object_space_intersection.location.transform(&self.object_to_world),
-                normal: object_space_intersection.normal.transform(&self.object_to_world),
-                shading_normal: object_space_intersection.shading_normal.map(|n| n.transform(&self.object_to_world)),
-                uv: object_space_intersection.uv,
-                material: None,
-            }),
-            None => None,
-        }
+        self.geometry.intersect(&world_ray.clone().invert_transform(&self.object_to_world))
+            .map(|i| i.transform(&self.object_to_world))
     }
 }

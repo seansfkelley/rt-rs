@@ -2,6 +2,7 @@
 - actually implement area lights
 - transmittance (volume integration) -- does this cover traveling through refractive substances?
 - some scenes fail assertions when converting into bxdf-local space (e.g. cube-mapping.scene)
+  - need dpdu/dpdv computations
 
 ## features
 - animate objects in scenes

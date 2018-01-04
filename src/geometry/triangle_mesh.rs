@@ -132,8 +132,18 @@ impl Geometry for Triangle {
         Some(Intersection {
             distance: t,
             location: ray.at(t),
-            normal,
-            shading_normal,
+            geometry: IntersectionGeometry {
+                normal,
+                // TODO: dp/du and dp/dv.
+                u_axis: Vec3::uniform(0f64),
+                v_axis: Vec3::uniform(0f64),
+            },
+            shading_geometry: shading_normal.map(|normal| IntersectionGeometry {
+                normal,
+                // TODO: dp/du and dp/dv.
+                u_axis: Vec3::uniform(0f64),
+                v_axis: Vec3::uniform(0f64),
+            }),
             uv,
             material: None,
         })

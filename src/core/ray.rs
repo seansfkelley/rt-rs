@@ -57,21 +57,19 @@ impl Ray {
 }
 
 impl Transformable for Ray {
-    fn transform(&self, transform: &Transform) -> Ray {
+    fn transform(self, transform: &Transform) -> Ray {
         Ray {
             origin: self.origin.transform(transform),
             direction: self.direction.transform(transform),
-            t_min: self.t_min,
-            t_max: self.t_max,
+            ..self
         }
     }
 
-    fn invert_transform(&self, transform: &Transform) -> Ray {
+    fn invert_transform(self, transform: &Transform) -> Ray {
         Ray {
             origin: self.origin.invert_transform(transform),
             direction: self.direction.invert_transform(transform),
-            t_min: self.t_min,
-            t_max: self.t_max,
+            ..self
         }
     }
 }

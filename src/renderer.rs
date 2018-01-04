@@ -119,9 +119,9 @@ impl Renderer {
         let p = intersection.location;
         let w_o = -ray.direction.as_normalized();
         let n = {
-            match intersection.shading_normal {
-                Some(normal) => normal,
-                None => intersection.normal,
+            match intersection.shading_geometry {
+                Some(geometry) => geometry.normal,
+                None => intersection.geometry.normal,
             }
         }.as_normalized();
 

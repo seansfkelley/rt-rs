@@ -16,9 +16,9 @@ impl Bsdf {
     pub fn new(bxdfs: Vec<Box<Bxdf>>, intersection: &Intersection) -> Bsdf {
         // TODO: This is the same as the math in Renderer. Should one defer to the other?
         let normal = {
-            match intersection.shading_normal {
-                Some(normal) => normal,
-                None => intersection.normal,
+            match &intersection.shading_geometry {
+                &Some(ref geometry) => geometry.normal.clone(),
+                &None => intersection.geometry.normal.clone(),
             }
         }.as_normalized();
 

@@ -19,18 +19,18 @@ impl Transform {
 }
 
 pub trait Transformable {
-    fn transform(&self, transform: &Transform) -> Self;
-    fn invert_transform(&self, transform: &Transform) -> Self;
+    fn transform(self, transform: &Transform) -> Self;
+    fn invert_transform(self, transform: &Transform) -> Self;
 }
 
 macro_rules! make_transformable {
     ($struct:ty, $transformer:ident) => {
         impl Transformable for $struct {
-            fn transform(&self, transform: &Transform) -> $struct {
+            fn transform(self, transform: &Transform) -> $struct {
                 $transformer(self, &transform.m)
             }
 
-            fn invert_transform(&self, transform: &Transform) -> $struct {
+            fn invert_transform(self, transform: &Transform) -> $struct {
                 $transformer(self, &transform.m_inverse)
             }
         }
@@ -40,11 +40,11 @@ macro_rules! make_transformable {
 macro_rules! make_transformable_inverted {
     ($struct:ty, $transformer:ident) => {
         impl Transformable for $struct {
-            fn transform(&self, transform: &Transform) -> $struct {
+            fn transform(self, transform: &Transform) -> $struct {
                 $transformer(self, &transform.m_inverse)
             }
 
-            fn invert_transform(&self, transform: &Transform) -> $struct {
+            fn invert_transform(self, transform: &Transform) -> $struct {
                 $transformer(self, &transform.m)
             }
         }
@@ -52,7 +52,7 @@ macro_rules! make_transformable_inverted {
 }
 
 // pbrt pg. 86
-fn transform_point(point: &Point, mat4: &Mat4) -> Point {
+fn transform_point(point: Point, mat4: &Mat4) -> Point {
     let mut vec4 = [0f64; 4];
 
     for i in 0..4 {
@@ -74,15 +74,15 @@ fn transform_point(point: &Point, mat4: &Mat4) -> Point {
 make_transformable!(Point, transform_point);
 
 // pbrt pg. 86
-fn transform_vec3(in_vector: &Vec3, mat4: &Mat4) -> Vec3 {
+fn transform_vec3(vector: Vec3, mat4: &Mat4) -> Vec3 {
     // The homogenous coordinate is implicitly zero, i.e., vectors are not translatable.
     let mut vec3 = [0f64; 3];
 
     for i in 0..3 {
         vec3[i] =
-            mat4.cells[i][0] * in_vector.x +
-            mat4.cells[i][1] * in_vector.y +
-            mat4.cells[i][2] * in_vector.z;
+            mat4.cells[i][0] * vector.x +
+            mat4.cells[i][1] * vector.y +
+            mat4.cells[i][2] * vector.z;
     }
 
     Vec3::new(vec3[0], vec3[1], vec3[2])
@@ -91,7 +91,7 @@ fn transform_vec3(in_vector: &Vec3, mat4: &Mat4) -> Vec3 {
 make_transformable!(Vec3, transform_vec3);
 
 // pbrt pg. 86
-fn transform_normal(normal: &Normal, mat4: &Mat4) -> Normal {
+fn transform_normal(normal: Normal, mat4: &Mat4) -> Normal {
     let mut vec3 = [0f64; 3];
 
     for i in 0..3 {

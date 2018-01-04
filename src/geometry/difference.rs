@@ -16,12 +16,21 @@ impl Difference {
     }
 }
 
+fn flip_intersection_geometry_normal(g: IntersectionGeometry) -> IntersectionGeometry {
+    IntersectionGeometry {
+        normal: -g.normal,
+        // TODO: Should u/v be flipped also?
+        u_axis: g.u_axis,
+        v_axis: g.v_axis,
+    }
+}
+
 fn flip_normal(i: Intersection) -> Intersection {
     Intersection {
         distance: i.distance,
         location: i.location,
-        normal: -i.normal,
-        shading_normal: i.shading_normal.map(|n| -n),
+        geometry: flip_intersection_geometry_normal(i.geometry),
+        shading_geometry: i.shading_geometry.map(flip_intersection_geometry_normal),
         uv: i.uv,
         material: i.material,
     }
@@ -65,8 +74,9 @@ impl Difference {
     fn internal_intersect_nontrivial(&self, ray: Ray, lhs_intersection: Intersection, rhs_intersection: Intersection) -> Option<Intersection> {
         const EPSILON: f64 = 1e-10f64;
 
-        let inside_lhs = lhs_intersection.normal.dot(&ray.direction) > 0f64;
-        let inside_rhs = rhs_intersection.normal.dot(&ray.direction) > 0f64;
+        // TODO: Does this have to be normalized, or does this work as-is?
+        let inside_lhs = lhs_intersection.geometry.normal.dot(&ray.direction) > 0f64;
+        let inside_rhs = rhs_intersection.geometry.normal.dot(&ray.direction) > 0f64;
         if inside_lhs && inside_rhs {
             if lhs_intersection.distance < rhs_intersection.distance {
                 let d = lhs_intersection.distance + EPSILON;
