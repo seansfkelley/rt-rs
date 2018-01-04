@@ -1,5 +1,4 @@
 ## todo
-- fix refraction
 - actually implement area lights
 - transmittance (volume integration) -- does this cover traveling through refractive substances?
 - correct lighting in handedness.scene (it shouldn't be lit on the back)
