@@ -13,7 +13,7 @@ camera perspective {
 animation {
   frames 18
   camera_transforms [
-    rotate 20 1 1 1
+    rotate 20 deg 1 1 1
   ]
 }
 
