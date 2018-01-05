@@ -24,12 +24,8 @@ pub struct Intersection {
 impl Intersection {
     pub fn with_material(self, material: Arc<Material>) -> Intersection {
         Intersection {
-            distance: self.distance,
-            location: self.location,
-            geometry: self.geometry,
-            shading_geometry: self.shading_geometry,
-            uv: self.uv,
             material: Some(material),
+            ..self
         }
     }
 }
