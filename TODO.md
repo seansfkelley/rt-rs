@@ -33,6 +33,7 @@
 - partial intersection in geometries
 - partial intersection in kd-tree
 - loading the large images for the space pictures is sloooooow
+- add Geometry::transformed_bound(&self, transform) so that some shapes can maybe compute better world-space bounds
 
 ## misc
 - Add pixel-matching image tests

@@ -92,6 +92,7 @@ fn intersect<T: Geometry>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
                 },
                 &Node::Leaf(ref items) => {
                     for item in items {
+                        // TODO: Should we bother checking the bounding box before testing intersection?
                         match item.intersect(&r) {
                             Some(intersection) => {
                                 r.t_max = intersection.distance;
