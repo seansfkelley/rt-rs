@@ -1,0 +1,30 @@
+inline "common/common.scene"
+inline "common/lighting/3-front-1-back.scene"
+
+inline "common/image/orbit.scene"
+
+camera perspective {
+  position 0 5 -5
+  look_at 0 0 0
+  up 0 1 0
+}
+
+transform translate -2 -2 -2
+transform rotate 5 deg 0 1 0
+object {
+  geometry rect_prism {
+    min -1 -1 -1
+    max 1 1 1
+  }
+  material uv_debug
+}
+transform pop 2
+
+transform translate 1 1 1
+object {
+  geometry sphere {
+    radius 1
+  }
+  material uv_debug
+}
+transform pop

@@ -4,7 +4,7 @@ image_dimensions 512 512
 antialias 3
 
 camera perspective {
-  position 5 5 -5
+  position 0 5 5
   look_at 0 0 0
   up 0 1 0
   field_of_view 60
@@ -13,14 +13,15 @@ camera perspective {
 animation {
   frames 18
   camera_transforms [
-    rotate 20 deg 1 1 1
+    rotate 20 deg 0 1 0
   ]
 }
 
 material cubemap flat {
-  texture image "common/textures/cube-map.png"
+  texture image "common/textures/cube-map-from-inside.png"
 }
 
+transform rotate 5 deg 0 1 0
 object {
   geometry rect_prism {
     min -1 -1 -1
@@ -29,12 +30,32 @@ object {
   material cubemap
 }
 
-light point {
-  position 5 5 -10
-  intensity 200 200 200
+light directional {
+  direction 2 0 0
+  radiance 5 5 5
 }
 
-light point {
-  position -5 -5 10
-  intensity 200 200 200
+light directional {
+  direction -2 0 0
+  radiance 5 5 5
+}
+
+light directional {
+  direction 0 2 0
+  radiance 5 5 5
+}
+
+light directional {
+  direction 0 -2 0
+  radiance 5 5 5
+}
+
+light directional {
+  direction 0 0 2
+  radiance 5 5 5
+}
+
+light directional {
+  direction 0 0 -2
+  radiance 5 5 5
 }
