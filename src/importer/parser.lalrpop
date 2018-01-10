@@ -104,6 +104,7 @@ Texture: Box<Texture> = {
         color_one: color_one.unwrap_or(Color::WHITE),
         color_two: color_two.unwrap_or(Color::BLACK),
     }),
+    "debug" => Box::new(DebugTexture {}),
     // "wood" "{"
     //     "color_one" <color_one:Color>
     //     "color_two" <color_two:Color>
