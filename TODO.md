@@ -1,6 +1,7 @@
 ## todo
 - actually implement area lights
 - transmittance (volume integration) -- does this cover traveling through refractive substances?
+- stuff.scene -- what are those weird reflections on both the spheres?
 
 ## features
 - animate objects in scenes
