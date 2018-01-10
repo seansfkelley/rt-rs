@@ -22,7 +22,6 @@ material cubemap flat {
 }
 
 transform scale 5 5 5
-transform rotate 5 deg 0 1 0
 object {
   geometry rect_prism {
     min -1 -1 -1
@@ -30,9 +29,8 @@ object {
   }
   material cubemap
 }
-transform pop 2
+transform pop
 
-transform rotate 5 deg 0 1 0
 inline "common/objects/axes.scene"
 
 light directional {

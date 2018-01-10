@@ -32,53 +32,47 @@ impl RectPrism {
             (location.z - self.min.z) / dimensions.z,
         );
 
-        let (normal, u, v, u_axis, v_axis) =
+        let (u, v, u_axis, v_axis) =
                    if location.x.fuzzy_eq(self.min.x) {
                 (
-                    Normal::new(-1f64, 0f64, 0f64),
                     scaled_z * ONE_FOURTH,
                     scaled_y * ONE_THIRD + ONE_THIRD,
-                    Vec3::new(0f64, 0f64, -dimensions.z),
+                    Vec3::new(0f64, 0f64, dimensions.z),
                     Vec3::new(0f64, dimensions.y, 0f64),
                 )
             } else if location.x.fuzzy_eq(self.max.x) {
                 (
-                    Normal::new(1f64, 0f64, 0f64),
                     (1f64 - scaled_z) * ONE_FOURTH + 2f64 * ONE_FOURTH,
                     scaled_y * ONE_THIRD + ONE_THIRD,
-                    Vec3::new(0f64, 0f64, dimensions.z),
+                    Vec3::new(0f64, 0f64, -dimensions.z),
                     Vec3::new(0f64, dimensions.y, 0f64),
                 )
             } else if location.y.fuzzy_eq(self.min.y) {
                 (
-                    Normal::new(0f64, -1f64, 0f64),
                     scaled_x * ONE_FOURTH + ONE_FOURTH,
-                    (1f64 - scaled_z) * ONE_THIRD,
-                    Vec3::new(dimensions.x, 0f64, 0f64),
-                    Vec3::new(0f64, 0f64, -dimensions.z),
-                )
-            } else if location.y.fuzzy_eq(self.max.y) {
-                (
-                    Normal::new(0f64, 1f64, 0f64),
-                    scaled_x * ONE_FOURTH + ONE_FOURTH,
-                    scaled_z * ONE_THIRD + 2f64 * ONE_THIRD,
+                    scaled_z * ONE_THIRD,
                     Vec3::new(dimensions.x, 0f64, 0f64),
                     Vec3::new(0f64, 0f64, dimensions.z),
                 )
+            } else if location.y.fuzzy_eq(self.max.y) {
+                (
+                    scaled_x * ONE_FOURTH + ONE_FOURTH,
+                    (1f64 - scaled_z) * ONE_THIRD + 2f64 * ONE_THIRD,
+                    Vec3::new(dimensions.x, 0f64, 0f64),
+                    Vec3::new(0f64, 0f64, -dimensions.z),
+                )
             } else if location.z.fuzzy_eq(self.min.z) {
                 (
-                    Normal::new(0f64, 0f64, -1f64),
-                    scaled_x * ONE_FOURTH + 3f64 * ONE_FOURTH,
+                    (1f64 - scaled_x) * ONE_FOURTH + 3f64 * ONE_FOURTH,
                     scaled_y * ONE_THIRD + ONE_THIRD,
-                    Vec3::new(dimensions.x, 0f64, 0f64),
+                    Vec3::new(-dimensions.x, 0f64, 0f64),
                     Vec3::new(0f64, dimensions.y, 0f64),
                 )
             } else if location.z.fuzzy_eq(self.max.z) {
                 (
-                    Normal::new(0f64, 0f64, 1f64),
-                    (1f64 - scaled_x) * ONE_FOURTH + ONE_FOURTH,
+                    scaled_x * ONE_FOURTH + ONE_FOURTH,
                     scaled_y * ONE_THIRD + ONE_THIRD,
-                    Vec3::new(-dimensions.x, 0f64, 0f64),
+                    Vec3::new(dimensions.x, 0f64, 0f64),
                     Vec3::new(0f64, dimensions.y, 0f64),
                 )
             } else {
@@ -88,11 +82,7 @@ impl RectPrism {
         Intersection {
             distance: t,
             location,
-            geometry: IntersectionGeometry {
-                normal,
-                u_axis,
-                v_axis,
-            },
+            geometry: IntersectionGeometry::new(u_axis, v_axis),
             shading_geometry: None,
             uv: Uv(u, v),
             material: None,
