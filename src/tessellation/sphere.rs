@@ -30,7 +30,7 @@ pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMeshData {
         divide_triangle(triangle, &mut builder, 0, depth);
     }
 
-    builder.build(smoothing, true)
+    builder.build(smoothing)
 }
 
 fn divide_triangle(triangle: (Point, Point, Point), builder: &mut TriangleMeshBuilder, current_depth: u32, depth_limit: u32) {
@@ -128,8 +128,8 @@ impl TriangleMeshBuilder {
         }
     }
 
-    pub fn build(self, smoothing: Smoothing, closed: bool) -> TriangleMeshData {
-        TriangleMeshData::new(self.positions, smoothing, Some(self.uvs), self.indices, closed)
+    pub fn build(self, smoothing: Smoothing) -> TriangleMeshData {
+        TriangleMeshData::new(self.positions, smoothing, Some(self.uvs), self.indices)
     }
 }
 

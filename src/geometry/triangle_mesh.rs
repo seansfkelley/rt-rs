@@ -17,14 +17,13 @@ pub struct TriangleMeshData {
     pub indices: Vec<TriangleIndices>,
     pub normals: Option<Vec<Normal>>,
     pub uvs: Option<Vec<Uv>>,
-    pub closed: bool,
 }
 
 pub type TriangleMesh = KdTree<Triangle>;
 
 impl TriangleMeshData {
     // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
-    pub fn new(positions: Vec<Point>, smoothing: Smoothing, uvs: Option<Vec<Uv>>, indices: Vec<TriangleIndices>, closed: bool) -> TriangleMeshData {
+    pub fn new(positions: Vec<Point>, smoothing: Smoothing, uvs: Option<Vec<Uv>>, indices: Vec<TriangleIndices>) -> TriangleMeshData {
         let normals = match smoothing {
             Smoothing::Explicit(normals) => {
                 assert_eq!(positions.len(), normals.len());
@@ -38,7 +37,7 @@ impl TriangleMeshData {
             assert_eq!(positions.len(), uvs.as_ref().unwrap().len());
         }
 
-        TriangleMeshData { positions, indices: indices.clone(), normals, uvs, closed }
+        TriangleMeshData { positions, indices: indices.clone(), normals, uvs }
     }
 
     pub fn into_triangle_mesh(self) -> TriangleMesh {
@@ -131,7 +130,7 @@ impl Geometry for Triangle {
         let shading_geometry = self.mesh.normals.as_ref().map(|normals| {
             let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
             // Blergh, can't overload .cross, so we have to convert the normal into a vector.
-            let shading_normal = (n0 * b0 + n1 * b1 + n2 * b2).into_normalized().into_vector();
+            let shading_normal = (n0 * b0 + n1 * b1 + n2 * b2).into_vector().into_normalized();
             let intermediate_u_axis = u_axis.into_normalized();
             let shading_v_axis = shading_normal.cross(intermediate_u_axis).into_normalized();
             IntersectionGeometry::new(

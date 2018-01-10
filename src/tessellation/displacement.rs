@@ -30,5 +30,5 @@ pub fn displace_triangle_mesh(map: DisplacementMap, data: TriangleMeshData, smoo
         })
         .collect();
 
-    TriangleMeshData::new(new_positions, smoothing, Some(uvs), data.indices, true)
+    TriangleMeshData::new(new_positions, smoothing, Some(uvs), data.indices)
 }

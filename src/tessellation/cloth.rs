@@ -85,5 +85,5 @@ pub fn create_cloth(curves: Vec<Box<Curve>>, tessellation_factor: usize, closure
         }
     }
 
-    TriangleMeshData::new(positions, Smoothing::Implicit, None, indices.to_owned(), closure == ClothClosure::Closed)
+    TriangleMeshData::new(positions, Smoothing::Implicit, None, indices.to_owned())
 }

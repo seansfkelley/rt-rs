@@ -52,7 +52,6 @@ object {
       -1 1 -1,
       1 1 -1,
     ]
-    is_closed false
   }
   material flat_purple
 }
@@ -73,7 +72,6 @@ object {
       0 3 1,
       0 4 3,
     ]
-    is_closed false
   }
   material flat_purple
 }
@@ -95,7 +93,6 @@ object {
       0 4 3,
     ]
     smoothing none
-    is_closed false
   }
   material flat_purple
 }

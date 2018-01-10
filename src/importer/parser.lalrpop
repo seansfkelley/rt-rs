@@ -171,13 +171,11 @@ TriangleMeshData: TriangleMeshData = {
         <uvs:("uvs" <List<Uv>>)?>
         "indices" <indices:List<Tuple3<Usize>>>
         <smoothing:("smoothing" <Smoothing>)?>
-        <is_closed:("is_closed" <Bool>)?>
     "}" => TriangleMeshData::new(
         positions,
         smoothing.unwrap_or(Smoothing::Implicit),
         uvs,
         indices,
-        is_closed.unwrap_or(true),
     ),
     "cloth" "{"
         "curves" <curves:List<Curve>>
