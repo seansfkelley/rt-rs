@@ -4,7 +4,7 @@ image_dimensions 512 512
 antialias 3
 
 camera perspective {
-  position 0 5 5
+  position 0 20 20
   look_at 0 0 0
   up 0 1 0
   field_of_view 60
@@ -21,6 +21,7 @@ material cubemap flat {
   texture image "common/textures/cube-map.png"
 }
 
+transform scale 5 5 5
 transform rotate 5 deg 0 1 0
 object {
   geometry rect_prism {
@@ -29,6 +30,10 @@ object {
   }
   material cubemap
 }
+transform pop 2
+
+transform rotate 5 deg 0 1 0
+inline "common/objects/axes.scene"
 
 light directional {
   direction 2 0 0
