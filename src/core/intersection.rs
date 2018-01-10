@@ -6,11 +6,19 @@ use super::uv::Uv;
 
 #[derive(Debug)]
 pub struct IntersectionGeometry {
-    // Note that, unlike pbrt, normal is not necessarily u_axis x v_axis.
-    // TODO: normal should probably be u_axis x v_axis for predictability.
     pub normal: Normal,
     pub u_axis: Vec3,
     pub v_axis: Vec3,
+}
+
+impl IntersectionGeometry {
+    pub fn new(u_axis: Vec3, v_axis: Vec3) -> IntersectionGeometry {
+        IntersectionGeometry {
+            normal: u_axis.cross(v_axis).into_normal(),
+            u_axis,
+            v_axis,
+        }
+    }
 }
 
 #[derive(Debug)]

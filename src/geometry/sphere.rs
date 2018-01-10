@@ -34,7 +34,6 @@ impl Sphere {
             // pbrt uses some clever equivalencies to compute the sin/cos here without referring to
             // phi, but whatever. This is more straightforward.
             PI * location.y * phi.cos(),
-            // Should this be PI or -PI? -PI I _think_ means top-left corner origin, which I don't want.
             -PI * self.radius * theta.sin(),
             PI * location.y * phi.sin(),
         );
@@ -42,11 +41,7 @@ impl Sphere {
         Intersection {
             distance: t,
             location,
-            geometry: IntersectionGeometry {
-                normal: location.into_normal(),
-                u_axis,
-                v_axis,
-            },
+            geometry: IntersectionGeometry::new(u_axis, v_axis),
             shading_geometry: None,
             uv,
             material: None,

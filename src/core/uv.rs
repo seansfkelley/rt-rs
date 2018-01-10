@@ -32,7 +32,7 @@ pub fn sphere_uv_for_normalized_point(point: Point) -> Uv {
     v.assert_normalized();
 
     Uv(
-        0.5f64 + v.z.atan2(v.x) / TWO_PI,
+        0.5f64 - v.z.atan2(v.x) / TWO_PI,
         0.5f64 - v.y.asin() / PI,
     )
 }
