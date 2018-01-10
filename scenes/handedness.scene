@@ -11,7 +11,7 @@ image_dimensions 100 100
 background_color #222
 
 camera perspective {
-  position 0 0 -10
+  position 0 0 10
   look_at 0 0 0
   up 0 1 0
   field_of_view 45
