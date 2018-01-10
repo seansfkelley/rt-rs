@@ -5,7 +5,7 @@ inline "common/image/standard.scene"
 // inline "common/image/orbit.scene"
 
 camera perspective {
-  position 0 5 -40
+  position 0 5 40
   look_at 0 0 0
   up 0 1 0
   field_of_view 30

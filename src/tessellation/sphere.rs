@@ -4,12 +4,12 @@ use core::*;
 use geometry::*;
 
 pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMeshData {
-    const P0: Point = Point { x:  0f64, y:  0f64, z:  1f64 };
-    const P1: Point = Point { x:  1f64, y:  0f64, z:  0f64 };
-    const P2: Point = Point { x:  0f64, y:  1f64, z:  0f64 };
-    const P3: Point = Point { x: -1f64, y:  0f64, z:  0f64 };
-    const P4: Point = Point { x:  0f64, y: -1f64, z:  0f64 };
-    const P5: Point = Point { x:  0f64, y:  0f64, z: -1f64 };
+    const X_MAX: Point = Point { x:  1f64, y:  0f64, z:  0f64 };
+    const X_MIN: Point = Point { x: -1f64, y:  0f64, z:  0f64 };
+    const Y_MIN: Point = Point { x:  0f64, y: -1f64, z:  0f64 };
+    const Y_MAX: Point = Point { x:  0f64, y:  1f64, z:  0f64 };
+    const Z_MIN: Point = Point { x:  0f64, y:  0f64, z: -1f64 };
+    const Z_MAX: Point = Point { x:  0f64, y:  0f64, z:  1f64 };
 
     let expected_positions = 6usize * 3usize.pow(depth);
     let expected_triangles = 8usize * 4usize.pow(depth);
@@ -17,14 +17,14 @@ pub fn tessellate_sphere(depth: u32, smoothing: Smoothing) -> TriangleMeshData {
     let mut builder = TriangleMeshBuilder::new_with_expected_size(hash_precision, expected_positions, expected_triangles);
     // TODO: move to lazy static
     let starting_triangles = vec![
-        (P2, P5, P1),
-        (P2, P1, P0),
-        (P2, P0, P3),
-        (P2, P3, P5),
-        (P4, P5, P3),
-        (P4, P3, P0),
-        (P4, P0, P1),
-        (P4, P1, P5),
+        (Y_MAX, X_MAX, Z_MIN),
+        (Y_MAX, Z_MAX, X_MAX),
+        (Y_MAX, X_MIN, Z_MAX),
+        (Y_MAX, Z_MIN, X_MIN),
+        (Y_MIN, X_MIN, Z_MIN),
+        (Y_MIN, Z_MAX, X_MIN),
+        (Y_MIN, X_MAX, Z_MAX),
+        (Y_MIN, Z_MIN, X_MAX),
     ];
     for triangle in starting_triangles {
         divide_triangle(triangle, &mut builder, 0, depth);

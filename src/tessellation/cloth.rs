@@ -56,8 +56,8 @@ pub fn create_cloth(curves: Vec<Box<Curve>>, tessellation_factor: usize, closure
             let b = left_curve_start + i;
             let c = right_curve_start + i;
             let d = right_curve_start + i + 1;
-            indices.push((b, a, c));
-            indices.push((c, a, d));
+            indices.push((b, c, a));
+            indices.push((c, d, a));
         }
     };
 
@@ -74,13 +74,13 @@ pub fn create_cloth(curves: Vec<Box<Curve>>, tessellation_factor: usize, closure
         for curve_index in 1..(number_of_curves - 1) {
             indices.push((
                 0,
+                (curve_index + 1) * tessellation_factor,
                 curve_index * tessellation_factor,
-                (curve_index + 1) * tessellation_factor
             ));
             indices.push((
                 tessellation_factor - 1,
+                (curve_index + 2) * tessellation_factor - 1,
                 (curve_index + 1) * tessellation_factor - 1,
-                (curve_index + 2) * tessellation_factor - 1
             ));
         }
     }

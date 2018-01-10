@@ -1,19 +1,19 @@
 light point {
-  position 20 20 -50
-  intensity 1000 1000 1000
-}
-
-light point {
-  position -20 20 -50
-  intensity 1000 1000 1000
-}
-
-light point {
-  position 0 -20 -50
+  position 20 20 50
   intensity 1000 1000 1000
 }
 
 light point {
   position -20 20 50
+  intensity 1000 1000 1000
+}
+
+light point {
+  position 0 -20 50
+  intensity 1000 1000 1000
+}
+
+light point {
+  position -20 20 -50
   intensity 1000 1000 1000
 }
