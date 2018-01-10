@@ -168,7 +168,7 @@ mod tests {
 
     #[test]
     fn it_should_bloat_the_bounding_box_under_some_transformations() {
-        let bb = SIMPLE_BOUNDING_BOX.transform(
+        let bb = SIMPLE_BOUNDING_BOX.clone().transform(
             &Transform::new(Mat4::create_rotation(45f64.to_radians(), Vec3::Z_AXIS)),
         );
         assert_near!(bb.min, Point::new(-2f64.sqrt(), -2f64.sqrt(), -1f64));

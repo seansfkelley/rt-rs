@@ -160,7 +160,6 @@ mod tests {
             Smoothing::None,
             None,
             vec![(0, 1, 2)],
-            true,
         ).into_triangle_mesh();
     }
 
