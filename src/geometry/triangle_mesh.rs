@@ -128,21 +128,23 @@ impl Geometry for Triangle {
             )
         };
 
-        // let mut shading_normal = self.mesh.normals.as_ref().map(|normals| {
-        //     let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
-        //     (n0 * b0 + n1 * b1 + n2 * b2).into_normalized()
-        // });
-
-        // if !self.mesh.closed && normal.dot(&ray.direction) > 0f64 {
-        //     normal = -normal;
-        //     shading_normal = shading_normal.map(|n| -n);
-        // };
+        let shading_geometry = self.mesh.normals.as_ref().map(|normals| {
+            let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
+            // Blergh, can't overload .cross, so we have to convert the normal into a vector.
+            let shading_normal = (n0 * b0 + n1 * b1 + n2 * b2).into_normalized().into_vector();
+            let intermediate_u_axis = u_axis.as_normal().into_normalized();
+            let shading_v_axis = intermediate_u_axis.cross(shading_normal).into_normalized();
+            IntersectionGeometry::new(
+                shading_v_axis.cross(shading_normal),
+                shading_v_axis,
+            )
+        });
 
         Some(Intersection {
             distance: t,
             location: ray.at(t),
             geometry: IntersectionGeometry::new(u_axis, v_axis),
-            shading_geometry: None,
+            shading_geometry,
             uv: uv0 * b0 + uv1 * b1 + uv2 * b2,
             material: None,
         })

@@ -1,7 +1,7 @@
 ## todo
 - actually implement area lights
 - transmittance (volume integration) -- does this cover traveling through refractive substances?
-- actually implement dp/du and dp/dv for triangle mesh
+- remove open triangle meshes -- it's kinda weird and doesn't play well with dpdu/dpdv
 
 ## features
 - animate objects in scenes
