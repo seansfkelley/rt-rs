@@ -4,6 +4,6 @@ antialias 1
 animation {
   frames 24
   camera_transforms [
-    rotate 15 0 1 0
+    rotate 15 deg 0 1 0
   ]
 }

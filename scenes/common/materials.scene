@@ -63,3 +63,7 @@ material glass phong {
   transmission .9 .9 .9
   index_of_refraction 1.5
 }
+
+material uv_debug flat {
+  texture debug
+}

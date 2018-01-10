@@ -1,0 +1,23 @@
+object {
+  geometry rect_prism {
+    min  0 -0.5 -0.5
+    max 10  0.5  0.5
+  }
+  material flat_red
+}
+
+object {
+  geometry rect_prism {
+    min -0.5  0 -0.5
+    max  0.5 10  0.5
+  }
+  material flat_green
+}
+
+object {
+  geometry rect_prism {
+    min -0.5 -0.5  0
+    max  0.5  0.5 10
+  }
+  material flat_blue
+}

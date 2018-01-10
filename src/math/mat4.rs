@@ -67,14 +67,14 @@ impl Mat4 {
     // pbrt pg. 84
     pub fn create_look_at(position: Point, look_at: Point, in_up: Vec3) -> Mat4 {
         let direction = (look_at - position).into_normalized();
-        let left = in_up.cross(direction).into_normalized();
-        let up = direction.cross(left);
+        let right = direction.cross(in_up).into_normalized();
+        let up = right.cross(direction);
 
         Mat4 {
             cells: [
-                [left.x, up.x, direction.x, position.x],
-                [left.y, up.y, direction.y, position.y],
-                [left.z, up.z, direction.z, position.z],
+                [right.x, up.x, direction.x, position.x],
+                [right.y, up.y, direction.y, position.y],
+                [right.z, up.z, direction.z, position.z],
                 [  0f64, 0f64,        0f64,       1f64]
             ],
         }.invert().unwrap()
