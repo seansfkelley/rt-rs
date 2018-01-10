@@ -13,7 +13,7 @@ antialias 1
 animation {
   frames 18
   camera_transforms [
-    rotate 10 1 0 0
+    rotate 10 deg 1 0 0
   ]
 }
 
@@ -33,24 +33,24 @@ transform translate -3 0 0
 object {
   geometry triangle_mesh {
     positions [
-      0 0 0,
+       0  0 0,
       -1 -1 1,
-      1 -1 1,
-      -1 1 1,
-      1 1 1,
+       1 -1 1,
+      -1  1 1,
+       1  1 1,
     ]
     indices [
-      0 1 2,
-      0 2 4,
-      0 3 1,
-      0 4 3,
+      0 2 1,
+      0 4 2,
+      0 1 3,
+      0 3 4,
     ]
     smoothing explicit [
-      0 0 -1,
+       0  0 -1,
       -1 -1 -1,
-      1 -1 -1,
-      -1 1 -1,
-      1 1 -1,
+       1 -1 -1,
+      -1  1 -1,
+       1  1 -1,
     ]
   }
   material flat_purple
@@ -60,17 +60,17 @@ transform pop
 object {
   geometry triangle_mesh {
     positions [
-      0 0 0,
+       0  0 0,
       -1 -1 1,
-      1 -1 1,
-      -1 1 1,
-      1 1 1,
+       1 -1 1,
+      -1  1 1,
+       1  1 1,
     ]
     indices [
-      0 1 2,
-      0 2 4,
-      0 3 1,
-      0 4 3,
+      0 2 1,
+      0 4 2,
+      0 1 3,
+      0 3 4,
     ]
   }
   material flat_purple
@@ -80,17 +80,17 @@ transform translate 3 0 0
 object {
   geometry triangle_mesh {
     positions [
-      0 0 0,
+       0  0 0,
       -1 -1 1,
-      1 -1 1,
-      -1 1 1,
-      1 1 1,
+       1 -1 1,
+      -1  1 1,
+       1  1 1,
     ]
     indices [
-      0 1 2,
-      0 2 4,
-      0 3 1,
-      0 4 3,
+      0 2 1,
+      0 4 2,
+      0 1 3,
+      0 3 4,
     ]
     smoothing none
   }
