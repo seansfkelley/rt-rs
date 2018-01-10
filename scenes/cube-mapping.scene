@@ -18,7 +18,7 @@ animation {
 }
 
 material cubemap flat {
-  texture image "common/textures/cube-map-from-inside.png"
+  texture image "common/textures/cube-map.png"
 }
 
 transform rotate 5 deg 0 1 0
