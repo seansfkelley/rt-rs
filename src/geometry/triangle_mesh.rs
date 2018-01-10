@@ -56,7 +56,7 @@ impl TriangleMeshData {
     fn compute_implicit_normals(positions: &Vec<Point>, indices: &Vec<TriangleIndices>) -> Vec<Normal> {
         let mut normals = vec![Normal::uniform(0f64); positions.len()];
         for &(i0, i1, i2) in indices {
-            let normal = (positions[i2] - positions[i0]).cross(positions[i1] - positions[i0]).into_normal();
+            let normal = (positions[i1] - positions[i0]).cross(positions[i2] - positions[i0]).into_normal();
             normals[i0] = normals[i0] + normal;
             normals[i1] = normals[i1] + normal;
             normals[i2] = normals[i2] + normal;
@@ -132,8 +132,8 @@ impl Geometry for Triangle {
             let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
             // Blergh, can't overload .cross, so we have to convert the normal into a vector.
             let shading_normal = (n0 * b0 + n1 * b1 + n2 * b2).into_normalized().into_vector();
-            let intermediate_u_axis = u_axis.as_normal().into_normalized();
-            let shading_v_axis = intermediate_u_axis.cross(shading_normal).into_normalized();
+            let intermediate_u_axis = u_axis.into_normalized();
+            let shading_v_axis = shading_normal.cross(intermediate_u_axis).into_normalized();
             IntersectionGeometry::new(
                 shading_v_axis.cross(shading_normal),
                 shading_v_axis,
