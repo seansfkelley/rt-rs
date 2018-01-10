@@ -112,39 +112,38 @@ impl Geometry for Triangle {
 
         let b0 = 1f64 - b2 - b1;
 
-        let uv = self.mesh.uvs.as_ref().map_or(Uv(0f64, 0f64), |uv| {
-            let (uv0, uv1, uv2) = (uv[i0], uv[i1], uv[i2]);
-            uv0 * b0 + uv1 * b1 + uv2 * b2
-        });
-
-        let mut normal = e2.cross(e1).into_normalized().into_normal();
-
-        let mut shading_normal = self.mesh.normals.as_ref().map(|normals| {
-            let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
-            (n0 * b0 + n1 * b1 + n2 * b2).into_normalized()
-        });
-
-        if !self.mesh.closed && normal.dot(&ray.direction) > 0f64 {
-            normal = -normal;
-            shading_normal = shading_normal.map(|n| -n);
+        let (uv0, uv1, uv2) = match self.mesh.uvs.as_ref() {
+            Some(uvs) => (uvs[i0], uvs[i1], uvs[i2]),
+            None => (Uv(0f64, 0f64), Uv(1f64, 0f64), Uv(1f64, 1f64))
         };
+
+        let (u_axis, v_axis) = {
+            let (du0, du1, dv0, dv1) = (uv0.0 - uv2.0, uv1.0 - uv2.0, uv0.1 - uv2.1, uv1.1 - uv2.1);
+            let (dp0, dp1) = (p0 - p2, p1 - p2);
+            let d = du0 * dv1 - dv0 * du1;
+            // TODO: If d == 0, the user supplied degenerate UVs and we have to synthesize three basis vectors.
+            (
+                (dp0 *  dv1 - dp1 * dv0) / d,
+                (dp0 * -du1 + dp1 * du0) / d,
+            )
+        };
+
+        // let mut shading_normal = self.mesh.normals.as_ref().map(|normals| {
+        //     let (n0, n1, n2) = (normals[i0], normals[i1], normals[i2]);
+        //     (n0 * b0 + n1 * b1 + n2 * b2).into_normalized()
+        // });
+
+        // if !self.mesh.closed && normal.dot(&ray.direction) > 0f64 {
+        //     normal = -normal;
+        //     shading_normal = shading_normal.map(|n| -n);
+        // };
 
         Some(Intersection {
             distance: t,
             location: ray.at(t),
-            geometry: IntersectionGeometry {
-                normal,
-                // TODO: dp/du and dp/dv.
-                u_axis: Vec3::uniform(0f64),
-                v_axis: Vec3::uniform(0f64),
-            },
-            shading_geometry: shading_normal.map(|normal| IntersectionGeometry {
-                normal,
-                // TODO: dp/du and dp/dv.
-                u_axis: Vec3::uniform(0f64),
-                v_axis: Vec3::uniform(0f64),
-            }),
-            uv,
+            geometry: IntersectionGeometry::new(u_axis, v_axis),
+            shading_geometry: None,
+            uv: uv0 * b0 + uv1 * b1 + uv2 * b2,
             material: None,
         })
     }
