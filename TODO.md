@@ -1,9 +1,6 @@
-## todo
-- actually implement area lights
-- transmittance (volume integration) -- does this cover traveling through refractive substances?
+## probable bugs
 - stuff.scene -- what are those weird reflections on both the spheres?
-- Reflectance textures
-- Difference geometries
+- fix difference geometries
 
 ## features
 - animate objects in scenes
@@ -23,6 +20,9 @@
 - subdivision surfaces
 - refraction: attenuation over distance (think: dark but not opaque liquid)
 - measured BRDFs
+- transmittance (volume integration) -- does this cover traveling through refractive substances?
+- area lights
+- reflectance textures
 
 ## performance/quality
 - r-tree/bvh (would these be better than the kd-tree?)

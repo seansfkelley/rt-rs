@@ -98,23 +98,23 @@ object {
 }
 transform pop
 
-// object {
-//   geometry difference {
-//     positive {
-//       geometry sphere {
-//         radius 3
-//       }
-//       transform translate 4 -4 0
-//     }
-//     negative {
-//       geometry sphere {
-//         radius 3
-//       }
-//       transform translate 3 -3.5 -.5
-//     }
-//   }
-//   material wood_texture
-// }
+object {
+  geometry difference {
+    positive {
+      geometry sphere {
+        radius 3
+      }
+      transform translate 4 -4 0
+    }
+    negative {
+      geometry sphere {
+        radius 3
+      }
+      transform translate 3 -3.5 .5
+    }
+  }
+  material yellow_matte
+}
 
 transform scale 2 5 2
 transform rotate 30 deg 0 0 1

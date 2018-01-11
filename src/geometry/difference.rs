@@ -16,21 +16,16 @@ impl Difference {
     }
 }
 
-fn flip_intersection_geometry_normal(g: IntersectionGeometry) -> IntersectionGeometry {
-    IntersectionGeometry {
-        normal: -g.normal,
-        // TODO: Should u/v be flipped also?
-        u_axis: g.u_axis,
-        v_axis: g.v_axis,
-    }
+fn invert_intersection_geometry(g: IntersectionGeometry) -> IntersectionGeometry {
+    IntersectionGeometry::new(-g.u_axis, g.v_axis)
 }
 
 fn flip_normal(i: Intersection) -> Intersection {
     Intersection {
         distance: i.distance,
         location: i.location,
-        geometry: flip_intersection_geometry_normal(i.geometry),
-        shading_geometry: i.shading_geometry.map(flip_intersection_geometry_normal),
+        geometry: invert_intersection_geometry(i.geometry),
+        shading_geometry: i.shading_geometry.map(invert_intersection_geometry),
         uv: i.uv,
         material: i.material,
     }
