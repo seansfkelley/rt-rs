@@ -1,6 +1,9 @@
 ## probable bugs
 - stuff.scene -- what are those weird reflections on both the spheres?
 - fix difference geometries
+- BRDF issues
+  - topo-earth is too dark and not shiny enough -- is PhongMaterial working correctly?
+  - refraction.scene appears to have the right geometry but the refracted straw is desaturated
 
 ## features
 - animate objects in scenes
