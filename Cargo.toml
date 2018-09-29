@@ -8,12 +8,12 @@ include = ["src/**/*", "Cargo.toml", "build.rs"]
 debug = true
 
 [build-dependencies]
-lalrpop = "0.13.1"
+lalrpop = "0.16.0"
 
 [dependencies]
 image = "0.17.0"
 rand = "0.3.17"
-lalrpop-util = "0.13.1"
+lalrpop-util = "0.16.0"
 regex = "0.2.1"
 lazy_static = "0.2.9"
 terminal_size = "0.1.7"

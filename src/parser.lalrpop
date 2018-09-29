@@ -33,7 +33,7 @@ Statement: () = {
     "transform" <Transform> => builder.push_transform(<>),
     "object" <Object> => builder.add_object(<>),
     "light" <Light> => builder.add_light(<>),
-    "inline" <Path> => parse_into_builder(<>.as_ref(), builder, self::parse_SceneFile),
+    "inline" <Path> => parse_into_builder(<>.as_ref(), builder, &self::SceneFileParser::new()),
 };
 
 CameraBuilder: CameraBuilder = {
@@ -155,7 +155,7 @@ pub Geometry: Box<Geometry> = {
         Arc::new(Shape::new(Arc::from(negative_geometry), negative_transform.map(Transform::new).unwrap_or(IDENTITY_TRANSFORM.clone()))),
     )),
     <TriangleMeshData> => Box::new(<>.into_triangle_mesh()),
-    <Path> => parse_into_builder(<>.as_ref(), builder, self::parse_Geometry),
+    <Path> => parse_into_builder(<>.as_ref(), builder, &self::GeometryParser::new()),
 };
 
 ClothClosure: ClothClosure = {

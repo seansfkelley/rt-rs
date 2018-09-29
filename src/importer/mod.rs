@@ -1,5 +1,6 @@
-mod parser;
 mod scene_builder;
+
+lalrpop_mod!(pub parser);
 
 use regex::Regex;
 use std::path::Path;
@@ -8,6 +9,7 @@ use std::io::Read;
 
 use core::*;
 use lalrpop_util::ParseError;
+use self::parser::{ Token, SceneFileParser, GeometryParser };
 use self::scene_builder::SceneBuilder;
 
 lazy_static! {
@@ -41,7 +43,7 @@ pub struct SceneFile {
 
 pub fn parse(path: &Path) -> SceneFile {
     let mut builder = SceneBuilder::new();
-    parse_into_builder(path, &mut builder, parser::parse_SceneFile);
+    parse_into_builder(path, &mut builder, &SceneFileParser::new());
     SceneFile {
         camera: builder.build_camera(),
         animation: builder.build_animation(),
@@ -51,10 +53,24 @@ pub fn parse(path: &Path) -> SceneFile {
     }
 }
 
-type ParserFn<T> = for<'a> fn(&mut SceneBuilder, &Path, &'a str) -> Result<T, ParseError<usize, (usize, &'a str), ()>>;
+pub trait Parser<T> {
+    fn do_parse<'input>(&self, path: &Path, builder: &mut SceneBuilder, input: &'input str) -> Result<T, ParseError<usize, Token<'input>, &'static str>>;
+}
 
-// https://stackoverflow.com/questions/48038871/value-does-not-live-long-enough-but-only-when-using-a-function-pointer
-pub fn parse_into_builder<T>(path: &Path, builder: &mut SceneBuilder, method: ParserFn<T>) -> T {
+macro_rules! implement_parser {
+    ($parser:ty, $output:ty) => {
+        impl Parser<$output> for $parser {
+            fn do_parse<'input>(&self, path: &Path, builder: &mut SceneBuilder, input: &'input str) -> Result<$output, ParseError<usize, Token<'input>, &'static str>> {
+                self.parse(builder, path, input)
+            }
+        }
+    };
+}
+
+implement_parser!(SceneFileParser, ());
+implement_parser!(GeometryParser, Box<Geometry>);
+
+pub fn parse_into_builder<T>(path: &Path, builder: &mut SceneBuilder, parser: &Parser<T>) -> T {
     let file_source = strip_comments(read_file_contents(path));
     let line_lengths: Vec<usize> = NEWLINE_REGEX
         .split(file_source.as_str())
@@ -71,7 +87,7 @@ pub fn parse_into_builder<T>(path: &Path, builder: &mut SceneBuilder, method: Pa
         (line + 1, index + 1)
     };
 
-    match method(builder, path, file_source.as_str()) {
+    match parser.do_parse(path, builder, file_source.as_str()) {
         Ok(value) => { value },
         Err(reason) => {
             let formatted_file_name = path.to_str().expect("could not convert path to string");
