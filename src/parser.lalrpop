@@ -266,11 +266,11 @@ List<T>: Vec<T> = {
 Tuple2<T>: (T, T) = <T> <T>;
 Tuple3<T>: (T, T, T) = <T> <T> <T>;
 
-Point: Point = <f1:F64> <f2:F64> <f3:F64> => Point { x: f1, y: f2, z: f3 };
-Vec3: Vec3 = <f1:F64> <f2:F64> <f3:F64> => Vec3 { x: f1, y: f2, z: f3 };
-Normal: Normal = <f1:F64> <f2:F64> <f3:F64> => Normal { x: f1, y: f2, z: f3 };
+Point: Point = <x:F64> <y:F64> <z:F64> => Point { x, y, z };
+Vec3: Vec3 = <x:F64> <y:F64> <z:F64> => Vec3 { x, y, z };
+Normal: Normal = <x:F64> <y:F64> <z:F64> => Normal { x, y, z };
 Color: Color = {
-    <f1:F64> <f2:F64> <f3:F64> => Color { r: f1, g: f2, b: f3 },
+    <r:F64> <g:F64> <b:F64> => Color { r, g, b },
     r##"#[0-9a-fA-F]{3}"## => Color {
         r: u32::from_str_radix(&<>[1..2], 16).unwrap() as f64 / 15f64,
         g: u32::from_str_radix(&<>[2..3], 16).unwrap() as f64 / 15f64,
