@@ -20,21 +20,21 @@ impl Sphere {
         let location = ray.at(t);
         let uv = sphere_uv_for_normalized_point(location / self.radius);
         let (phi, theta) = sphere_uv_to_polar(uv);
-        // pbrt pg. 121, tweaked for different u/v formula (y/z swapped)
+        // pbrt pg. 121, tweaked for different u/v formula (y/z swapped) and right-handedness (signs changed).
         let u_axis = Vec3::new(
             // The factor of TWO_PI means that the range [0, 1] for u will trace out the entire
             // latitutde line (corresponding to v) exactly. If it were normalized, it'd require
             // a range of [0, 2 * PI * radius-at-the-latitude] to do so.
-            -TWO_PI * location.z,
+            TWO_PI * location.z,
             0f64,
-            TWO_PI * location.x,
+            -TWO_PI * location.x,
         );
         let v_axis = Vec3::new(
             // This has a factor of PI for the same reason u_axis has a factor of TWO_PI.
             // pbrt uses some clever equivalencies to compute the sin/cos here without referring to
             // phi, but whatever. This is more straightforward.
-            PI * location.y * phi.cos(),
-            -PI * self.radius * theta.sin(),
+            -PI * location.y * phi.cos(),
+            PI * self.radius * theta.sin(),
             PI * location.y * phi.sin(),
         );
 
