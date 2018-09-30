@@ -7,6 +7,7 @@
   - is the translation of dpdu/dpdv into u_axis and v_axis correctly, especially given the left-handed nature of the the brdf local coordinate space?
 
 ## features
+- glossy specular BRDFs so Phong materials can work right
 - animate objects in scenes
 - procedural textures - K
 - procedural shapes - K
@@ -27,6 +28,7 @@
 - transmittance (volume integration) -- does this cover traveling through refractive substances?
 - area lights
 - reflectance textures
+- measured BRDFs
 
 ## performance/quality
 - r-tree/bvh (would these be better than the kd-tree?)
