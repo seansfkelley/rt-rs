@@ -4,6 +4,7 @@
 - BRDF issues
   - topo-earth is too dark and not shiny enough -- is PhongMaterial working correctly?
   - refraction.scene appears to have the right geometry but the refracted straw is desaturated
+  - is the translation of dpdu/dpdv into u_axis and v_axis correctly, especially given the left-handed nature of the the brdf local coordinate space?
 
 ## features
 - animate objects in scenes
