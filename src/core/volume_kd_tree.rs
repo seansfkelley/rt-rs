@@ -51,7 +51,7 @@ impl <T: Geometry> Node<T> {
 }
 
 // pbrt pg. 240
-fn intersect<T: Geometry>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
+fn intersect<T: Geometry>(tree: &VolumeKdTree<T>, ray: Ray) -> Option<Intersection> {
     let (t_min_init, t_max_init) = match tree.bound.intersect(&ray) {
         Some((t0, t1)) => (t0, t1),
         None => { return None; }
@@ -109,7 +109,7 @@ fn intersect<T: Geometry>(tree: &KdTree<T>, ray: Ray) -> Option<Intersection> {
     closest
 }
 
-pub struct KdTree<T: Geometry> {
+pub struct VolumeKdTree<T: Geometry> {
     root: Node<T>,
     bound: BoundingBox,
 }
@@ -252,8 +252,8 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
     }
 }
 
-impl <T: Geometry> KdTree<T> {
-    pub fn from(items: Vec<T>) -> KdTree<T> {
+impl <T: Geometry> VolumeKdTree<T> {
+    pub fn from(items: Vec<T>) -> VolumeKdTree<T> {
         let pairs: Vec<(Arc<T>, BoundingBox)> = items.into_iter().map(|i| {
             let bound = i.bound();
             (Arc::new(i), bound)
@@ -261,14 +261,14 @@ impl <T: Geometry> KdTree<T> {
         let tree_bound = pairs
             .iter()
             .fold(BoundingBox::empty(), |unioned_bounds, &(_, ref bound)| BoundingBox::union(&unioned_bounds, bound));
-        KdTree {
+        VolumeKdTree {
             root: recursively_build_tree(pairs, tree_bound.clone()),
             bound: tree_bound,
         }
     }
 }
 
-impl <T: Geometry> Geometry for KdTree<T> {
+impl <T: Geometry> Geometry for VolumeKdTree<T> {
     fn bound(&self) -> BoundingBox {
         self.bound.clone()
     }
@@ -283,7 +283,7 @@ impl <T: Geometry> Geometry for KdTree<T> {
     }
 }
 
-impl <T: Geometry> Debug for KdTree<T> {
+impl <T: Geometry> Debug for VolumeKdTree<T> {
     fn fmt(&self, f: &mut Formatter) -> Result {
         self.root.fmt_indented(f, 0)
     }

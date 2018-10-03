@@ -2,7 +2,7 @@ use std::sync::Arc;
 use super::bounding_box::BoundingBox;
 use super::geometry::Geometry;
 use super::intersection::Intersection;
-use super::kd_tree::KdTree;
+use super::volume_kd_tree::VolumeKdTree;
 use super::light::LightType;
 use super::ray::Ray;
 use super::shape::Shape;
@@ -25,6 +25,6 @@ impl Geometry for SceneObject {
 }
 
 pub struct Scene {
-    pub objects: KdTree<SceneObject>,
+    pub objects: VolumeKdTree<SceneObject>,
     pub lights: Vec<LightType>,
 }

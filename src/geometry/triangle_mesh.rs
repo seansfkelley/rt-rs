@@ -19,7 +19,7 @@ pub struct TriangleMeshData {
     pub uvs: Option<Vec<Uv>>,
 }
 
-pub type TriangleMesh = KdTree<Triangle>;
+pub type TriangleMesh = VolumeKdTree<Triangle>;
 
 impl TriangleMeshData {
     // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
