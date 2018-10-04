@@ -1,5 +1,6 @@
 use std::sync::Arc;
 use std::fmt::{ Debug, Formatter, Result };
+use ordered_float::NotNaN;
 use math::*;
 use core::*;
 
@@ -7,65 +8,75 @@ trait Pointable: Debug + Send + Sync {
   fn get_point(&self) -> Point;
 }
 
-#[derive(Debug, Clone, Copy)]
-enum Axis {
-    X = 0,
-    Y = 1,
-    Z = 2,
-}
-
 enum Node<T: Pointable> {
     Internal(Arc<T>, Point, Axis, Box<Node<T>>, Box<Node<T>>),
     Leaf(Arc<T>),
+    Empty,
 }
 
-pub struct VolumeKdTree<T: Pointable> {
+pub struct PointKdTree<T: Pointable> {
     root: Node<T>,
-    bound: BoundingBox,
 }
 
-fn recursively_build_tree<T: Pointable>(items: Vec<Arc<T>>) -> Node<T> {
+impl <T: Pointable> PointKdTree<T> {
+    pub fn from(items: Vec<T>) -> PointKdTree<T> {
+        let arc_items: Vec<Arc<T>> = items
+            .into_iter()
+            .map(|i| Arc::new(i))
+            .collect();
+
+        let tree_bound = items
+            .iter()
+            .fold(BoundingBox::empty(), |unioned_bounds, &item| BoundingBox::with_point(&unioned_bounds, &item.get_point()));
+
+        PointKdTree {
+            root: recursively_build_tree(&mut arc_items, tree_bound),
+        }
+    }
+}
+
+fn recursively_build_tree<T: Pointable>(items: &mut [Arc<T>], node_bounds: BoundingBox) -> Node<T> {
     if items.len() == 0 {
+        Node::Empty
+    } else if items.len() == 1 {
         Node::Leaf(Arc::clone(items.first().unwrap()))
     } else {
-        let best_partition: (Axis, f64) = [Axis::X, Axis::Y, Axis::Z]
-            .into_iter()
-            .map(|axis| {
-                let axis_index = *axis as usize;
+        let split_axis = node_bounds.maximum_extent();
 
-                let mut partition_candidates: Vec<f64> = items
-                    .iter()
-                    .map(|ref item| item.get_point[axis_index])
-                    .collect();
+        // TODO: Partitioning can be done in O(n) rather than O(nlgn)
+        items.sort_unstable_by(|ref p1, ref p2| {
+            let value1 = NotNaN::new(p1.get_point()[split_axis]).unwrap();
+            let value2 = NotNaN::new(p2.get_point()[split_axis]).unwrap();
+            value1.cmp(&value2)
+        });
 
-                partition_candidates.sort_unstable();
+        let middle_index = items.len() / 2;
 
-                let (distance, count) = partition_candidates
-                    .into_iter()
-                    .fold(vec![], |mut coalesced: Vec<(f64, usize)>, candidate| {
-                        if coalesced.len() == 0 {
-                            coalesced.push((candidate, 1));
-                        } else {
-                            let last_index = coalesced.len() - 1;
-                            let last = coalesced[last_index];
-                            if last.0 == candidate {
-                                coalesced[last_index] = (last.0, last.1 + 1);
-                            } else {
-                                coalesced.push((candidate, last.1 + 1));
-                            }
-                        }
-                        coalesced
-                    })
-                    .into_iter()
-                    .find(|(_, count)| count >= items.len() / 2)
-                    .unwrap();
+        let left_items = items.get_mut(0..middle_index).unwrap();
+        let left_bounds = {
+            let mut bounds = BoundingBox::empty();
+            for item in left_items {
+                bounds = bounds.with_point(&item.get_point());
+            }
+            bounds
+        };
 
-                (axis, distance, items.len() - count)
-            })
-            .min_by_key(|&(_, _, cost)| cost)
-            .map(|(axis, distance, _)| (*axis, distance));
+        let right_items = items.get_mut((middle_index + 1)..items.len()).unwrap();
+        let right_bounds = {
+            let mut bounds = BoundingBox::empty();
+            for item in right_items {
+                bounds = bounds.with_point(&item.get_point());
+            }
+            bounds
+        };
 
-        // TODO: Split into two using the proper comparison operator.
+        Node::Internal(
+            Arc::clone(&items[middle_index]),
+            items[middle_index].get_point(),
+            split_axis,
+            Box::new(recursively_build_tree(left_items, left_bounds)),
+            Box::new(recursively_build_tree(right_items, node_bounds)),
+        )
     }
 }
 
@@ -77,6 +88,9 @@ impl <T: Pointable> Node<T> {
             },
             &Node::Leaf(_) => {
                 1
+            },
+            &Node::Empty => {
+                0
             },
         }
     }
@@ -91,11 +105,12 @@ impl <T: Pointable> Node<T> {
             &Node::Leaf(ref object) => {
                 write!(f, "{}leaf at {:?}\n", " ".repeat(indent_level * 2), object.get_point())
             },
+            &Node::Empty => {},
         }
     }
 }
 
-impl <T: Pointable> Debug for VolumeKdTree<T> {
+impl <T: Pointable> Debug for PointKdTree<T> {
     fn fmt(&self, f: &mut Formatter) -> Result {
         self.root.fmt_indented(f, 0)
     }

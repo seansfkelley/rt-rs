@@ -75,6 +75,17 @@ impl BoundingBox {
 
         Some((t0, t1))
     }
+
+    pub fn maximum_extent(&self) -> Axis {
+        let diagonal = self.max - self.min;
+        if diagonal.x > diagonal.y && diagonal.x > diagonal.z {
+            Axis::X
+        } else if diagonal.y > diagonal.z {
+            Axis::Y
+        } else {
+            Axis::Z
+        }
+    }
 }
 
 macro_rules! apply_transform {

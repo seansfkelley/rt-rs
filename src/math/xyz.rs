@@ -2,6 +2,13 @@
 use std::fmt::{ Display, Debug, Formatter, Result };
 use std::ops::{ Add, Sub, Div, Mul, Neg, Index, IndexMut };
 
+#[derive(Debug, Clone, Copy)]
+pub enum Axis {
+    X,
+    Y,
+    Z,
+}
+
 pub trait Xyz {
     fn x(&self) -> f64;
     fn y(&self) -> f64;
@@ -53,6 +60,18 @@ macro_rules! xyz_base {
             }
         }
 
+        impl Index<Axis> for $name {
+            type Output = f64;
+
+            fn index(&self, index: Axis) -> &f64 {
+                match index {
+                    Axis::X => &self.x,
+                    Axis::Y => &self.y,
+                    Axis::Z => &self.z,
+                }
+            }
+        }
+
         impl IndexMut<usize> for $name {
             fn index_mut(&mut self, index: usize) -> &mut f64 {
                 match index {
@@ -60,6 +79,16 @@ macro_rules! xyz_base {
                     1 => &mut self.y,
                     2 => &mut self.z,
                     _ => { panic!("index out of range: {}", index); }
+                }
+            }
+        }
+
+        impl IndexMut<Axis> for $name {
+            fn index_mut(&mut self, index: Axis) -> &mut f64 {
+                match index {
+                    Axis::X => &mut self.x,
+                    Axis::Y => &mut self.y,
+                    Axis::Z => &mut self.z,
                 }
             }
         }

@@ -3,15 +3,9 @@ use std::sync::Arc;
 use std::fmt::{ Debug, Formatter, Result };
 use ordered_float::NotNaN;
 use core::*;
+use math::*;
 
 use rayon;
-
-#[derive(Debug, Clone, Copy)]
-enum Axis {
-    X = 0,
-    Y = 1,
-    Z = 2,
-}
 
 #[derive(Debug, PartialEq, Eq)]
 enum EdgeType {
@@ -65,9 +59,8 @@ fn intersect<T: Geometry>(tree: &VolumeKdTree<T>, ray: Ray) -> Option<Intersecti
         if t_min < r.t_max {
             match node {
                 &Node::Internal(axis, distance, ref left, ref right) => {
-                    let axis_index = axis as usize;
-                    let origin_component = r.origin[axis_index];
-                    let direction_component = r.direction[axis_index];
+                    let origin_component = r.origin[axis];
+                    let direction_component = r.direction[axis];
                     let (near, far) = if (origin_component < distance) || (origin_component == distance && direction_component <= 0f64) {
                         (left, right)
                     } else {
@@ -133,16 +126,14 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
         let best_partition: Option<(Axis, f64)> = [Axis::X, Axis::Y, Axis::Z]
             .into_iter()
             .map(|axis| {
-                let axis_index = *axis as usize;
-
-                let (node_min, node_max) = (node_bounds.min[axis_index], node_bounds.max[axis_index]);
+                let (node_min, node_max) = (node_bounds.min[*axis], node_bounds.max[*axis]);
 
                 let mut partition_candidates: Vec<(NotNaN<f64>, EdgeType)> = items
                     .iter()
                     .flat_map(|&(_, ref bound)| {
                         vec![
-                            (NotNaN::new(bound.min[axis_index]).unwrap(), EdgeType::Start),
-                            (NotNaN::new(bound.max[axis_index]).unwrap(), EdgeType::End),
+                            (NotNaN::new(bound.min[*axis]).unwrap(), EdgeType::Start),
+                            (NotNaN::new(bound.max[*axis]).unwrap(), EdgeType::End),
                         ].into_iter()
                     })
                     .collect();
@@ -179,9 +170,9 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
                         // degenerate and useless (one partition will be zero-width which doesn't actually save work).
                         let candidate = if node_min < distance && distance < node_max {
                             let mut left_bounds = node_bounds.clone();
-                            left_bounds.max[axis_index] = distance;
+                            left_bounds.max[*axis] = distance;
                             let mut right_bounds = node_bounds.clone();
-                            right_bounds.min[axis_index] = distance;
+                            right_bounds.min[*axis] = distance;
                             let bonus_multiplier = 1f64 - (if left_count == 0 || right_count == 0 { EMPTY_BONUS } else { 0f64 });
                             let cost = TRAVERSAL_COST + INTERSECTION_COST * bonus_multiplier * (
                                 surface_area(&left_bounds) * left_count as f64 / node_surface_area +
@@ -254,13 +245,15 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
 
 impl <T: Geometry> VolumeKdTree<T> {
     pub fn from(items: Vec<T>) -> VolumeKdTree<T> {
-        let pairs: Vec<(Arc<T>, BoundingBox)> = items.into_iter().map(|i| {
-            let bound = i.bound();
-            (Arc::new(i), bound)
-        }).collect();
+        let pairs: Vec<(Arc<T>, BoundingBox)> = items
+            .into_iter()
+            .map(|i| (Arc::new(i), i.bound()))
+            .collect();
+
         let tree_bound = pairs
             .iter()
             .fold(BoundingBox::empty(), |unioned_bounds, &(_, ref bound)| BoundingBox::union(&unioned_bounds, bound));
+
         VolumeKdTree {
             root: recursively_build_tree(pairs, tree_bound.clone()),
             bound: tree_bound,
