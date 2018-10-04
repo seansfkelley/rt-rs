@@ -247,7 +247,10 @@ impl <T: Geometry> VolumeKdTree<T> {
     pub fn from(items: Vec<T>) -> VolumeKdTree<T> {
         let pairs: Vec<(Arc<T>, BoundingBox)> = items
             .into_iter()
-            .map(|i| (Arc::new(i), i.bound()))
+            .map(|i| {
+                let bound = i.bound();
+                (Arc::new(i), bound)
+            })
             .collect();
 
         let tree_bound = pairs

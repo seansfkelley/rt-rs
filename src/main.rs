@@ -73,7 +73,7 @@ fn main() {
 
     let object_tree = log_timing!(
         "building spatial index... ",
-        KdTree::from(scene_file.objects));
+        VolumeKdTree::from(scene_file.objects));
 
     let output_directory: PathBuf = vec![
         "out",

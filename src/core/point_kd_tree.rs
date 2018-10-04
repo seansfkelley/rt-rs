@@ -6,7 +6,7 @@ use ordered_float::NotNaN;
 use math::*;
 use core::*;
 
-trait Pointable: Debug + Send + Sync {
+pub trait Pointable: Debug + Send + Sync {
   fn get_point(&self) -> Point;
 }
 
@@ -20,7 +20,7 @@ pub struct PointKdTree<T: Pointable>(Node<T>);
 
 impl <T: Pointable> PointKdTree<T> {
     pub fn from(items: Vec<T>) -> PointKdTree<T> {
-        let arc_items: Vec<Arc<T>> = items
+        let mut arc_items: Vec<Arc<T>> = items
             .into_iter()
             .map(|i| Arc::new(i))
             .collect();
@@ -31,7 +31,7 @@ impl <T: Pointable> PointKdTree<T> {
     pub fn k_nearest(&self, point: Point, k: usize) -> Vec<Arc<T>> {
         let mut found_items = BinaryHeap::new();
         find_k_nearest(point, k, &self.0, &mut found_items);
-        found_items.into_vec().into_iter().map(|(item, _)| item).collect()
+        found_items.into_vec().into_iter().map(|SearchNode(item, _)| item).collect()
     }
 }
 
@@ -44,7 +44,7 @@ fn recursively_build_tree<T: Pointable>(items: &mut [Arc<T>]) -> Node<T> {
     } else {
         let split_axis = items
             .iter()
-            .fold(BoundingBox::empty(), |unioned_bounds, &item| BoundingBox::with_point(&unioned_bounds, &item.get_point()))
+            .fold(BoundingBox::empty(), |unioned_bounds, ref item| BoundingBox::with_point(&unioned_bounds, &item.get_point()))
             .maximum_extent();
 
         // TODO: Partitioning can be done in O(n) rather than O(nlgn)
@@ -93,24 +93,24 @@ impl <T: Pointable + Sized> Ord for SearchNode<T> {
 
 // TODO: Implement with stack rather than recursion?
 fn find_k_nearest<T: Pointable>(target_point: Point, k: usize, node: &Node<T>, found_items: &mut BinaryHeap<SearchNode<T>>) {
-    let maybe_add_point = |item: Arc<T>, point: Point| {
+    let mut maybe_add_point = |item: &Arc<T>, point: Point| {
         let squared_distance = NotNaN::new((point - target_point).magnitude2()).unwrap();
         if found_items.len() < k || found_items.peek().unwrap().1 > squared_distance {
             if found_items.len() == k {
                 found_items.pop();
             }
-            found_items.push(SearchNode(item, squared_distance));
+            found_items.push(SearchNode(*item, squared_distance));
         }
     };
 
-    let maybe_recurse = |splitting_point: Point, axis: Axis, child_node: &Node<T>| {
+    let mut maybe_recurse = |splitting_point: Point, axis: Axis, child_node: &Node<T>| {
         if found_items.peek().unwrap().1 >= NotNaN::new((splitting_point[axis] - target_point[axis]).powi(2)).unwrap() {
             find_k_nearest(target_point, k, child_node, found_items);
         }
     };
 
     match node {
-        &Node::Internal(item, point, axis, left, right) => {
+        &Node::Internal(ref item, point, axis, ref left, ref right) => {
             if target_point[axis] < point[axis] {
                 find_k_nearest(target_point, k, &left, found_items);
                 maybe_add_point(item, point);
@@ -125,7 +125,7 @@ fn find_k_nearest<T: Pointable>(target_point: Point, k: usize, node: &Node<T>, f
                 find_k_nearest(target_point, k, &right, found_items);
             }
         },
-        &Node::Leaf(item, point) => {
+        &Node::Leaf(ref item, point) => {
             maybe_add_point(item, point);
         },
         &Node::Empty => {},
@@ -158,7 +158,7 @@ impl <T: Pointable> Node<T> {
                 write!(f, "{}leaf at {:?}\n", " ".repeat(indent_level * 2), object.get_point())
             },
             &Node::Empty => {
-                Result::Ok
+                Ok(())
             },
         }
     }

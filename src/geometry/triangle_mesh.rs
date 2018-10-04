@@ -43,7 +43,7 @@ impl TriangleMeshData {
     pub fn into_triangle_mesh(self) -> TriangleMesh {
         let mesh = Arc::new(self);
 
-        KdTree::from(mesh.indices
+        VolumeKdTree::from(mesh.indices
             .iter()
             .map(|indices| Triangle {
                 mesh: Arc::clone(&mesh),
