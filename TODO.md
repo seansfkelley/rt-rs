@@ -6,6 +6,12 @@
   - refraction.scene appears to have the right geometry but the refracted straw is desaturated
   - is the translation of dpdu/dpdv into u_axis and v_axis correctly, especially given the left-handed nature of the the brdf local coordinate space?
 
+## tests
+- PointKdTree
+  - ensure knn returns proper result for some random data
+  - nsure it returns proper result when all data is in the same plane
+  - test-only code to count the number of nodes traversed to ensure it is proportional to lgn — how to compile extra code and how to accurately check proportionality?
+
 ## features
 - glossy specular BRDFs so Phong materials can work right
 - animate objects in scenes

@@ -16,7 +16,7 @@ enum Node<T: Pointable> {
     Empty,
 }
 
-pub struct PointKdTree<T: Pointable>(Node<T>);
+struct PointKdTree<T: Pointable>(Node<T>);
 
 impl <T: Pointable> PointKdTree<T> {
     pub fn from(items: Vec<T>) -> PointKdTree<T> {
@@ -29,9 +29,7 @@ impl <T: Pointable> PointKdTree<T> {
     }
 
     pub fn k_nearest(&self, point: Point, k: usize) -> Vec<Arc<T>> {
-        let mut found_items = BinaryHeap::new();
-        find_k_nearest(point, k, &self.0, &mut found_items);
-        found_items.into_vec().into_iter().map(|SearchNode(item, _)| item).collect()
+        find_k_nearest(point, k, &self.0)
     }
 }
 
@@ -55,13 +53,19 @@ fn recursively_build_tree<T: Pointable>(items: &mut [Arc<T>]) -> Node<T> {
         });
 
         let middle_index = items.len() / 2;
+        let item = Arc::clone(&items[middle_index]);
+        let point = item.get_point();
 
-        let left_items = items.get_mut(0..middle_index).unwrap();
-        let right_items = items.get_mut((middle_index + 1)..items.len()).unwrap();
+        let (left_items, middle_and_right_items) = items.split_at_mut(middle_index);
+        let right_items = if let Some((_, rest)) = middle_and_right_items.split_first_mut() {
+            rest
+        } else {
+            &mut[]
+        };
 
         Node::Internal(
-            Arc::clone(&items[middle_index]),
-            items[middle_index].get_point(),
+            item,
+            point,
             split_axis,
             Box::new(recursively_build_tree(left_items)),
             Box::new(recursively_build_tree(right_items)),
@@ -91,45 +95,54 @@ impl <T: Pointable + Sized> Ord for SearchNode<T> {
     }
 }
 
-// TODO: Implement with stack rather than recursion?
-fn find_k_nearest<T: Pointable>(target_point: Point, k: usize, node: &Node<T>, found_items: &mut BinaryHeap<SearchNode<T>>) {
-    let mut maybe_add_point = |item: &Arc<T>, point: Point| {
-        let squared_distance = NotNaN::new((point - target_point).magnitude2()).unwrap();
-        if found_items.len() < k || found_items.peek().unwrap().1 > squared_distance {
-            if found_items.len() == k {
-                found_items.pop();
-            }
-            found_items.push(SearchNode(*item, squared_distance));
-        }
-    };
+fn find_k_nearest<T: Pointable,>(target_point: Point, k: usize, root: &Node<T>) -> Vec<Arc<T>> {
+    let mut found_items = BinaryHeap::<SearchNode<T>>::new();
+    let mut search_stack = vec![root];
 
-    let mut maybe_recurse = |splitting_point: Point, axis: Axis, child_node: &Node<T>| {
-        if found_items.peek().unwrap().1 >= NotNaN::new((splitting_point[axis] - target_point[axis]).powi(2)).unwrap() {
-            find_k_nearest(target_point, k, child_node, found_items);
-        }
-    };
-
-    match node {
-        &Node::Internal(ref item, point, axis, ref left, ref right) => {
-            if target_point[axis] < point[axis] {
-                find_k_nearest(target_point, k, &left, found_items);
-                maybe_add_point(item, point);
-                maybe_recurse(point, axis, &right);
-            } else if target_point[axis] > point[axis] {
-                find_k_nearest(target_point, k, &right, found_items);
-                maybe_add_point(item, point);
-                maybe_recurse(point, axis, &left);
-            } else {
-                maybe_add_point(item, point);
-                find_k_nearest(target_point, k, &left, found_items);
-                find_k_nearest(target_point, k, &right, found_items);
+    {
+        let mut maybe_add_point = |item: &Arc<T>, point: Point| {
+            let squared_distance = NotNaN::new((point - target_point).magnitude2()).unwrap();
+            if found_items.len() < k || found_items.peek().unwrap().1 > squared_distance {
+                if found_items.len() == k {
+                    found_items.pop();
+                }
+                found_items.push(SearchNode(Arc::clone(item), squared_distance));
             }
-        },
-        &Node::Leaf(ref item, point) => {
-            maybe_add_point(item, point);
-        },
-        &Node::Empty => {},
+        };
+
+        let farthest_crosses_splitting_plane = |splitting_point: Point, axis: Axis|
+            found_items.peek().unwrap().1 >= NotNaN::new((splitting_point[axis] - target_point[axis]).powi(2)).unwrap();
+
+        while let Some(node) = search_stack.pop() {
+            match node {
+                &Node::Internal(ref item, point, axis, ref left, ref right) => {
+                    if target_point[axis] < point[axis] {
+                        search_stack.push(&left);
+                        maybe_add_point(item, point);
+                        if farthest_crosses_splitting_plane(point, axis) {
+                            search_stack.push(&right);
+                        }
+                    } else if target_point[axis] > point[axis] {
+                        search_stack.push(&right);
+                        maybe_add_point(item, point);
+                        if farthest_crosses_splitting_plane(point, axis) {
+                            search_stack.push(&left);
+                        }
+                    } else {
+                        maybe_add_point(item, point);
+                        search_stack.push(&left);
+                        search_stack.push(&right);
+                    }
+                },
+                &Node::Leaf(ref item, point) => {
+                    maybe_add_point(item, point);
+                },
+                &Node::Empty => {},
+            };
+        }
     }
+
+    found_items.into_iter().map(|SearchNode(item, _)| item).collect()
 }
 
 impl <T: Pointable> Node<T> {
@@ -149,7 +162,7 @@ impl <T: Pointable> Node<T> {
 
     fn fmt_indented(&self, f: &mut Formatter, indent_level: usize) -> Result {
         match self {
-            &Node::Internal(ref pointable, ref point, ref axis, ref left, ref right) => {
+            &Node::Internal(_, ref point, ref axis, ref left, ref right) => {
                 write!(f, "{}{} objects, split {:?} at {:?}\n",  " ".repeat(indent_level * 2), self.size(), *axis, point)?;
                 left.fmt_indented(f, indent_level + 1)?;
                 right.fmt_indented(f, indent_level + 1)
