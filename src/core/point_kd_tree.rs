@@ -16,7 +16,7 @@ enum Node<T: Pointable> {
     Empty,
 }
 
-struct PointKdTree<T: Pointable>(Node<T>);
+pub struct PointKdTree<T: Pointable>(Node<T>);
 
 impl <T: Pointable> PointKdTree<T> {
     pub fn from(items: Vec<T>) -> PointKdTree<T> {
