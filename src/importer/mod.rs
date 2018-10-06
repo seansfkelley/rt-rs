@@ -2,7 +2,6 @@ mod scene_builder;
 
 lalrpop_mod!(pub parser);
 
-use regex::Regex;
 use std::path::Path;
 
 use core::*;
@@ -10,10 +9,6 @@ use file_utils::*;
 use lalrpop_util::ParseError;
 use self::parser::{ Token, SceneFileParser, GeometryParser };
 use self::scene_builder::SceneBuilder;
-
-lazy_static! {
-    static ref NEWLINE_REGEX: Regex = Regex::new(r"\n").unwrap();
-}
 
 #[derive(Debug)]
 pub struct SceneFile {
@@ -55,9 +50,9 @@ implement_parser!(GeometryParser, Box<Geometry>);
 
 pub fn parse_into_builder<T>(path: &Path, builder: &mut SceneBuilder, parser: &Parser<T>) -> T {
     let file_source = strip_comments(read_file_contents(path));
-    let line_lengths: Vec<usize> = NEWLINE_REGEX
-        .split(file_source.as_str())
-        .map(|text| text.len())
+    let line_lengths: Vec<usize> = file_source.as_str()
+        .split("\n")
+        .map(|line| line.len())
         .collect();
 
     let get_line_and_column = |i: usize|  {

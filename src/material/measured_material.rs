@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::str::FromStr;
 use core::*;
 use bxdf::*;
 use file_utils::*;
@@ -26,11 +27,25 @@ impl Material for MeasuredMaterial {
 
 impl MeasuredMaterial {
     pub fn from(path: &Path) -> MeasuredMaterial {
-        let contents = strip_comments(read_file_contents(path));
-        // TODO: Read each line, split, then turn into a sample thing.
+        MeasuredMaterial::new(strip_comments(read_file_contents(path)).as_str()
+            .split("\n")
+            .map(|line| line.trim())
+            .filter(|line| line.len() > 0)
+            .map(|line| {
+                let v: Vec<f64> = line.split(",").map(|v| f64::from_str(v).unwrap()).collect();
+                RawPhiThetaMeasuredSample {
+                    theta_i: v[0],
+                    phi_i: v[1],
+                    theta_o: v[2],
+                    phi_o: v[3],
+                    color: Color::new(v[4], v[5], v[6]),
+                }
+            })
+            .collect()
+        )
     }
 
-    pub fn new(data: Vec<RawPhiThetaMeasuredSample>) -> MeasuredMaterial {
+    fn new(data: Vec<RawPhiThetaMeasuredSample>) -> MeasuredMaterial {
         // pbrt pg. 465
         let samples = data
             .into_iter()
