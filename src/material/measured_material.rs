@@ -1,11 +1,13 @@
 use std::path::Path;
 use core::*;
 use bxdf::*;
-use math::*;
+use file_utils::*;
 
-pub struct RawMeasuredSample {
-    w_o: Vec3,
-    wi: Vec3,
+struct RawPhiThetaMeasuredSample {
+    theta_i: f64,
+    phi_i: f64,
+    theta_o: f64,
+    phi_o: f64,
     color: Color,
 }
 
@@ -24,18 +26,21 @@ impl Material for MeasuredMaterial {
 
 impl MeasuredMaterial {
     pub fn from(path: &Path) -> MeasuredMaterial {
-        match openImage(path) {
-            Ok(img) => { img.to_rgb() }
-            Err(reason) => { panic!("could not open file at {:?}: {:?}", path, reason); }
-        }
+        let contents = strip_comments(read_file_contents(path));
+        // TODO: Read each line, split, then turn into a sample thing.
     }
 
-    pub fn new(data: Vec<RawMeasuredSample>) -> MeasuredMaterial {
+    pub fn new(data: Vec<RawPhiThetaMeasuredSample>) -> MeasuredMaterial {
         // pbrt pg. 465
         let samples = data
             .into_iter()
             .map(|datum| MeasuredSample {
-                marschner_location: compute_marschner_location(datum.w_o, datum.wi),
+                marschner_location: compute_marschner_location_phi_theta(
+                    datum.theta_i,
+                    datum.phi_i,
+                    datum.theta_o,
+                    datum.phi_o,
+                ),
                 color: datum.color,
             })
             .collect();

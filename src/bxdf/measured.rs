@@ -20,7 +20,22 @@ impl Pointable for MeasuredSample {
 
 // pbrt pg. 465
 pub fn compute_marschner_location(w_o: Vec3, w_i: Vec3) -> Point {
-    let delta_phi = bxdf_spherical_phi(&w_i) - bxdf_spherical_phi(&w_o);
+    _compute_marschner_location(
+        bxdf_sin_theta(&w_i),
+        bxdf_cos_theta(&w_i),
+        bxdf_spherical_phi(&w_i),
+        bxdf_sin_theta(&w_o),
+        bxdf_cos_theta(&w_o),
+        bxdf_spherical_phi(&w_o),
+    )
+}
+
+pub fn compute_marschner_location_phi_theta(theta_i: f64, phi_i: f64, theta_o: f64, phi_o: f64) -> Point {
+    _compute_marschner_location(theta_i.sin(), theta_i.cos(), phi_i, theta_o.sin(), theta_o.cos(), phi_o)
+}
+
+fn _compute_marschner_location(sin_theta_i: f64, cos_theta_i: f64, phi_i: f64, sin_theta_o: f64, cos_theta_o: f64, phi_o: f64) -> Point {
+    let delta_phi = phi_i - phi_o;
 
     let clamped_delta_phi = if delta_phi < 0f64 {
         delta_phi + TWO_PI
@@ -33,9 +48,9 @@ pub fn compute_marschner_location(w_o: Vec3, w_i: Vec3) -> Point {
     let minimal_delta_phi = if clamped_delta_phi > PI { TWO_PI - clamped_delta_phi } else { clamped_delta_phi };
 
     Point::new(
-        bxdf_sin_theta(&w_i) * bxdf_sin_theta(&w_o),
+        sin_theta_i * sin_theta_o,
         minimal_delta_phi / PI,
-        bxdf_cos_theta(&w_i) * bxdf_cos_theta(&w_o),
+        cos_theta_i * cos_theta_o,
     )
 }
 

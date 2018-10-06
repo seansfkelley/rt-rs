@@ -12,12 +12,7 @@ use self::parser::{ Token, SceneFileParser, GeometryParser };
 use self::scene_builder::SceneBuilder;
 
 lazy_static! {
-    static ref COMMENT_REGEX: Regex = Regex::new(r"//[^\n]*(\n|$)").unwrap();
     static ref NEWLINE_REGEX: Regex = Regex::new(r"\n").unwrap();
-}
-
-fn strip_comments(s: String) -> String {
-    COMMENT_REGEX.replace_all(s.as_str(), "$1").into_owned()
 }
 
 #[derive(Debug)]
