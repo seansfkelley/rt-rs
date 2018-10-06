@@ -74,7 +74,8 @@ Material: Box<Material> = {
         reflection: reflection.unwrap_or(Box::new(Color::BLACK)),
         transmission: transmission.unwrap_or(Box::new(Color::BLACK)),
         index_of_refraction: index_of_refraction.unwrap_or(1f64),
-    })
+    }),
+    "measured" <Path> => Box::new(MeasuredMaterial::from(<>.as_ref())),
 };
 
 // LightingFacet: LightingFacet = {

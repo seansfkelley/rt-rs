@@ -4,10 +4,9 @@ lalrpop_mod!(pub parser);
 
 use regex::Regex;
 use std::path::Path;
-use std::fs::File;
-use std::io::Read;
 
 use core::*;
+use file_utils::*;
 use lalrpop_util::ParseError;
 use self::parser::{ Token, SceneFileParser, GeometryParser };
 use self::scene_builder::SceneBuilder;
@@ -15,17 +14,6 @@ use self::scene_builder::SceneBuilder;
 lazy_static! {
     static ref COMMENT_REGEX: Regex = Regex::new(r"//[^\n]*(\n|$)").unwrap();
     static ref NEWLINE_REGEX: Regex = Regex::new(r"\n").unwrap();
-}
-
-fn read_file_contents(path: &Path) -> String {
-    let formatted_path = path.to_str().unwrap_or("input file");
-    let mut contents: String = String::new();
-    File::open(path)
-        .expect(&format!("couldn't open {}", formatted_path))
-        .read_to_string(&mut contents)
-        .expect(&format!("couldn't read {} after opening", formatted_path));
-
-    contents
 }
 
 fn strip_comments(s: String) -> String {

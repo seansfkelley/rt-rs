@@ -12,6 +12,7 @@ extern crate lalrpop_util;
 
 mod bxdf;
 mod core;
+mod file_utils;
 mod geometry;
 mod image_utils;
 mod importer;

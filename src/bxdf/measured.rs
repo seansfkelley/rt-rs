@@ -5,17 +5,11 @@ use super::bxdf_trig::*;
 
 const TWO_PI: f64 = PI * 2f64;
 
-pub struct RawMeasuredSample {
-    w_o: Vec3,
-    wi: Vec3,
-    color: Color,
-}
-
 // pbrt pg. 465
 #[derive(Debug)]
-struct MeasuredSample {
-    marschner_location: Point,
-    color: Color,
+pub struct MeasuredSample {
+    pub marschner_location: Point,
+    pub color: Color,
 }
 
 impl Pointable for MeasuredSample {
@@ -25,7 +19,7 @@ impl Pointable for MeasuredSample {
 }
 
 // pbrt pg. 465
-fn compute_marschner_location(w_o: Vec3, w_i: Vec3) -> Point {
+pub fn compute_marschner_location(w_o: Vec3, w_i: Vec3) -> Point {
     let delta_phi = bxdf_spherical_phi(&w_i) - bxdf_spherical_phi(&w_o);
 
     let clamped_delta_phi = if delta_phi < 0f64 {
@@ -48,16 +42,8 @@ fn compute_marschner_location(w_o: Vec3, w_i: Vec3) -> Point {
 pub struct Measured(PointKdTree<MeasuredSample>);
 
 impl Measured {
-    pub fn new(data: Vec<RawMeasuredSample>) -> Measured {
-        // pbrt pg. 465
-        let samples = data
-            .into_iter()
-            .map(|datum| MeasuredSample {
-                marschner_location: compute_marschner_location(datum.w_o, datum.wi),
-                color: datum.color,
-            })
-            .collect();
-        Measured(PointKdTree::from(samples))
+    pub fn new(data: PointKdTree<MeasuredSample>) -> Measured {
+        Measured(data)
     }
 }
 
