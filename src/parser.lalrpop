@@ -75,7 +75,10 @@ Material: Box<Material> = {
         transmission: transmission.unwrap_or(Box::new(Color::BLACK)),
         index_of_refraction: index_of_refraction.unwrap_or(1f64),
     }),
-    "measured" <Path> => Box::new(MeasuredMaterial::from(<>.as_ref())),
+    "measured" "{"
+        "astm" <path:Path>
+        <scale:("scale" <F64>)?>
+    "}" => Box::new(MeasuredMaterial::from(path.as_ref(), scale.unwrap_or(1f64))),
 };
 
 // LightingFacet: LightingFacet = {

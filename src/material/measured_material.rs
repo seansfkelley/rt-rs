@@ -27,7 +27,7 @@ impl Material for MeasuredMaterial {
 }
 
 impl MeasuredMaterial {
-    pub fn from(path: &Path) -> MeasuredMaterial {
+    pub fn from(path: &Path, scale: f64) -> MeasuredMaterial {
         MeasuredMaterial::new(strip_comments(read_file_contents(path)).as_str()
             .split("\n")
             .map(|line| line.trim())
@@ -39,7 +39,7 @@ impl MeasuredMaterial {
                     phi_i: v[1],
                     theta_o: v[2],
                     phi_o: v[3],
-                    color: Color::new(v[4], v[5], v[6]),
+                    color: Color::new(v[4], v[5], v[6]) * scale,
                 }
             })
             .collect()

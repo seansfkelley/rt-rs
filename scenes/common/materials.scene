@@ -68,4 +68,7 @@ material uv_debug flat {
   texture debug
 }
 
-material garnet_red measured "./measured-bxdf/garnet_red_RGB.astm"
+material garnet_red measured {
+  astm "./measured-bxdf/garnet_red_RGB.astm"
+  scale 15
+}
