@@ -67,3 +67,5 @@ material glass phong {
 material uv_debug flat {
   texture debug
 }
+
+material garnet_red measured "./measured-bxdf/garnet_red_RGB.astm"

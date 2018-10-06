@@ -1,0 +1,27 @@
+inline "common/common.scene"
+
+inline "common/image/standard.scene"
+// inline "common/image/orbit.scene"
+
+antialias 1
+
+background_color #666
+
+camera perspective {
+  position 0 50 -200
+  look_at 0 0 0
+  up 0 1 0
+}
+
+light directional {
+  direction -0.5 -0.5 1
+  radiance 1 1 1
+}
+
+transform rotate -75 deg 1 0 0
+transform rotate 55 deg 0 1 0
+transform translate 50 50 0
+object {
+  geometry "common/geometry/killeroo.geo"
+  material garnet_red
+}
