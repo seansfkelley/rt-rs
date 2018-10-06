@@ -1,4 +1,5 @@
 use std::f64::consts::PI;
+use std::sync::Arc;
 use math::*;
 use core::*;
 use super::bxdf_trig::*;
@@ -54,10 +55,10 @@ fn _compute_marschner_location(sin_theta_i: f64, cos_theta_i: f64, phi_i: f64, s
     )
 }
 
-pub struct Measured(PointKdTree<MeasuredSample>);
+pub struct Measured(Arc<PointKdTree<MeasuredSample>>);
 
 impl Measured {
-    pub fn new(data: PointKdTree<MeasuredSample>) -> Measured {
+    pub fn new(data: Arc<PointKdTree<MeasuredSample>>) -> Measured {
         Measured(data)
     }
 }

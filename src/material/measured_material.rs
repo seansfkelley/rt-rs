@@ -1,5 +1,6 @@
 use std::path::Path;
 use std::str::FromStr;
+use std::sync::Arc;
 use core::*;
 use bxdf::*;
 use file_utils::*;
@@ -14,13 +15,13 @@ struct RawPhiThetaMeasuredSample {
 
 #[derive(Debug)]
 pub struct MeasuredMaterial {
-    pub samples: PointKdTree<MeasuredSample>,
+    pub samples: Arc<PointKdTree<MeasuredSample>>,
 }
 
 impl Material for MeasuredMaterial {
     fn get_bsdf(&self, intersection: &Intersection) -> Bsdf {
         Bsdf::new(vec![
-            Box::new(Measured::new(self.samples))
+            Box::new(Measured::new(Arc::clone(&self.samples)))
         ], intersection)
     }
 }
@@ -60,7 +61,7 @@ impl MeasuredMaterial {
             })
             .collect();
         MeasuredMaterial {
-            samples: PointKdTree::from(samples),
+            samples: Arc::new(PointKdTree::from(samples)),
         }
     }
 }
