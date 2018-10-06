@@ -5,7 +5,7 @@ use super::bxdf_trig::*;
 
 const TWO_PI: f64 = PI * 2f64;
 
-struct RawMeasuredSample {
+pub struct RawMeasuredSample {
     w_o: Vec3,
     wi: Vec3,
     color: Color,
@@ -63,13 +63,22 @@ impl Measured {
 
 impl Bxdf for Measured {
     fn bxdf_type(&self) -> BxdfType {
-        // TODO: What type is it?
-        (TransportType::Reflective, SpectrumType::Diffuse)
+        (TransportType::Reflective, SpectrumType::GlossySpecular)
     }
 
     // pbrt pg. 466
     fn evaluate(&self, w_o: Vec3, w_i: Vec3) -> Color {
-        let nearest = self.0.k_nearest(compute_marschner_location(w_o, w_i), 3);
-        // TODO
+        let target_point = compute_marschner_location(w_o, w_i);
+        let (color, total_weight) = self.0.k_nearest(target_point, 3)
+            .into_iter()
+            .map(|sample| (
+                sample.color,
+                (-100f64 * (sample.marschner_location - target_point).magnitude2()).exp(),
+            ))
+            .fold(
+                (Color::BLACK, 0f64),
+                |(acc_color, acc_weight), (color, weight)| (acc_color + weight * color, acc_weight + weight),
+            );
+        color / total_weight
     }
 }
