@@ -15,6 +15,7 @@ enum EdgeType {
 
 enum Node<T: Geometry> {
     Internal(Axis, f64, Box<Node<T>>, Box<Node<T>>),
+    // TODO: Should this be Box, not Arc?
     Leaf(Vec<Arc<T>>),
 }
 

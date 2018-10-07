@@ -11,6 +11,7 @@ pub trait Pointable: Debug + Send + Sync {
 }
 
 enum Node<T: Pointable> {
+    // TODO: Should these be Box, not Arc?
     Internal(Arc<T>, Point, Axis, Box<Node<T>>, Box<Node<T>>),
     Leaf(Arc<T>, Point),
     Empty,
@@ -95,7 +96,7 @@ impl <T: Pointable + Sized> Ord for SearchNode<T> {
     }
 }
 
-fn find_k_nearest<T: Pointable,>(target_point: Point, k: usize, root: &Node<T>) -> Vec<Arc<T>> {
+fn find_k_nearest<T: Pointable>(target_point: Point, k: usize, root: &Node<T>) -> Vec<Arc<T>> {
     let mut found_items = BinaryHeap::<SearchNode<T>>::new();
     let mut search_stack = vec![root];
 
@@ -178,5 +179,103 @@ impl <T: Pointable> Node<T> {
 impl <T: Pointable> Debug for PointKdTree<T> {
     fn fmt(&self, f: &mut Formatter) -> Result {
         self.0.fmt_indented(f, 0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rand::{ Rng, SeedableRng, StdRng };
+
+    const TEST_RNG_SEED: [usize; 1] = [5];
+
+    macro_rules! assert_xyz_eq {
+        ($left:expr, $right:expr) => {
+            assert_eq!($left.x, $right.x);
+            assert_eq!($left.y, $right.y);
+            assert_eq!($left.z, $right.z);
+        };
+    }
+
+    impl Pointable for Point {
+        fn get_point(&self) -> Point {
+            *self
+        }
+    }
+
+    impl Eq for Point {}
+
+    impl PartialOrd for Point {
+        fn partial_cmp(&self, other: &Point) -> Option<Ordering> {
+            if self.x != other.x {
+                NotNaN::new(self.x).unwrap().partial_cmp(&NotNaN::new(other.x).unwrap())
+            } else if self.y != other.y {
+                NotNaN::new(self.y).unwrap().partial_cmp(&NotNaN::new(other.y).unwrap())
+            } else {
+                NotNaN::new(self.z).unwrap().partial_cmp(&NotNaN::new(other.z).unwrap())
+            }
+        }
+    }
+
+    impl Ord for Point {
+        fn cmp(&self, other: &Point) -> Ordering {
+            self.partial_cmp(&other).unwrap()
+        }
+    }
+
+    fn random_point(rng: &mut Rng) -> Point {
+        Point::new(rng.next_f64(), rng.next_f64(), rng.next_f64())
+    }
+
+    #[test]
+    fn it_should_find_nearest_when_in_the_same_plane() {
+        let tree = PointKdTree::from(vec![
+            Point::new(0f64, 0f64, 0f64),
+            Point::new(0f64, 0f64, 1f64),
+            Point::new(0f64, 0f64, 2f64),
+            Point::new(0f64, 0f64, 3f64),
+            Point::new(0f64, 0f64, 4f64),
+            Point::new(0f64, 0f64, 5f64),
+            Point::new(0f64, 0f64, 6f64),
+            Point::new(0f64, 0f64, 7f64),
+        ]);
+
+        let mut nearest = tree.k_nearest(Point::new(0f64, 0f64, 3.5), 2);
+
+        assert_eq!(nearest.len(), 2);
+
+        nearest.sort_unstable();
+
+        assert_xyz_eq!(nearest[0], Point::new(0f64, 0f64, 3f64));
+        assert_xyz_eq!(nearest[1], Point::new(0f64, 0f64, 4f64));
+    }
+
+    #[test]
+    fn it_should_find_nearest_of_random_data() {
+        let mut rng = StdRng::from_seed(&TEST_RNG_SEED);
+        let k = 25;
+
+        let points: Vec<Point> = (0..1000)
+            .into_iter()
+            .map(|_| random_point(&mut rng))
+            .collect();
+
+        let tree = PointKdTree::from(points.clone());
+
+        let target_point = random_point(&mut rng);
+
+        let mut nearest_actual = tree.k_nearest(target_point, k);
+        nearest_actual.sort_unstable();
+
+        let mut nearest_expected = points.clone();
+        nearest_expected.sort_unstable_by_key(|&p| NotNaN::new((p - target_point).magnitude2()).unwrap());
+        let mut nearest_expected = nearest_expected.split_at(k).0.to_vec();
+        nearest_expected.sort_unstable();
+
+        assert_eq!(nearest_actual.len(), nearest_expected.len());
+
+        for i in 0..k {
+            assert_xyz_eq!(nearest_actual[i], nearest_expected[i]);
+        }
     }
 }

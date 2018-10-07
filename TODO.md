@@ -8,9 +8,9 @@
 
 ## tests
 - PointKdTree
-  - ensure knn returns proper result for some random data
-  - nsure it returns proper result when all data is in the same plane
   - test-only code to count the number of nodes traversed to ensure it is proportional to lgn — how to compile extra code and how to accurately check proportionality?
+    - best way I can think to implement this is as a macro that implements the declaration, sans return type, and the body, but the macro takes four arguments: a return type, a statement to execute at the beginning of the function, a statement to execute on each iteration, and a statement to produce the return type
+    - or stmt_expr_attributes
 
 ## features
 - glossy specular BRDFs so Phong materials can work right
