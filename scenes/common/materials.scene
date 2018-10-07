@@ -72,3 +72,8 @@ material garnet_red measured {
   astm "./measured-bxdf/garnet_red_RGB.astm"
   scale 15
 }
+
+material cayman measured {
+  astm "./measured-bxdf/cayman_RGB.astm"
+  scale 15
+}

@@ -23,5 +23,5 @@ transform rotate 55 deg 0 1 0
 transform translate 50 50 0
 object {
   geometry "common/geometry/killeroo.geo"
-  material garnet_red
+  material cayman
 }
