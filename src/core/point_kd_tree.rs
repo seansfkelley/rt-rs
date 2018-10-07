@@ -169,7 +169,7 @@ impl <T: Pointable> Node<T> {
                 write!(f, "{}leaf at {:?}\n", " ".repeat(indent_level * 2), object.get_point())
             },
             &Node::Empty => {
-                Ok(())
+                write!(f, "{}empty\n", " ".repeat(indent_level * 2))
             },
         }
     }
