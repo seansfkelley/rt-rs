@@ -97,50 +97,47 @@ impl <T: Pointable + Sized> Ord for SearchNode<T> {
 
 fn find_k_nearest<T: Pointable,>(target_point: Point, k: usize, root: &Node<T>) -> Vec<Arc<T>> {
     let mut found_items = BinaryHeap::<SearchNode<T>>::new();
+    let mut search_stack = vec![root];
 
-    {
-        let mut search_stack = vec![root];
-
-        let maybe_add_point = |found_items: &mut BinaryHeap<SearchNode<T>>, item: &Arc<T>, point: Point| {
-            let squared_distance = NotNaN::new((point - target_point).magnitude2()).unwrap();
-            if found_items.len() < k || found_items.peek().unwrap().1 > squared_distance {
-                if found_items.len() == k {
-                    found_items.pop();
-                }
-                found_items.push(SearchNode(Arc::clone(item), squared_distance));
+    let maybe_add_point = |found_items: &mut BinaryHeap<SearchNode<T>>, item: &Arc<T>, point: Point| {
+        let squared_distance = NotNaN::new((point - target_point).magnitude2()).unwrap();
+        if found_items.len() < k || found_items.peek().unwrap().1 > squared_distance {
+            if found_items.len() == k {
+                found_items.pop();
             }
-        };
+            found_items.push(SearchNode(Arc::clone(item), squared_distance));
+        }
+    };
 
-        let farthest_crosses_splitting_plane = |found_items: &BinaryHeap<SearchNode<T>>, splitting_point: Point, axis: Axis|
-            found_items.peek().unwrap().1 >= NotNaN::new((splitting_point[axis] - target_point[axis]).powi(2)).unwrap();
+    let farthest_crosses_splitting_plane = |found_items: &BinaryHeap<SearchNode<T>>, splitting_point: Point, axis: Axis|
+        found_items.peek().unwrap().1 >= NotNaN::new((splitting_point[axis] - target_point[axis]).powi(2)).unwrap();
 
-        while let Some(node) = search_stack.pop() {
-            match node {
-                &Node::Internal(ref item, point, axis, ref left, ref right) => {
-                    if target_point[axis] < point[axis] {
-                        search_stack.push(&left);
-                        maybe_add_point(&mut found_items, item, point);
-                        if farthest_crosses_splitting_plane(&found_items, point, axis) {
-                            search_stack.push(&right);
-                        }
-                    } else if target_point[axis] > point[axis] {
-                        search_stack.push(&right);
-                        maybe_add_point(&mut found_items, item, point);
-                        if farthest_crosses_splitting_plane(&found_items, point, axis) {
-                            search_stack.push(&left);
-                        }
-                    } else {
-                        maybe_add_point(&mut found_items, item, point);
-                        search_stack.push(&left);
+    while let Some(node) = search_stack.pop() {
+        match node {
+            &Node::Internal(ref item, point, axis, ref left, ref right) => {
+                if target_point[axis] < point[axis] {
+                    search_stack.push(&left);
+                    maybe_add_point(&mut found_items, item, point);
+                    if farthest_crosses_splitting_plane(&found_items, point, axis) {
                         search_stack.push(&right);
                     }
-                },
-                &Node::Leaf(ref item, point) => {
+                } else if target_point[axis] > point[axis] {
+                    search_stack.push(&right);
                     maybe_add_point(&mut found_items, item, point);
-                },
-                &Node::Empty => {},
-            };
-        }
+                    if farthest_crosses_splitting_plane(&found_items, point, axis) {
+                        search_stack.push(&left);
+                    }
+                } else {
+                    maybe_add_point(&mut found_items, item, point);
+                    search_stack.push(&left);
+                    search_stack.push(&right);
+                }
+            },
+            &Node::Leaf(ref item, point) => {
+                maybe_add_point(&mut found_items, item, point);
+            },
+            &Node::Empty => {},
+        };
     }
 
     found_items.into_iter().map(|SearchNode(item, _)| item).collect()
