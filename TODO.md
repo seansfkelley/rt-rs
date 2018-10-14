@@ -1,6 +1,4 @@
 ## probable bugs
-- stuff.scene -- what are those weird reflections on both the spheres?
-- fix difference geometries
 - BRDF issues
   - topo-earth is too dark and not shiny enough -- is PhongMaterial working correctly?
   - refraction.scene appears to have the right geometry but the refracted straw is desaturated
@@ -11,6 +9,7 @@
   - test-only code to count the number of nodes traversed to ensure it is proportional to lgn — how to compile extra code and how to accurately check proportionality?
     - best way I can think to implement this is as a macro that implements the declaration, sans return type, and the body, but the macro takes four arguments: a return type, a statement to execute at the beginning of the function, a statement to execute on each iteration, and a statement to produce the return type
     - or stmt_expr_attributes
+- pixel-matching regression tests
 
 ## features
 - glossy specular BRDFs so Phong materials can work right
@@ -30,11 +29,9 @@
 - named objects, geometries in scenes
 - subdivision surfaces
 - refraction: attenuation over distance (think: dark but not opaque liquid)
-- measured BRDFs
 - transmittance (volume integration) -- does this cover traveling through refractive substances?
 - area lights
 - reflectance textures
-- measured BRDFs
 
 ## performance/quality
 - r-tree/bvh (would these be better than the kd-tree?)
@@ -48,6 +45,3 @@
 - partial intersection in kd-tree
 - loading the large images for the space pictures is sloooooow
 - add Geometry::transformed_bound(&self, transform) so that some shapes can maybe compute better world-space bounds
-
-## misc
-- Add pixel-matching image tests
