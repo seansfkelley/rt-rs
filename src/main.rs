@@ -10,6 +10,9 @@ extern crate noise;
 #[macro_use]
 extern crate lalrpop_util;
 
+#[macro_use]
+mod math;
+
 mod bxdf;
 mod core;
 mod file_utils;
@@ -18,7 +21,6 @@ mod image_utils;
 mod importer;
 mod light;
 mod material;
-mod math;
 mod progress_bar;
 mod renderer;
 mod tessellation;

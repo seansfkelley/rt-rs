@@ -200,17 +200,16 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
 
         match best_partition {
             Some((axis, distance)) => {
-                let axis_index = axis as usize;
                 let mut left_items: Vec<(Arc<T>, BoundingBox)> = vec![];
                 let mut right_items: Vec<(Arc<T>, BoundingBox)> = vec![];
                 for &(ref item, ref bound) in &items {
-                    let in_plane = bound.min[axis_index] == distance && distance == bound.max[axis_index];
+                    let in_plane = bound.min[axis] == distance && distance == bound.max[axis];
                     let mut did_add = false;
-                    if bound.min[axis_index] < distance || in_plane {
+                    if bound.min[axis] < distance || in_plane {
                         left_items.push((Arc::clone(item), bound.clone()));
                         did_add = true;
                     }
-                    if bound.max[axis_index] > distance || in_plane {
+                    if bound.max[axis] > distance || in_plane {
                         right_items.push((Arc::clone(item), bound.clone()));
                         did_add = true;
                     }
@@ -222,9 +221,9 @@ fn recursively_build_tree<T: Geometry>(items: Vec<(Arc<T>, BoundingBox)>, node_b
                     Node::Leaf(items.into_iter().map(|(i, _)| Arc::clone(&i)).collect())
                 } else {
                     let mut left_bounds = node_bounds.clone();
-                    left_bounds.max[axis_index] = distance;
+                    left_bounds.max[axis] = distance;
                     let mut right_bounds = node_bounds.clone();
-                    right_bounds.min[axis_index] = distance;
+                    right_bounds.min[axis] = distance;
                     let (left_node, right_node) = rayon::join(
                         move || recursively_build_tree(left_items, left_bounds),
                         move || recursively_build_tree(right_items, right_bounds),

@@ -15,6 +15,17 @@ pub trait Xyz {
     fn z(&self) -> f64;
 }
 
+macro_rules! foreach_axis {
+    ($i:ident in $body:block) => {
+        let $i = Axis::X;
+        $body
+        let $i = Axis::Y;
+        $body
+        let $i = Axis::Z;
+        $body
+    }
+}
+
 macro_rules! xyz_base {
     ($name:ident) => {
         #[derive(PartialEq, Clone, Copy)]
@@ -47,19 +58,6 @@ macro_rules! xyz_base {
             }
         }
 
-        impl Index<usize> for $name {
-            type Output = f64;
-
-            fn index(&self, index: usize) -> &f64 {
-                match index {
-                    0 => &self.x,
-                    1 => &self.y,
-                    2 => &self.z,
-                    _ => { panic!("index out of range: {}", index); }
-                }
-            }
-        }
-
         impl Index<Axis> for $name {
             type Output = f64;
 
@@ -68,17 +66,6 @@ macro_rules! xyz_base {
                     Axis::X => &self.x,
                     Axis::Y => &self.y,
                     Axis::Z => &self.z,
-                }
-            }
-        }
-
-        impl IndexMut<usize> for $name {
-            fn index_mut(&mut self, index: usize) -> &mut f64 {
-                match index {
-                    0 => &mut self.x,
-                    1 => &mut self.y,
-                    2 => &mut self.z,
-                    _ => { panic!("index out of range: {}", index); }
                 }
             }
         }
