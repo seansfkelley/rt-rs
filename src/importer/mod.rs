@@ -2,35 +2,13 @@ mod scene_builder;
 
 lalrpop_mod!(pub parser);
 
-use regex::Regex;
 use std::path::Path;
-use std::fs::File;
-use std::io::Read;
 
 use core::*;
+use file_utils::*;
 use lalrpop_util::ParseError;
 use self::parser::{ Token, SceneFileParser, GeometryParser };
 use self::scene_builder::SceneBuilder;
-
-lazy_static! {
-    static ref COMMENT_REGEX: Regex = Regex::new(r"//[^\n]*(\n|$)").unwrap();
-    static ref NEWLINE_REGEX: Regex = Regex::new(r"\n").unwrap();
-}
-
-fn read_file_contents(path: &Path) -> String {
-    let formatted_path = path.to_str().unwrap_or("input file");
-    let mut contents: String = String::new();
-    File::open(path)
-        .expect(&format!("couldn't open {}", formatted_path))
-        .read_to_string(&mut contents)
-        .expect(&format!("couldn't read {} after opening", formatted_path));
-
-    contents
-}
-
-fn strip_comments(s: String) -> String {
-    COMMENT_REGEX.replace_all(s.as_str(), "$1").into_owned()
-}
 
 #[derive(Debug)]
 pub struct SceneFile {
@@ -72,9 +50,9 @@ implement_parser!(GeometryParser, Box<Geometry>);
 
 pub fn parse_into_builder<T>(path: &Path, builder: &mut SceneBuilder, parser: &Parser<T>) -> T {
     let file_source = strip_comments(read_file_contents(path));
-    let line_lengths: Vec<usize> = NEWLINE_REGEX
-        .split(file_source.as_str())
-        .map(|text| text.len())
+    let line_lengths: Vec<usize> = file_source.as_str()
+        .split("\n")
+        .map(|line| line.len())
         .collect();
 
     let get_line_and_column = |i: usize|  {

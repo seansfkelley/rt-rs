@@ -4,6 +4,7 @@ mod fuzzy_eq;
 mod mat4;
 mod non_nan;
 mod samples;
+#[macro_use]
 mod xyz;
 
 pub use self::curve::*;

@@ -19,7 +19,7 @@ pub struct TriangleMeshData {
     pub uvs: Option<Vec<Uv>>,
 }
 
-pub type TriangleMesh = KdTree<Triangle>;
+pub type TriangleMesh = VolumeKdTree<Triangle>;
 
 impl TriangleMeshData {
     // FYI, the "front" is when the vertices are in counterclockwise order, following OpenGL.
@@ -43,7 +43,7 @@ impl TriangleMeshData {
     pub fn into_triangle_mesh(self) -> TriangleMesh {
         let mesh = Arc::new(self);
 
-        KdTree::from(mesh.indices
+        VolumeKdTree::from(mesh.indices
             .iter()
             .map(|indices| Triangle {
                 mesh: Arc::clone(&mesh),

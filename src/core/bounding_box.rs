@@ -58,10 +58,10 @@ impl BoundingBox {
     pub fn intersect(&self, ray: &Ray) -> Option<(f64, f64)> {
         let (mut t0, mut t1) = (ray.t_min, ray.t_max);
 
-        for i in 0..3 {
+        foreach_axis!(a in {
             let (mut t_near, mut t_far) = (
-                (self.min[i] - ray.origin[i]) / ray.direction[i],
-                (self.max[i] - ray.origin[i]) / ray.direction[i],
+                (self.min[a] - ray.origin[a]) / ray.direction[a],
+                (self.max[a] - ray.origin[a]) / ray.direction[a],
             );
             if t_near > t_far {
                 swap!(t_near, t_far);
@@ -71,9 +71,20 @@ impl BoundingBox {
             if t0 > t1 {
                 return None;
             }
-        }
+        });
 
         Some((t0, t1))
+    }
+
+    pub fn maximum_extent(&self) -> Axis {
+        let diagonal = self.max - self.min;
+        if diagonal.x > diagonal.y && diagonal.x > diagonal.z {
+            Axis::X
+        } else if diagonal.y > diagonal.z {
+            Axis::Y
+        } else {
+            Axis::Z
+        }
     }
 }
 
@@ -94,14 +105,14 @@ macro_rules! apply_transform {
             let mut max = Point::uniform(f64::NEG_INFINITY);
             for i in 0..8 {
                 let c = candidates[i];
-                for j in 0..3 {
-                    if c[j] < min[j] {
-                        min[j] = c[j];
+                foreach_axis!(a in {
+                    if c[a] < min[a] {
+                        min[a] = c[a];
                     }
-                    if c[j] > max[j] {
-                        max[j] = c[j];
+                    if c[a] > max[a] {
+                        max[a] = c[a];
                     }
-                }
+                });
             }
             BoundingBox { min, max }
         }

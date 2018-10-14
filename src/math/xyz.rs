@@ -2,10 +2,28 @@
 use std::fmt::{ Display, Debug, Formatter, Result };
 use std::ops::{ Add, Sub, Div, Mul, Neg, Index, IndexMut };
 
+#[derive(Debug, Clone, Copy)]
+pub enum Axis {
+    X,
+    Y,
+    Z,
+}
+
 pub trait Xyz {
     fn x(&self) -> f64;
     fn y(&self) -> f64;
     fn z(&self) -> f64;
+}
+
+macro_rules! foreach_axis {
+    ($i:ident in $body:block) => {
+        let $i = Axis::X;
+        $body
+        let $i = Axis::Y;
+        $body
+        let $i = Axis::Z;
+        $body
+    }
 }
 
 macro_rules! xyz_base {
@@ -40,26 +58,24 @@ macro_rules! xyz_base {
             }
         }
 
-        impl Index<usize> for $name {
+        impl Index<Axis> for $name {
             type Output = f64;
 
-            fn index(&self, index: usize) -> &f64 {
+            fn index(&self, index: Axis) -> &f64 {
                 match index {
-                    0 => &self.x,
-                    1 => &self.y,
-                    2 => &self.z,
-                    _ => { panic!("index out of range: {}", index); }
+                    Axis::X => &self.x,
+                    Axis::Y => &self.y,
+                    Axis::Z => &self.z,
                 }
             }
         }
 
-        impl IndexMut<usize> for $name {
-            fn index_mut(&mut self, index: usize) -> &mut f64 {
+        impl IndexMut<Axis> for $name {
+            fn index_mut(&mut self, index: Axis) -> &mut f64 {
                 match index {
-                    0 => &mut self.x,
-                    1 => &mut self.y,
-                    2 => &mut self.z,
-                    _ => { panic!("index out of range: {}", index); }
+                    Axis::X => &mut self.x,
+                    Axis::Y => &mut self.y,
+                    Axis::Z => &mut self.z,
                 }
             }
         }

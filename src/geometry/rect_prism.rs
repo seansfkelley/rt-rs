@@ -102,10 +102,10 @@ impl Geometry for RectPrism {
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
         let (mut t0, mut t1) = (f64::NEG_INFINITY, f64::INFINITY);
 
-        for i in 0..3 {
+        foreach_axis!(a in {
             let (mut t_near, mut t_far) = (
-                (self.min[i] - ray.origin[i]) / ray.direction[i],
-                (self.max[i] - ray.origin[i]) / ray.direction[i],
+                (self.min[a] - ray.origin[a]) / ray.direction[a],
+                (self.max[a] - ray.origin[a]) / ray.direction[a],
             );
             if t_near > t_far {
                 swap!(t_near, t_far);
@@ -115,7 +115,7 @@ impl Geometry for RectPrism {
             if t0 > t1 {
                 return None;
             }
-        }
+        });
 
         if t1 < ray.t_min || t0 > ray.t_max {
             None

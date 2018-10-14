@@ -6,6 +6,12 @@
   - refraction.scene appears to have the right geometry but the refracted straw is desaturated
   - is the translation of dpdu/dpdv into u_axis and v_axis correctly, especially given the left-handed nature of the the brdf local coordinate space?
 
+## tests
+- PointKdTree
+  - test-only code to count the number of nodes traversed to ensure it is proportional to lgn — how to compile extra code and how to accurately check proportionality?
+    - best way I can think to implement this is as a macro that implements the declaration, sans return type, and the body, but the macro takes four arguments: a return type, a statement to execute at the beginning of the function, a statement to execute on each iteration, and a statement to produce the return type
+    - or stmt_expr_attributes
+
 ## features
 - glossy specular BRDFs so Phong materials can work right
 - animate objects in scenes
