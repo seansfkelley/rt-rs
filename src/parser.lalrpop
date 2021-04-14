@@ -78,7 +78,8 @@ Material: Box<Material> = {
     "measured" "{"
         "astm" <path:Path>
         <scale:("scale" <F64>)?>
-    "}" => Box::new(MeasuredMaterial::from(path.as_ref(), scale.unwrap_or(1f64))),
+        <smoothing:("smoothing" <U64>)?>
+    "}" => Box::new(MeasuredMaterial::from(path.as_ref(), scale.unwrap_or(1f64), smoothing.unwrap_or(5usize))),
 };
 
 // LightingFacet: LightingFacet = {

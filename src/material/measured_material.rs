@@ -16,6 +16,7 @@ struct RawPhiThetaMeasuredSample {
 #[derive(Debug)]
 pub struct MeasuredMaterial {
     pub samples: Arc<PointKdTree<MeasuredSample>>,
+    pub smoothing: usize,
 }
 
 impl Material for MeasuredMaterial {
@@ -27,8 +28,8 @@ impl Material for MeasuredMaterial {
 }
 
 impl MeasuredMaterial {
-    pub fn from(path: &Path, scale: f64) -> MeasuredMaterial {
-        MeasuredMaterial::new(strip_comments(read_file_contents(path)).as_str()
+    pub fn from(path: &Path, scale: f64, smoothing: usize) -> MeasuredMaterial {
+        let samples = strip_comments(read_file_contents(path)).as_str()
             .split("\n")
             .map(|line| line.trim())
             .filter(|line| line.len() > 0)
@@ -42,14 +43,7 @@ impl MeasuredMaterial {
                     color: Color::new(v[4], v[5], v[6]) * scale,
                 }
             })
-            .collect()
-        )
-    }
-
-    fn new(data: Vec<RawPhiThetaMeasuredSample>) -> MeasuredMaterial {
-        // pbrt pg. 465
-        let samples = data
-            .into_iter()
+            // pbrt pg. 465
             .map(|datum| MeasuredSample {
                 marschner_location: compute_marschner_location_phi_theta(
                     datum.theta_i,
@@ -60,8 +54,10 @@ impl MeasuredMaterial {
                 color: datum.color,
             })
             .collect();
+
         MeasuredMaterial {
             samples: Arc::new(PointKdTree::from(samples)),
+            smoothing,
         }
     }
 }
